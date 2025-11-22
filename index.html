@@ -68,9 +68,14 @@
         /* Скроллбар */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { 
+            background: #4A4A4A; /* Сделать темно-серым */
+            border-radius: 3px; 
+        }
 
-        [data-theme="light"] ::-webkit-scrollbar-thumb { background: #CCC; }
+        [data-theme="light"] ::-webkit-scrollbar-thumb { 
+            background: #A0A0A0; /* Темнее для светлой темы */
+        }
 
         /* Выделение текста */
         ::selection { background: var(--primary); color: white; }
@@ -280,6 +285,21 @@
             border: 1px solid var(--partners);
         }
 
+        /* 💡 ФИКС: Цвет текста партнеров в светлой теме - СДЕЛАТЬ ТЕМНЕЕ */
+        [data-theme="light"] .partner-box p {
+            color: #1a1a2a !important; /* Очень темный текст */
+        }
+
+        [data-theme="light"] .partner-box .social-btn {
+            border: 1px solid var(--partners);
+            color: var(--partners);
+        }
+
+        /* ФИКС: Цвет текста администрации в светлой теме - СДЕЛАТЬ ТЕМНЕЕ */
+        [data-theme="light"] .partner-box div > div:nth-child(2) {
+            color: #4a4a6b !important; /* Темно-серый для мелкой инфы */
+        }
+
         .partner-glow {
             position: absolute; width: 400px; height: 400px; background: var(--partners);
             filter: blur(120px); opacity: 0.15; top: 50%; left: 50%; transform: translate(-50%,-50%);
@@ -294,7 +314,7 @@
         }
         .social-btn:hover { background: var(--partners); color: white; transform: rotate(10deg); }
 
-        /* --- DOCKBAR (GOOEY EFFECT) --- */
+        /* --- DOCKBAR (LIQUID GLASS EFFECT) --- */
         .dock-wrapper {
             position: fixed; bottom: 30px; left: 0; width: 100%;
             display: flex; justify-content: center; z-index: 5000;
@@ -304,49 +324,101 @@
         .dock {
             pointer-events: auto;
             background: var(--dock-bg);
-            backdrop-filter: blur(var(--blur-val));
+            backdrop-filter: blur(calc(var(--blur-val) + 5px)); /* Увеличенный blur для лучшего эффекта */
             border-radius: 30px;
             padding: 10px 25px;
             display: flex; gap: 20px;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            /* GOOEY FILTER MAGIC */
-            filter: url('#goo'); 
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.5),
+                0 0 0 1px rgba(255,255,255,0.1),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
+            /* LIQUID GLASS EFFECT */
+            transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        /* Liquid Glass Background (БЕЗ ДЫХАНИЯ) */
+        .dock::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255,255,255,0.15) 0%, /* Уменьшенный блик */
+                rgba(255,255,255,0.05) 50%,
+                rgba(255,255,255,0.15) 100% /* Уменьшенный блик */
+            );
+            border-radius: 30px;
+            z-index: 1;
+            /* УБРАНА АНИМАЦИЯ ДЫХАНИЯ */
         }
 
         [data-theme="light"] .dock {
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(0,0,0,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.85); /* Менее прозрачный для света */
+        }
+
+        [data-theme="light"] .dock::before {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.3) 0%, /* Уменьшенный блик для светлой темы */
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.3) 100%
+            );
         }
 
         .dock-item {
             position: relative;
             width: 50px; height: 50px;
             display: grid; place-items: center;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.6);
             font-size: 1.4rem; z-index: 2;
             cursor: pointer; background: transparent; border: none;
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 15px;
         }
 
         [data-theme="light"] .dock-item {
-            color: rgba(45, 45, 90, 0.4);
+            color: rgba(45, 45, 90, 0.6);
         }
 
-        .dock-item.active { color: white; transform: translateY(-5px); }
+        .dock-item.active { 
+            color: white; 
+            transform: translateY(-5px) scale(1.1);
+            text-shadow: 0 0 20px var(--primary);
+        }
 
-        [data-theme="light"] .dock-item.active { color: var(--text); }
+        [data-theme="light"] .dock-item.active { 
+            color: var(--text);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
 
-        /* Капля, которая ездит */
+        /* Liquid Active Blob - ПЛАВНАЯ АНИМАЦИЯ */
         .active-blob {
             position: absolute;
-            top: 10px; left: 0;
-            width: 50px; height: 50px;
-            background: var(--primary);
-            border-radius: 50%;
+            top: 10px;
+            left: 0;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+            border-radius: 15px;
             z-index: 1;
-            transition: transform 0.5s cubic-bezier(0.5, -0.5, 0.3, 1.5); /* Пружинный эффект */
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Плавная анимация */
+            box-shadow: 
+                0 5px 20px var(--primary),
+                0 0 0 1px rgba(255,255,255,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
         }
 
         .goo-svg { position: absolute; width: 0; height: 0; }
@@ -407,8 +479,8 @@
     <svg class="goo-svg">
         <defs>
             <filter id="goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
                 <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
             </filter>
         </defs>
@@ -797,45 +869,73 @@
         setInterval(tickClock, 1000);
         tickClock();
 
-        // Init
+        // 🚀 Инициализация приложения
         window.onload = () => {
             loadSettings();
+            
+            // Применяем фиксы после загрузки
             setTimeout(() => {
+                fixInitialTabSelection();
+                
                 document.querySelector('.preloader').style.opacity = '0';
                 setTimeout(() => document.querySelector('.preloader').style.display = 'none', 600);
-            }, 1200);
+            }, 100);
         };
 
-        // Navigation
+        // 🎯 ФИКС: Исправление кривого выделения вкладки при первой загрузке
+        function fixInitialTabSelection() {
+            const dockItems = document.querySelectorAll('.dock-item');
+            const blob = document.querySelector('.active-blob');
+            const activeItem = document.querySelector('.dock-item.active');
+            
+            if (activeItem && blob) {
+                // Принудительно устанавливаем позицию blob для активной вкладки
+                setTimeout(() => {
+                    blob.style.left = activeItem.offsetLeft + 'px';
+                    blob.style.transform = 'translateX(0) scale(1)';
+                }, 100);
+            }
+        }
+
+        // 🧭 Навигация между секциями с ПЛАВНОЙ АНИМАЦИЕЙ
         function navTo(index, id) {
-            // Move Blob
+            // Анимация перемещения blob - ПЛАВНАЯ
             const dockItems = document.querySelectorAll('.dock-item');
             const blob = document.querySelector('.active-blob');
             const target = dockItems[index];
             
-            // Расчет позиции для blob (учитываем padding родителя)
-            // parent padding-left is 25px (mobile) or 40px (pc). 
-            // Better to use offsetLeft relative to parent
+            // ПЛАВНОЕ перемещение blob
+            blob.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             blob.style.left = target.offsetLeft + 'px';
+            blob.style.transform = 'translateX(0) scale(1.05)';
 
+            // Обновление активного состояния иконок
             dockItems.forEach(i => i.classList.remove('active'));
             target.classList.add('active');
 
-            // Page Transition
+            // Анимация перехода между страницами
             const trans = document.querySelector('.page-transition');
             const sections = document.querySelectorAll('.section');
             
-            trans.classList.add('active'); // Show spinner bg
+            trans.classList.add('active');
 
             setTimeout(() => {
                 sections.forEach(s => s.classList.remove('active'));
                 document.getElementById(id).classList.add('active');
                 window.scrollTo(0,0);
-                trans.classList.remove('active'); // Hide spinner bg
+                trans.classList.remove('active');
+                
+                // Финальная корректировка позиции blob
+                setTimeout(() => {
+                    if (blob && target) {
+                        blob.style.left = target.offsetLeft + 'px';
+                        blob.style.transform = 'translateX(0) scale(1)';
+                    }
+                }, 50);
             }, 400);
         }
 
-        // Settings Logic
+        // ⚙️ Логика настроек
         function loadSettings() {
             document.getElementById('langBtn').innerText = state.lang.toUpperCase();
             document.getElementById('fxCheck').checked = state.fx;
@@ -846,7 +946,7 @@
             applySettings();
             applyText();
 
-            // Listeners
+            // Обработчики событий для переключателей
             document.getElementById('langBtn').onclick = () => {
                 state.lang = state.lang === 'ru' ? 'en' : 'ru';
                 localStorage.setItem('ab_lang', state.lang);
@@ -871,10 +971,10 @@
         }
 
         function applySettings() {
-            // Theme
+            // Применение темы
             document.body.setAttribute('data-theme', state.theme);
             
-            // Particles
+            // Настройка частиц
             const p = document.getElementById('particles-js');
             if(state.fx) { 
                 p.classList.remove('hidden'); 
@@ -890,7 +990,7 @@
                 });
             } else { p.classList.add('hidden'); }
             
-            // Attributes for CSS
+            // Применение атрибутов для CSS
             document.body.setAttribute('data-glass', state.glass);
             document.body.setAttribute('data-anim', state.liq);
         }
@@ -904,4 +1004,4 @@
         }
     </script>
 </body>
-    </html>
+                                                                                                                                      </html>
