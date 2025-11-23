@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aubeig | Магазин & Информация</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
             --text: #E8E8FF;
             --text-sec: #A0A0C0;
             --font-main: 'Nunito', sans-serif;
-            --dock-bg: rgba(15, 15, 25, 0.85);
+            --dock-bg: rgba(15, 15, 25, 0.15); 
             --blur-val: 20px;
             --card-radius: 24px;
         }
@@ -37,7 +37,7 @@
             --partners: #FF9933;
             --text: #2D2D5A;
             --text-sec: #6B6B8B;
-            --dock-bg: rgba(255, 255, 255, 0.9);
+            --dock-bg: rgba(255, 255, 255, 0.2); 
         }
 
         /* Режим без стекла */
@@ -60,7 +60,6 @@
             color: var(--text);
             overflow-x: hidden;
             height: 100vh;
-            /* Отступ снизу для дока */
             padding-bottom: 100px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -69,16 +68,75 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { 
-            background: #4A4A4A; /* Сделать темно-серым */
+            background: #4A4A4A;
             border-radius: 3px; 
         }
 
         [data-theme="light"] ::-webkit-scrollbar-thumb { 
-            background: #A0A0A0; /* Темнее для светлой темы */
+            background: #A0A0A0;
         }
 
         /* Выделение текста */
         ::selection { background: var(--primary); color: white; }
+
+        /* --- RIPPLE EFFECT --- */
+        .has-ripple {
+            position: relative;
+            overflow: hidden; 
+            transform: translateZ(0);
+        }
+        
+        /* Специальные правила для круглых элементов, чтобы рябь обрезалась по кругу */
+        .dock-item.has-ripple, 
+        /* .avatar-box.has-ripple, -- УБРАНО С ЛОГОТИПА */
+        .social-btn.has-ripple,
+        .card-icon.has-ripple,
+        .partner-logo.has-ripple { 
+            overflow: hidden; 
+            border-radius: inherit; 
+        }
+        
+        /* Тумблер - имеет скругленные углы по дизайну */
+        .switch.has-ripple {
+             overflow: hidden; 
+             border-radius: 34px; 
+        }
+
+        /* Условие: если рябь отключена, отключаем pointer-events и курсор */
+        body[data-ripple="false"] .has-ripple {
+            pointer-events: auto !important; 
+            cursor: pointer !important;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            /* Улучшенная рябь: более прозрачная, с легким "стеклянным" бликом */
+            background-color: rgba(255, 255, 255, 0.1); /* Еще более прозрачный для glassmorphism */
+            backdrop-filter: blur(8px) brightness(1.2); /* Усилен блюр и яркость для отражения */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), inset 0 0 10px rgba(255,255,255,0.2); /* Больше свечения и внутренний блик */
+            pointer-events: none;
+            transform: scale(0);
+            opacity: 1;
+            animation: ripple-animation 0.6s ease-out; /* Чуть медленнее для "волны" */
+        }
+
+        [data-theme="light"] .ripple {
+            background-color: rgba(138, 79, 255, 0.08); /* Цвет ряби для светлой темы */
+            box-shadow: 0 0 15px rgba(138, 79, 255, 0.2), inset 0 0 10px rgba(138, 79, 255, 0.1); /* Свечение для светлой темы */
+        }
+
+        @keyframes ripple-animation {
+            0% { 
+                transform: scale(0); 
+                opacity: 1; 
+            }
+            100% {
+                transform: scale(3.5); 
+                opacity: 0; 
+            }
+        }
+
 
         /* --- PRELOADER (LIQUID CLOCK) --- */
         .preloader {
@@ -122,7 +180,7 @@
         /* --- PAGE TRANSITION --- */
         .page-transition {
             position: fixed; inset: 0; background: var(--bg);
-            z-index: 4000; /* Меньше чем Док (5000), но больше контента */
+            z-index: 4000;
             pointer-events: none; opacity: 0; transition: opacity 0.4s ease;
             display: flex; justify-content: center; align-items: center;
         }
@@ -157,6 +215,10 @@
         
         .avatar-box {
             position: relative; width: 160px; height: 160px; margin: 0 auto 20px;
+            cursor: pointer;
+            border-radius: 50%; 
+            overflow: hidden; /* Обрезаем, чтобы любые дочерние элементы были внутри круга */
+            /* Убран has-ripple */
         }
         .avatar-img {
             width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
@@ -216,6 +278,7 @@
             background: rgba(255,255,255,0.05); border-radius: 20px;
             font-size: 1.8rem; margin-bottom: 20px; color: var(--text);
             transition: 0.3s;
+            cursor: pointer;
         }
 
         [data-theme="light"] .card-icon {
@@ -232,7 +295,7 @@
         .card h3 { font-size: 1.5rem; margin-bottom: 10px; font-weight: 800; }
         .card p { color: var(--text-sec); line-height: 1.6; margin-bottom: 20px; font-size: 0.95rem; }
 
-        /* Списки внутри карточек (Инфа вернулась!) */
+        /* Списки внутри карточек */
         .card-list { list-style: none; }
         .card-list li {
             display: flex; align-items: center; gap: 10px;
@@ -272,6 +335,15 @@
             background: rgba(138, 79, 255, 0.1); color: var(--primary); border-color: var(--primary); 
         }
 
+        /* ИСПРАВЛЕНИЕ: Кнопка "Отзывы" в светлой теме */
+        [data-theme="light"] .hero .btn { 
+            background: var(--primary); 
+            color: white; 
+        }
+        [data-theme="light"] .hero .btn:hover {
+            box-shadow: 0 5px 20px rgba(138, 79, 255, 0.4);
+        }
+
         /* --- PARTNERS --- */
         .partner-box {
             text-align: center; padding: 50px 20px;
@@ -285,9 +357,8 @@
             border: 1px solid var(--partners);
         }
 
-        /* 💡 ФИКС: Цвет текста партнеров в светлой теме - СДЕЛАТЬ ТЕМНЕЕ */
         [data-theme="light"] .partner-box p {
-            color: #1a1a2a !important; /* Очень темный текст */
+            color: #1a1a2a !important; 
         }
 
         [data-theme="light"] .partner-box .social-btn {
@@ -295,9 +366,8 @@
             color: var(--partners);
         }
 
-        /* ФИКС: Цвет текста администрации в светлой теме - СДЕЛАТЬ ТЕМНЕЕ */
         [data-theme="light"] .partner-box div > div:nth-child(2) {
-            color: #4a4a6b !important; /* Темно-серый для мелкой инфы */
+            color: #4a4a6b !important;
         }
 
         .partner-glow {
@@ -310,38 +380,63 @@
         .social-btn {
             width: 50px; height: 50px; display: grid; place-items: center;
             border: 1px solid var(--partners); color: var(--partners);
-            border-radius: 50%; text-decoration: none; transition: 0.3s;
+            border-radius: 50%; /* Сделано круглым */
+            text-decoration: none; transition: 0.3s;
         }
         .social-btn:hover { background: var(--partners); color: white; transform: rotate(10deg); }
 
-        /* --- DOCKBAR (LIQUID GLASS EFFECT) --- */
+        /* --- DOCKBAR --- */
         .dock-wrapper {
             position: fixed; bottom: 30px; left: 0; width: 100%;
             display: flex; justify-content: center; z-index: 5000;
-            pointer-events: none; /* Чтобы клики по бокам проходили */
+            pointer-events: none;
+            perspective: 1000px;
         }
 
         .dock {
             pointer-events: auto;
             background: var(--dock-bg);
-            backdrop-filter: blur(calc(var(--blur-val) + 5px)); /* Увеличенный blur для лучшего эффекта */
+            backdrop-filter: blur(calc(var(--blur-val) + 10px)); 
             border-radius: 30px;
             padding: 10px 25px;
-            display: flex; gap: 20px;
+            display: flex; gap: 25px;
             position: relative;
             box-shadow: 
-                0 10px 40px rgba(0,0,0,0.5),
-                0 0 0 1px rgba(255,255,255,0.1),
-                inset 0 1px 0 rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.15);
-            /* LIQUID GLASS EFFECT */
+                0 5px 30px rgba(0,0,0,0.3); 
+            border: none; 
+            
             transform: translateZ(0);
             will-change: transform;
             backface-visibility: hidden;
-            overflow: hidden;
+            overflow: visible; 
         }
 
-        /* Liquid Glass Background (БЕЗ ДЫХАНИЯ) */
+        .dock::after {
+            content: '';
+            position: absolute;
+            top: -5px; 
+            left: -5px; 
+            right: -5px; 
+            bottom: -5px; 
+            border-radius: 32px; 
+            z-index: 0;
+            pointer-events: none;
+            
+            box-shadow: 
+                0 0 10px rgba(112, 0, 255, 0.5), 
+                0 0 15px 5px rgba(0, 240, 255, 0.2); 
+            
+            opacity: 0.3;
+            filter: blur(5px); 
+        }
+
+        [data-theme="light"] .dock::after {
+            box-shadow: 
+                0 0 10px rgba(138, 79, 255, 0.3), 
+                0 0 15px 5px rgba(0, 194, 214, 0.1); 
+        }
+
+
         .dock::before {
             content: '';
             position: absolute;
@@ -351,46 +446,39 @@
             bottom: 0;
             background: linear-gradient(
                 135deg,
-                rgba(255,255,255,0.15) 0%, /* Уменьшенный блик */
-                rgba(255,255,255,0.05) 50%,
-                rgba(255,255,255,0.15) 100% /* Уменьшенный блик */
+                rgba(255,255,255,0.1) 0%, 
+                rgba(255,255,255,0.01) 50%,
+                rgba(255,255,255,0.1) 100% 
             );
             border-radius: 30px;
             z-index: 1;
-            /* УБРАНА АНИМАЦИЯ ДЫХАНИЯ */
-        }
-
-        [data-theme="light"] .dock {
-            box-shadow: 
-                0 10px 40px rgba(0,0,0,0.1),
-                0 0 0 1px rgba(0,0,0,0.08),
-                inset 0 1px 0 rgba(255,255,255,0.8);
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(255, 255, 255, 0.85); /* Менее прозрачный для света */
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
         }
 
         [data-theme="light"] .dock::before {
             background: linear-gradient(
                 135deg,
-                rgba(255, 255, 255, 0.3) 0%, /* Уменьшенный блик для светлой темы */
-                rgba(255, 255, 255, 0.1) 50%,
-                rgba(255, 255, 255, 0.3) 100%
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(255, 255, 255, 0.15) 100%
             );
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
         }
+
 
         .dock-item {
             position: relative;
             width: 50px; height: 50px;
             display: grid; place-items: center;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.8); 
             font-size: 1.4rem; z-index: 2;
             cursor: pointer; background: transparent; border: none;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 15px;
+            border-radius: 15px; 
         }
 
         [data-theme="light"] .dock-item {
-            color: rgba(45, 45, 90, 0.6);
+            color: rgba(45, 45, 90, 0.8);
         }
 
         .dock-item.active { 
@@ -404,17 +492,16 @@
             text-shadow: 0 0 20px var(--primary-glow);
         }
 
-        /* Liquid Active Blob - ПЛАВНАЯ АНИМАЦИЯ */
         .active-blob {
             position: absolute;
-            top: 10px;
+            top: 7px;
             left: 0;
             width: 50px;
             height: 50px;
             background: linear-gradient(135deg, var(--primary), var(--primary-glow));
             border-radius: 15px;
             z-index: 1;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Плавная анимация */
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
             box-shadow: 
                 0 5px 20px var(--primary),
                 0 0 0 1px rgba(255,255,255,0.2),
@@ -433,8 +520,22 @@
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch { 
+            position: relative; 
+            display: inline-block; 
+            width: 50px; 
+            height: 26px; 
+            overflow: hidden; 
+            border-radius: 34px; 
+        }
+        
+        .switch input { 
+            opacity: 0; 
+            width: 0; 
+            height: 0; 
+        }
+        
+        /* Слайдер и бегунок */
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #333; transition: .4s; border-radius: 34px;
@@ -474,7 +575,8 @@
 
     </style>
 </head>
-<body data-glass="true" data-anim="true" data-theme="dark">
+<body data-glass="true" data-anim="true" data
+<body data-glass="true" data-anim="true" data-theme="dark" data-ripple="true">
 
     <svg class="goo-svg">
         <defs>
@@ -494,7 +596,7 @@
             <div class="hand min" id="mHand"></div>
             <div class="hand sec" id="sHand"></div>
         </div>
-        <div style="margin-top: 20px; letter-spacing: 3px; font-weight: 800; color: var(--primary);" data-lang="loading">LOADING..</div>
+        <div style="margin-top: 20px; letter-spacing: 3px; font-weight: 800; color: var(--primary);" data-lang="loading">ЗАГРУЗКА..</div>
     </div>
 
     <div class="page-transition">
@@ -517,7 +619,7 @@
                     Я создаю цифровые продукты, объединяя чистый код и эстетичный дизайн. От простых скриптов до сложных экосистем.
                 </p>
                 <div style="margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
-                    <a href="https://t.me/Aube1g" target="_blank" class="btn" style="width: auto; background: rgba(255,255,255,0.1);">
+                    <a href="https://t.me/Aube1g" target="_blank" class="btn has-ripple" style="width: auto;">
                         <i class="fab fa-telegram"></i> <span data-lang="reviews">Отзывы</span>
                     </a>
                 </div>
@@ -525,9 +627,9 @@
 
             <h2 style="margin-bottom: 20px; font-weight: 800;" data-lang="projects">Проекты</h2>
             <div class="grid">
-                <div class="card" data-theme="hydra">
+                <div class="card has-ripple" data-theme="hydra">
                     <span class="badge bg-hydra" data-lang="hydra_badge">Close Beta 1.2.0</span>
-                    <div class="card-icon"><i class="fas fa-dragon"></i></div>
+                    <div class="card-icon has-ripple"><i class="fas fa-dragon"></i></div>
                     <h3 data-lang="hydra_title">Hydra User Bot</h3>
                     <p data-lang="hydra_text">Мощнейший юзербот на базе современных технологий. Максимальная скорость и защита.</p>
                     <ul class="card-list">
@@ -537,9 +639,9 @@
                     </ul>
                 </div>
 
-                <div class="card" data-theme="anon">
-                    <span class="badge bg-accent" data-lang="soon">SOON</span>
-                    <div class="card-icon"><i class="fas fa-user-secret"></i></div>
+                <div class="card has-ripple" data-theme="anon">
+                    <span class="badge bg-accent" data-lang="soon">СКОРО</span>
+                    <div class="card-icon has-ripple"><i class="fas fa-user-secret"></i></div>
                     <h3 data-lang="anon_title">Anon Bot</h3>
                     <p data-lang="anon_text">Система для полностью анонимного общения без логов и следов.</p>
                     <ul class="card-list">
@@ -548,9 +650,9 @@
                     </ul>
                 </div>
                 
-                <div class="card" data-theme="minisir">
-                    <span class="badge bg-purple" data-lang="soon">SOON</span>
-                    <div class="card-icon"><i class="fas fa-robot"></i></div>
+                <div class="card has-ripple" data-theme="minisir">
+                    <span class="badge bg-purple" data-lang="soon">СКОРО</span>
+                    <div class="card-icon has-ripple"><i class="fas fa-robot"></i></div>
                     <h3 data-lang="minisir_title">Мини-Сырок</h3>
                     <p data-lang="minisir_text">Телеграм бот помощник включающий в себя </p>
                     <ul class="card-list">
@@ -559,9 +661,9 @@
                     </ul>
                 </div>
                 
-                <div class="card" data-theme="minisir">
+                <div class="card has-ripple" data-theme="minisir">
                     <span class="badge bg-purple">AI</span>
-                    <div class="card-icon"><i class="fas fa-brain"></i></div>
+                    <div class="card-icon has-ripple"><i class="fas fa-brain"></i></div>
                     <h3 data-lang="minisirai_title">Мини-Сырок AI</h3>
                     <p data-lang="minisirai_text">Телеграм бот помощник с Искусственным интеллектом</p>
                     <ul class="card-list">
@@ -570,8 +672,8 @@
                     </ul>
                 </div>
 
-                <div class="card">
-                    <div class="card-icon"><i class="fas fa-code"></i></div>
+                <div class="card has-ripple">
+                    <div class="card-icon has-ripple"><i class="fas fa-code"></i></div>
                     <h3 data-lang="dev_title">Development</h3>
                     <p data-lang="dev_text">Разработка веб-сайтов, парсеров и утилит под заказ.</p>
                     <ul class="card-list">
@@ -589,31 +691,31 @@
             </div>
             
             <div class="grid">
-                <div class="card" data-theme="hydra">
+                <div class="card has-ripple" data-theme="hydra">
                     <span class="badge bg-hydra">HYDRA</span>
-                    <div class="card-icon"><i class="fas fa-dragon"></i></div>
+                    <div class="card-icon has-ripple"><i class="fas fa-dragon"></i></div>
                     <h3 data-lang="htmlhelper_title">HtmlHelper</h3>
                     <p data-lang="htmlhelper_text">Легендарный копировщик сайтов для Hydra User Bot. Сохраняет структуру, стили и скрипты.</p>
                     <div style="font-size: 1.5rem; font-weight: 800; margin: 15px 0; color: var(--hydra);">1 745₽</div>
-                    <a href="https://t.me/ModulsGods/7" class="btn" style="background: var(--hydra);" data-lang="buy">Купить</a>
+                    <a href="https://t.me/ModulsGods/7" class="btn has-ripple" style="background: var(--hydra);" data-lang="buy">Купить</a>
                 </div>
 
-                <div class="card">
+                <div class="card has-ripple">
                     <span class="badge bg-gray">HEROKU</span>
-                    <div class="card-icon"><i class="fas fa-cloud"></i></div>
+                    <div class="card-icon has-ripple"><i class="fas fa-cloud"></i></div>
                     <h3>HtmlHelper <span style="font-size: 0.6em; opacity: 0.7;" data-lang="integration">Интеграция</span></h3>
                     <p data-lang="htmlhelper_heroku_text">Версия парсера, оптимизированная для юзер бота Heroku.</p>
                     <div style="font-size: 1.5rem; font-weight: 800; margin: 15px 0; color: var(--primary);">1 745₽</div>
-                    <a href="https://t.me/ModulsGods/7" class="btn" data-lang="buy">Купить</a>
+                    <a href="https://t.me/ModulsGods/7" class="btn has-ripple" data-lang="buy">Купить</a>
                 </div>
 
-                <div class="card">
+                <div class="card has-ripple">
                     <span class="badge bg-gray">WEB</span>
-                    <div class="card-icon"><i class="fas fa-server"></i></div>
+                    <div class="card-icon has-ripple"><i class="fas fa-server"></i></div>
                     <h3 data-lang="webdev_title">Web разработка <span style="font-size: 0.6em; opacity: 0.7;" data-lang="exclusive">Эксклюзив</span></h3>
                     <p data-lang="webdev_text">Source Code прошлой версии сайта ,или написание нового.</p>
                     <div style="font-size: 1.5rem; font-weight: 800; margin: 15px 0; color: var(--primary);" data-lang="negotiable">Обоговаривается</div>
-                    <a href="https://t.me/Aubeig" class="btn" data-lang="write">Написать</a>
+                    <a href="https://t.me/Aubeig" class="btn has-ripple" data-lang="write">Написать</a>
                 </div>
             </div>
         </section>
@@ -626,7 +728,7 @@
             <div class="partner-box">
                 <div class="partner-glow"></div>
                 <div style="position: relative; z-index: 2;">
-                    <img src="https://i.postimg.cc/GpMV4jkW/IMG-20250906-235217-068.jpg" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--partners); margin-bottom: 20px;">
+                    <img src="https://i.postimg.cc/GpMV4jkW/IMG-20250906-235217-068.jpg" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--partners); margin-bottom: 20px;" class="has-ripple partner-logo">
                     <h2 style="font-size: 2.5rem; color: var(--partners); margin-bottom: 10px;" data-lang="fp_title">First Platform</h2>
                     <p style="color: #ccc; max-width: 600px; margin: 0 auto; line-height: 1.6;" data-lang="fp_text">
                      Я ZFliers ( @NOZF_liers / @ZF_LIERS ), основатель проекта First Platform (сокращённо FP) , очень рад тебя тут видеть! Ты блогер? Стример? Ведёшь свой тгк? Не проблема, у нас ты сможешь найти друзей/партнёров по съемкам.
@@ -652,10 +754,10 @@
                     </div>
 
                     <div class="social-row">
-                        <a href="https://t.me/ZFliers" target="_blank" class="social-btn"><i class="fab fa-telegram-plane"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-twitch"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-vk"></i></a>
+                        <a href="https://t.me/ZFliers" target="_blank" class="social-btn has-ripple"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="#" class="social-btn has-ripple"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="social-btn has-ripple"><i class="fab fa-twitch"></i></a>
+                        <a href="#" class="social-btn has-ripple"><i class="fab fa-vk"></i></a>
                     </div>
                 </div>
             </div>
@@ -669,23 +771,27 @@
             <div class="card" style="max-width: 600px; margin: 0 auto;">
                 <div class="settings-row">
                     <span data-lang="set_lang">Язык / Language</span>
-                    <button class="btn" style="width: auto; padding: 5px 20px;" id="langBtn">RU</button>
+                    <button class="btn has-ripple" style="width: auto; padding: 5px 20px;" id="langBtn">RU</button>
+                </div>
+                <div class="settings-row">
+                    <span data-lang="set_ripple">Эффект ряби (Ripple) BETA</span> 
+                    <label class="switch has-ripple"><input type="checkbox" id="rippleCheck"><span class="slider"></span></label>
                 </div>
                 <div class="settings-row">
                     <span data-lang="set_fx">Частицы (Particles)</span>
-                    <label class="switch"><input type="checkbox" id="fxCheck"><span class="slider"></span></label>
+                    <label class="switch has-ripple"><input type="checkbox" id="fxCheck"><span class="slider"></span></label>
                 </div>
                 <div class="settings-row">
                     <span data-lang="set_liq">Жидкие иконки</span>
-                    <label class="switch"><input type="checkbox" id="liqCheck"><span class="slider"></span></label>
+                    <label class="switch has-ripple"><input type="checkbox" id="liqCheck"><span class="slider"></span></label>
                 </div>
                 <div class="settings-row">
                     <span data-lang="set_glass">Эффект стекла</span>
-                    <label class="switch"><input type="checkbox" id="glassCheck"><span class="slider"></span></label>
+                    <label class="switch has-ripple"><input type="checkbox" id="glassCheck"><span class="slider"></span></label>
                 </div>
                 <div class="settings-row">
-                    <span data-lang="set_theme">Тема оформления</span>
-                    <label class="switch"><input type="checkbox" id="themeCheck"><span class="slider"></span></label>
+                    <span data-lang="set_theme">Светлая тема</span>
+                    <label class="switch has-ripple"><input type="checkbox" id="themeCheck"><span class="slider"></span></label>
                 </div>
             </div>
         </section>
@@ -695,22 +801,89 @@
     <div class="dock-wrapper">
         <div class="dock">
             <div class="active-blob"></div>
-            <button class="dock-item active" onclick="navTo(0, 'home')"><i class="fas fa-home"></i></button>
-            <button class="dock-item" onclick="navTo(1, 'store')"><i class="fas fa-shopping-bag"></i></button>
-            <button class="dock-item" onclick="navTo(2, 'partners')"><i class="fas fa-handshake"></i></button>
-            <button class="dock-item" onclick="navTo(3, 'settings')"><i class="fas fa-cog"></i></button>
+            <button class="dock-item active has-ripple" onclick="navTo(0, 'home')"><i class="fas fa-home"></i></button>
+            <button class="dock-item has-ripple" onclick="navTo(1, 'store')"><i class="fas fa-shopping-bag"></i></button>
+            <button class="dock-item has-ripple" onclick="navTo(2, 'partners')"><i class="fas fa-handshake"></i></button>
+            <button class="dock-item has-ripple" onclick="navTo(3, 'settings')"><i class="fas fa-cog"></i></button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
+        // 💡 Улучшенная логика Ripple Effect
+        function createRipple(event) {
+            const button = event.currentTarget;
+            
+            // Если эффект ряби отключен, не создаем его
+            if (document.body.getAttribute('data-ripple') === 'false') {
+                return;
+            }
+
+            // Создаем элемент ряби
+            const circle = document.createElement('span');
+            
+            // Получаем размеры элемента
+            const rect = button.getBoundingClientRect();
+            
+            // Определяем диаметр: больший из ширины или высоты + запас для полного покрытия
+            const size = Math.max(rect.width, rect.height) * 1.5; 
+            const radius = size / 2;
+
+            // Вычисляем координаты клика относительно элемента (x, y)
+            const x = event.clientX - rect.left - radius;
+            const y = event.clientY - rect.top - radius;
+            
+            // Применяем стили
+            circle.style.width = circle.style.height = `${size}px`;
+            circle.style.left = `${x}px`;
+            circle.style.top = `${y}px`;
+            circle.classList.add('ripple');
+
+            // Очищаем старую рябь, если она есть
+            const existingRipple = button.querySelector('.ripple');
+            if (existingRipple) {
+                existingRipple.remove();
+            }
+
+            button.appendChild(circle);
+
+            // Удаляем элемент ряби после завершения анимации
+            circle.addEventListener('animationend', () => {
+                circle.remove();
+            });
+        }
+
+        // 🎯 Применение Ripple к элементам с классом has-ripple
+        function initializeRipple() {
+            // Сначала удаляем все предыдущие обработчики, чтобы не дублировать
+            document.querySelectorAll('.has-ripple').forEach(target => {
+                target.removeEventListener('mousedown', createRipple);
+                target.removeEventListener('touchstart', createRipple); 
+            });
+
+            // Добавляем обработчики только если эффект включен в настройках
+            if (state.ripple) {
+                const rippleTargets = document.querySelectorAll('.has-ripple');
+                rippleTargets.forEach(target => {
+                    // Используем mousedown/touchstart, чтобы эффект был мгновенным
+                    // ВАЖНО: для лучшей совместимости с мобильными используем touchstart
+                    target.addEventListener('mousedown', createRipple);
+                    target.addEventListener('touchstart', createRipple, { passive: true }); 
+                });
+            }
+            
+            // Устанавливаем атрибут на body для CSS-стилей (включение/выключение)
+            document.body.setAttribute('data-ripple', state.ripple);
+        }
+
         // State & Config
         const state = {
             lang: localStorage.getItem('ab_lang') || 'ru',
             fx: localStorage.getItem('ab_fx') !== 'false',
             liq: localStorage.getItem('ab_liq') !== 'false',
             glass: localStorage.getItem('ab_glass') !== 'false',
-            theme: localStorage.getItem('ab_theme') || 'dark'
+            theme: localStorage.getItem('ab_theme') || 'dark',
+            ripple: localStorage.getItem('ab_ripple') !== 'false' 
         };
 
         const translations = {
@@ -773,12 +946,13 @@
                 // Partners
                 part_t: "Партнеры",
                 fp_title: "First Platform",
-                fp_text: "Я ZFliers ( @NOZF_liers / @ZF_LIERS ), основатель проекта First Platform (сокращённо FP) , очень рад тебя тут видеть! Ты блогер? Стример? Ведёшь свой тгк? Не проблема, у нас ты сможешь найти друзей/партнёров по съемкам. В нашем проекте ты можешь увидеть: - Дружелюбных администраторов которые могут вам помочь ( не всегда ) *Администрация в праве за собой отказывать в помощи если это не в их силах* - Не токсичных ребят, которые там участвуют - Хорошую работу проекта и много разных идей от участников! Здесь ты можете рекламировать свой канал, хоть YouTube, хоть telegram channel, хоть twitch. Все открыто.. Вопросы по проекту: модерация Вопросы по рекламе: @ZF_LIERS Другие вопросы: модерация.",
+                fp_text: "Я ZFliers ( @NOZF_liers / @ZF_LIERS ), основатель проекта First Platform (сокращённо FP), очень рад тебя тут видеть! Ты блогер? Стример? Ведёшь свой тгк? Не проблема, у нас ты сможешь найти друзей/партнёров по съемкам. В нашем проекте ты можешь увидеть: - Дружелюбных администраторов которые могут вам помочь (не всегда) *Администрация в праве за собой отказывать в помощи если это не в их силах* - Не токсичных ребят, которые там участвуют - Хорошую работу проекта и много разных идей от участников! Здесь ты можете рекламировать свой канал, хоть YouTube, хоть telegram channel, хоть twitch. Все открыто.. Вопросы по проекту: модерация Вопросы по рекламе: @ZF_LIERS Другие вопросы: модерация.",
                 administration: "Администрация:",
                 
                 // Settings
                 set_t: "Настройки", 
                 set_lang: "Язык", 
+                set_ripple: "Эффект ряби (Ripple) BETA", // Обновлено
                 set_fx: "Частицы", 
                 set_liq: "Жидкая анимация", 
                 set_glass: "Эффект стекла",
@@ -849,6 +1023,7 @@
                 // Settings
                 set_t: "Settings", 
                 set_lang: "Language", 
+                set_ripple: "Ripple Effect BETA", // Обновлено
                 set_fx: "Particles", 
                 set_liq: "Liquid Animation", 
                 set_glass: "Glass Effect",
@@ -876,6 +1051,7 @@
             // Применяем фиксы после загрузки
             setTimeout(() => {
                 fixInitialTabSelection();
+                initializeRipple(); // ПЕРЕЗАПУСК РЯБИ ПОСЛЕ ЗАГРУЗКИ
                 
                 document.querySelector('.preloader').style.opacity = '0';
                 setTimeout(() => document.querySelector('.preloader').style.display = 'none', 600);
@@ -884,36 +1060,36 @@
 
         // 🎯 ФИКС: Исправление кривого выделения вкладки при первой загрузке
         function fixInitialTabSelection() {
-            const dockItems = document.querySelectorAll('.dock-item');
             const blob = document.querySelector('.active-blob');
             const activeItem = document.querySelector('.dock-item.active');
             
             if (activeItem && blob) {
-                // Принудительно устанавливаем позицию blob для активной вкладки
+                // Временно отключаем transition, чтобы blob появился на месте мгновенно
+                blob.style.transition = 'none'; 
+                blob.style.left = activeItem.offsetLeft + 'px';
+                blob.style.transform = 'translateX(0) scale(1)';
+
+                // Возвращаем transition через 50мс, чтобы последующие переходы были плавными
                 setTimeout(() => {
-                    blob.style.left = activeItem.offsetLeft + 'px';
-                    blob.style.transform = 'translateX(0) scale(1)';
-                }, 100);
+                     blob.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }, 50);
             }
         }
 
-        // 🧭 Навигация между секциями с ПЛАВНОЙ АНИМАЦИЕЙ
+        // 🧭 Навигация между секциями с ПЛАВНОЙ "ПРУЖИНИСТОЙ" АНИМАЦИЕЙ
         function navTo(index, id) {
-            // Анимация перемещения blob - ПЛАВНАЯ
             const dockItems = document.querySelectorAll('.dock-item');
             const blob = document.querySelector('.active-blob');
             const target = dockItems[index];
             
-            // ПЛАВНОЕ перемещение blob
-            blob.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            blob.style.left = target.offsetLeft + 'px';
-            blob.style.transform = 'translateX(0) scale(1.05)';
+            if (blob) {
+                blob.style.left = target.offsetLeft + 'px';
+                blob.style.transform = 'translateX(0) scale(1.1)'; 
+            }
 
-            // Обновление активного состояния иконок
             dockItems.forEach(i => i.classList.remove('active'));
             target.classList.add('active');
 
-            // Анимация перехода между страницами
             const trans = document.querySelector('.page-transition');
             const sections = document.querySelectorAll('.section');
             
@@ -925,13 +1101,12 @@
                 window.scrollTo(0,0);
                 trans.classList.remove('active');
                 
-                // Финальная корректировка позиции blob
                 setTimeout(() => {
-                    if (blob && target) {
+                    if (blob) {
                         blob.style.left = target.offsetLeft + 'px';
-                        blob.style.transform = 'translateX(0) scale(1)';
+                        blob.style.transform = 'translateX(0) scale(1)'; 
                     }
-                }, 50);
+                }, 50); 
             }, 400);
         }
 
@@ -942,6 +1117,7 @@
             document.getElementById('liqCheck').checked = state.liq;
             document.getElementById('glassCheck').checked = state.glass;
             document.getElementById('themeCheck').checked = state.theme === 'light';
+            document.getElementById('rippleCheck').checked = state.ripple;
             
             applySettings();
             applyText();
@@ -954,12 +1130,17 @@
                 applyText();
             };
             
-            const toggles = ['fx', 'liq', 'glass'];
+            const toggles = ['fx', 'liq', 'glass', 'ripple']; 
             toggles.forEach(key => {
                 document.getElementById(key+'Check').onchange = (e) => {
                     state[key] = e.target.checked;
                     localStorage.setItem('ab_'+key, state[key]);
                     applySettings();
+                    
+                    if (key === 'ripple') {
+                        // Важно: переинициализируем обработчики при смене настройки ряби
+                        initializeRipple(); 
+                    }
                 };
             });
 
@@ -978,21 +1159,30 @@
             const p = document.getElementById('particles-js');
             if(state.fx) { 
                 p.classList.remove('hidden'); 
-                particlesJS('particles-js', {
-                    "particles": { 
-                        "number": {"value":40}, 
-                        "color":{"value": state.theme === 'light' ? "#8A4FFF" : "#7000FF"}, 
-                        "shape":{"type":"circle"}, 
-                        "opacity":{"value":0.5}, 
-                        "size":{"value":3}, 
-                        "move":{"enable":true,"speed":1}
-                    }
-                });
-            } else { p.classList.add('hidden'); }
+                if (typeof particlesJS !== 'undefined') {
+                    particlesJS('particles-js', {
+                        "particles": { 
+                            "number": {"value":40}, 
+                            "color":{"value": state.theme === 'light' ? "#8A4FFF" : "#7000FF"}, 
+                            "shape":{"type":"circle"}, 
+                            "opacity":{"value":0.5}, 
+                            "size":{"value":3}, 
+                            "move":{"enable":true,"speed":1}
+                        },
+                        "interactivity": {
+                            "detect_on": "canvas",
+                            "events": { "onhover": { "enable": true, "mode": "repulse" } }
+                        }
+                    });
+                }
+            } else { 
+                p.classList.add('hidden'); 
+            }
             
             // Применение атрибутов для CSS
             document.body.setAttribute('data-glass', state.glass);
             document.body.setAttribute('data-anim', state.liq);
+            document.body.setAttribute('data-ripple', state.ripple);
         }
 
         function applyText() {
@@ -1004,4 +1194,4 @@
         }
     </script>
 </body>
-                                                                                                                                      </html>
+</html>
