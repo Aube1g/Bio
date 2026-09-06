@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morph — Transitions.dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0812;
+    --bg-2: #120c1e;
+    --surface: #17101f;
+    --surface-2: #1f1729;
+    --surface-3: #251b33;
+    --line: #2b2038;
+    --line-soft: #221a2d;
+    --violet: #8b5cf6;
+    --violet-2: #a78bfa;
+    --fuchsia: #d946ef;
+    --ink: #ede9f8;
+    --ink-dim: #9c8fb0;
+    --ink-faint: #6b6080;
+    --ok: #34d399;
+
+    --morph-open-dur: 380ms;
+    --morph-close-dur: 260ms;
+    --morph-ease: cubic-bezier(0.34, 1.35, 0.64, 1);
+    --morph-close-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --morph-fade-dur: 200ms;
+    --morph-slide: 36px;
+    --morph-scale: 0.96;
+    --morph-blur: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(60% 50% at 15% 0%, rgba(139,92,246,0.16), transparent 60%),
+      radial-gradient(50% 40% at 100% 10%, rgba(217,70,239,0.10), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:64px 20px 120px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{margin-bottom:56px;}
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--violet-2);
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--fuchsia);box-shadow:0 0 12px var(--fuchsia);}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(30px,4.6vw,46px);margin:14px 0 8px;letter-spacing:-0.01em;}
+  h1 span{background:linear-gradient(90deg,var(--violet-2),var(--fuchsia));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{color:var(--ink-dim);font-size:15px;max-width:560px;line-height:1.6;}
+  .sec-label{
+    font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--ink-faint);
+    letter-spacing:.1em;text-transform:uppercase;margin:44px 0 14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .sec-label::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr;}}
+
+  .card{
+    background:linear-gradient(180deg,var(--surface),var(--bg-2));
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:26px 22px 26px;
+    position:relative;
+    overflow:hidden;
+    min-height:260px;
+    display:flex;flex-direction:column;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(120px 80px at 90% 0%, rgba(139,92,246,0.12), transparent 70%);
+    pointer-events:none;
+  }
+  .card-index{font-family:'Space Grotesk',sans-serif;font-size:12px;color:var(--ink-dim);letter-spacing:.08em;}
+  .card-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;margin:4px 0 2px;}
+  .card-desc{color:var(--ink-dim);font-size:13px;margin:0 0 18px;line-height:1.5;}
+  /* fixed-footprint anchor: reserves the OPEN size so nothing reflows while morphing */
+  .stage{
+    position:relative;flex:1;min-height:180px;
+  }
+  .anchor{
+    position:absolute;
+  }
+  .anchor.br{right:0;bottom:0;}
+  .anchor.bl{left:0;bottom:0;}
+  .anchor.center{left:50%;top:50%;transform:translate(-50%,-50%);}
+  .anchor.tl{left:0;top:0;}
+  .anchor.full{left:0;right:0;bottom:0;}
+
+  button, input{font-family:'Inter',sans-serif;}
+  :focus-visible{outline:2px solid var(--violet-2);outline-offset:2px;}
+
+  /* =====================================================
+     1) PLUS → MENU  (fixed: absolute anchor = no reflow,
+        explicit z-index so plus never traps clicks while open)
+  ===================================================== */
+  .t-morph{
+    position:relative;width:44px;height:44px;border-radius:22px;
+    background:linear-gradient(155deg,var(--violet),#6d28d9);
+    box-shadow:0 8px 24px -8px rgba(139,92,246,0.55), inset 0 1px 0 rgba(255,255,255,0.15);
+    overflow:hidden;
+    transition:width var(--morph-close-dur) var(--morph-close-ease),
+               height var(--morph-close-dur) var(--morph-close-ease),
+               border-radius var(--morph-close-dur) var(--morph-close-ease);
+  }
+  .t-morph[data-open="true"]{
+    width:188px;height:176px;border-radius:20px;
+    transition:width var(--morph-open-dur) var(--morph-ease),
+               height var(--morph-open-dur) var(--morph-ease),
+               border-radius var(--morph-open-dur) var(--morph-ease);
+  }
+  .t-morph-plus{
+    position:absolute;inset:auto 0 0 auto;width:44px;height:44px;z-index:2;
+    display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:#fff;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease),
+               transform var(--morph-open-dur) var(--morph-close-ease),
+               filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .t-morph-plus svg{transition:transform var(--morph-open-dur) var(--morph-close-ease);}
+  .t-morph[data-open="true"] .t-morph-plus{opacity:0;transform:translateX(-36px);filter:blur(3px);pointer-events:none;}
+  .t-morph[data-open="true"] .t-morph-plus svg{transform:scale(.96) rotate(45deg);}
+  .t-morph-menu{
+    position:absolute;inset:0;opacity:0;padding:12px;z-index:1;
+    transform:translateX(36px) scale(.96);filter:blur(3px);pointer-events:none;
+    display:flex;flex-direction:column;gap:4px;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease),
+               transform var(--morph-open-dur) var(--morph-close-ease),
+               filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .t-morph[data-open="true"] .t-morph-menu{opacity:1;transform:translateX(0) scale(1);filter:blur(0);pointer-events:auto;}
+  .t-morph-menu button{all:unset;color:#e7defb;font-size:13px;padding:9px 10px;border-radius:10px;cursor:pointer;}
+  .t-morph-menu button:hover{background:rgba(255,255,255,0.08);}
+
+  /* =====================================================
+     2) SEARCH ICON → SEARCH BAR (fixed: input no longer
+        steals focus while collapsed; label sr-only)
+  ===================================================== */
+  .s-morph{
+    position:relative;height:44px;width:44px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:22px;overflow:hidden;
+    transition:width var(--morph-close-dur) var(--morph-close-ease),
+               border-radius var(--morph-close-dur) var(--morph-close-ease),
+               background var(--morph-close-dur);
+  }
+  .s-morph[data-open="true"]{
+    width:min(280px,100%);border-radius:14px;background:var(--bg-2);border-color:var(--violet);
+    box-shadow:0 0 0 3px rgba(139,92,246,0.18);
+    transition:width var(--morph-open-dur) var(--morph-ease),
+               border-radius var(--morph-open-dur) var(--morph-ease),
+               background var(--morph-open-dur);
+  }
+  .s-morph-btn{position:absolute;left:0;top:0;width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;color:var(--violet-2);cursor:pointer;z-index:2;}
+  .s-morph[data-open="true"] .s-morph-btn{pointer-events:none;}
+  .s-morph input{
+    all:unset;position:absolute;inset:0;padding:0 40px 0 44px;box-sizing:border-box;
+    color:var(--ink);font-size:14px;opacity:0;pointer-events:none;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .s-morph[data-open="true"] input{opacity:1;pointer-events:auto;transition-delay:.08s;}
+  .s-morph-close{
+    position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:transparent;color:var(--ink-dim);cursor:pointer;
+    display:grid;place-items:center;opacity:0;transform:scale(.7);pointer-events:none;z-index:2;
+    transition:opacity .15s,transform .15s;
+  }
+  .s-morph[data-open="true"] .s-morph-close{opacity:1;transform:scale(1);pointer-events:auto;transition-delay:.1s;}
+
+  /* =====================================================
+     3) HAMBURGER → DRAWER (fixed: hit-target stays 44x44
+        at all times instead of covering whole open panel)
+  ===================================================== */
+  .d-morph{
+    position:relative;width:44px;height:44px;border-radius:14px;
+    background:var(--surface-2);border:1px solid var(--line);overflow:hidden;
+    transition:width var(--morph-close-dur) var(--morph-close-ease),
+               height var(--morph-close-dur) var(--morph-close-ease),
+               border-radius var(--morph-close-dur) var(--morph-close-ease),
+               background var(--morph-close-dur);
+  }
+  .d-morph[data-open="true"]{
+    width:210px;height:150px;border-radius:18px;
+    background:linear-gradient(160deg,var(--surface),#150e22);border-color:var(--violet);
+    transition:width var(--morph-open-dur) var(--morph-ease),
+               height var(--morph-open-dur) var(--morph-ease),
+               border-radius var(--morph-open-dur) var(--morph-ease),
+               background var(--morph-open-dur);
+  }
+  .d-morph-btn{position:absolute;top:0;left:0;width:44px;height:44px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;z-index:2;}
+  .d-morph-btn .bar{position:absolute;width:18px;height:2px;background:var(--ink);border-radius:2px;transition:transform .3s var(--morph-close-ease),opacity .2s,width .3s;}
+  .d-morph-btn .bar:nth-child(1){transform:translateY(-6px);}
+  .d-morph-btn .bar:nth-child(3){transform:translateY(6px);}
+  .d-morph[data-open="true"] .bar:nth-child(1){transform:translateY(0) rotate(45deg);background:var(--violet-2);}
+  .d-morph[data-open="true"] .bar:nth-child(2){opacity:0;width:0;}
+  .d-morph[data-open="true"] .bar:nth-child(3){transform:translateY(0) rotate(-45deg);background:var(--violet-2);}
+  .d-morph-panel{
+    position:absolute;inset:0;padding:16px 14px 14px 60px;opacity:0;z-index:1;
+    transform:translateY(14px) scale(.97);filter:blur(3px);pointer-events:none;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease),
+               transform var(--morph-open-dur) var(--morph-close-ease),
+               filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .d-morph[data-open="true"] .d-morph-panel{opacity:1;transform:translateY(0) scale(1);filter:blur(0);pointer-events:auto;}
+  .d-morph-panel .title{font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+  .d-morph-panel a{display:block;color:var(--ink);text-decoration:none;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line-soft);}
+  .d-morph-panel a:last-child{border-bottom:0;}
+
+  /* =====================================================
+     4) BUTTON → LOADING → SUCCESS (fixed: label no longer
+        flashes at full width for a frame before collapsing)
+  ===================================================== */
+  .b-morph{
+    position:relative;height:46px;width:150px;padding:0 22px;border-radius:23px;border:0;cursor:pointer;
+    background:linear-gradient(90deg,var(--violet),var(--fuchsia));color:#fff;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;overflow:hidden;
+    transition:width var(--morph-open-dur) var(--morph-ease),
+               border-radius var(--morph-open-dur) var(--morph-ease),
+               background .4s ease;
+  }
+  .b-morph[data-state="loading"],.b-morph[data-state="done"]{width:46px;padding:0;border-radius:50%;}
+  .b-morph[data-state="done"]{background:var(--ok);}
+  .b-morph .label{transition:opacity .12s;white-space:nowrap;}
+  .b-morph[data-state="loading"] .label,.b-morph[data-state="done"] .label{opacity:0;position:absolute;}
+  .spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;display:none;flex-shrink:0;}
+  .b-morph[data-state="loading"] .spinner{display:block;animation:spin .7s linear infinite;}
+  .check{display:none;}
+  .b-morph[data-state="done"] .check{display:block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* =====================================================
+     5) FLOATING-LABEL INPUT FIELD
+  ===================================================== */
+  .f-field{position:relative;width:100%;max-width:260px;}
+  .f-field input{
+    all:unset;box-sizing:border-box;width:100%;height:52px;padding:20px 16px 6px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:14px;color:var(--ink);font-size:14px;
+    transition:border-color var(--morph-open-dur) var(--morph-ease), box-shadow var(--morph-open-dur) var(--morph-ease);
+  }
+  .f-field input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,0.18);}
+  .f-field label{
+    position:absolute;left:16px;top:50%;transform:translateY(-50%);
+    color:var(--ink-faint);font-size:14px;pointer-events:none;transform-origin:left center;
+    transition:transform var(--morph-open-dur) var(--morph-ease), color var(--morph-open-dur) var(--morph-ease), top .2s;
+  }
+  .f-field input:focus + label,
+  .f-field input:not(:placeholder-shown) + label{
+    top:16px;transform:translateY(-50%) scale(.76);color:var(--violet-2);
+  }
+  .f-field .hint{
+    font-size:12px;color:var(--ink-faint);margin-top:8px;height:0;opacity:0;overflow:hidden;
+    transition:opacity .2s, height .2s;
+  }
+  .f-field input:focus ~ .hint{height:16px;opacity:1;}
+
+  /* =====================================================
+     6) THINKING / REASONING — collapsed pill → expanded trace
+  ===================================================== */
+  .r-morph{
+    position:relative;width:210px;border-radius:18px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;
+    transition:height var(--morph-close-dur) var(--morph-close-ease), background var(--morph-close-dur);
+  }
+  .r-morph[data-open="true"]{
+    background:linear-gradient(160deg,var(--surface),#150e22);border-color:var(--violet);
+    transition:height var(--morph-open-dur) var(--morph-ease), background var(--morph-open-dur);
+  }
+  .r-morph-head{
+    all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;height:44px;padding:0 14px;cursor:pointer;
+  }
+  .r-dots{display:flex;gap:3px;}
+  .r-dots span{width:5px;height:5px;border-radius:50%;background:var(--violet-2);animation:pulse 1.2s ease-in-out infinite;}
+  .r-dots span:nth-child(2){animation-delay:.15s;}
+  .r-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes pulse{0%,80%,100%{opacity:.25;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+  .r-morph-head .r-label{font-size:13px;color:var(--ink-dim);flex:1;text-align:left;}
+  .r-morph-head svg{transition:transform var(--morph-open-dur) var(--morph-close-ease);color:var(--ink-faint);flex-shrink:0;}
+  .r-morph[data-open="true"] .r-morph-head svg{transform:rotate(180deg);color:var(--violet-2);}
+  .r-morph-body{
+    padding:0 14px;opacity:0;max-height:0;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease), max-height var(--morph-open-dur) var(--morph-ease);
+  }
+  .r-morph[data-open="true"] .r-morph-body{opacity:1;max-height:160px;padding-bottom:14px;}
+  .r-morph-body .line{
+    font-size:12px;line-height:1.6;color:var(--ink-dim);padding-left:14px;border-left:1px solid var(--line);margin-bottom:6px;
+    opacity:0;transform:translateY(4px);transition:opacity .3s ease, transform .3s ease;
+  }
+  .r-morph[data-open="true"] .r-morph-body .line{opacity:1;transform:translateY(0);}
+  .r-morph[data-open="true"] .r-morph-body .line:nth-child(1){transition-delay:.08s;}
+  .r-morph[data-open="true"] .r-morph-body .line:nth-child(2){transition-delay:.16s;}
+  .r-morph[data-open="true"] .r-morph-body .line:nth-child(3){transition-delay:.24s;}
+
+  /* =====================================================
+     7) DOCK BAR — macOS-style magnify + launch morph
+  ===================================================== */
+  .dock{
+    display:flex;align-items:flex-end;gap:10px;padding:10px 14px;border-radius:22px;
+    background:rgba(23,16,31,0.7);border:1px solid var(--line);backdrop-filter:blur(12px);
+  }
+  .dock-item{
+    position:relative;width:42px;height:42px;border-radius:12px;border:0;cursor:pointer;flex-shrink:0;
+    background:linear-gradient(160deg,var(--surface-3),var(--surface-2));display:grid;place-items:center;color:var(--violet-2);
+    transition:transform .2s var(--morph-ease), box-shadow .2s ease;
+  }
+  .dock-item:hover, .dock-item:focus-visible{transform:translateY(-10px) scale(1.18);box-shadow:0 12px 20px -8px rgba(139,92,246,0.5);}
+  .dock-item::after{
+    content:"";position:absolute;left:50%;bottom:-8px;width:4px;height:4px;border-radius:50%;
+    background:var(--fuchsia);transform:translateX(-50%) scale(0);transition:transform .25s var(--morph-ease);
+  }
+  .dock-item[data-launched="true"]::after{transform:translateX(-50%) scale(1);}
+  .dock-item[data-launched="true"]{
+    animation:launch .45s var(--morph-ease);
+  }
+  @keyframes launch{
+    0%{transform:translateY(0) scale(1);}
+    40%{transform:translateY(-16px) scale(1.22);}
+    100%{transform:translateY(0) scale(1);}
+  }
+
+  /* =====================================================
+     8) NAVBAR — compact pill → full nav
+  ===================================================== */
+  .n-morph{
+    position:relative;height:48px;width:140px;border-radius:24px;background:var(--surface-2);border:1px solid var(--line);
+    display:flex;align-items:center;overflow:hidden;padding:0 6px;
+    transition:width var(--morph-close-dur) var(--morph-close-ease), background var(--morph-close-dur);
+  }
+  .n-morph[data-open="true"]{
+    width:100%;background:linear-gradient(100deg,var(--surface),#150e22);border-color:var(--violet);
+    transition:width var(--morph-open-dur) var(--morph-ease), background var(--morph-open-dur);
+  }
+  .n-logo{
+    width:32px;height:32px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(155deg,var(--violet),var(--fuchsia));display:grid;place-items:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:#fff;
+  }
+  .n-links{
+    display:flex;align-items:center;gap:2px;margin-left:8px;opacity:0;transform:translateX(-10px);filter:blur(3px);pointer-events:none;
+    transition:opacity var(--morph-fade-dur) var(--morph-close-ease), transform var(--morph-open-dur) var(--morph-close-ease), filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .n-morph[data-open="true"] .n-links{opacity:1;transform:translateX(0);filter:blur(0);pointer-events:auto;transition-delay:.06s;}
+  .n-links a{color:var(--ink-dim);text-decoration:none;font-size:13px;padding:8px 10px;border-radius:10px;white-space:nowrap;}
+  .n-links a:hover{color:var(--ink);background:rgba(255,255,255,0.06);}
+  .n-toggle{
+    all:unset;margin-left:auto;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--ink-dim);cursor:pointer;flex-shrink:0;
+  }
+  .n-toggle svg{transition:transform var(--morph-open-dur) var(--morph-close-ease);}
+  .n-morph[data-open="true"] .n-toggle svg{transform:rotate(90deg);color:var(--violet-2);}
+
+  /* =====================================================
+     9) MODAL — button morphs into a centered dialog
+  ===================================================== */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(6,4,10,0.6);backdrop-filter:blur(4px);
+    opacity:0;pointer-events:none;transition:opacity var(--morph-open-dur) var(--morph-ease);z-index:50;
+  }
+  .modal-backdrop[data-open="true"]{opacity:1;pointer-events:auto;}
+  .modal-card{
+    position:fixed;left:50%;top:50%;width:320px;max-width:90vw;border-radius:20px;
+    background:linear-gradient(165deg,var(--surface),#140d20);border:1px solid var(--violet);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);padding:22px;z-index:51;
+    transform:translate(-50%,-50%) scale(.4);opacity:0;filter:blur(6px);pointer-events:none;
+    transition:transform var(--morph-open-dur) var(--morph-ease), opacity var(--morph-fade-dur) var(--morph-close-ease), filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .modal-backdrop[data-open="true"] .modal-card{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0);pointer-events:auto;}
+  .modal-card h3{font-family:'Space Grotesk',sans-serif;margin:0 0 8px;font-size:17px;}
+  .modal-card p{color:var(--ink-dim);font-size:13px;line-height:1.55;margin:0 0 18px;}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .modal-actions button{all:unset;font-size:13px;padding:9px 16px;border-radius:11px;cursor:pointer;}
+  .modal-actions .ghost{color:var(--ink-dim);}
+  .modal-actions .ghost:hover{background:rgba(255,255,255,0.06);}
+  .modal-actions .solid{background:linear-gradient(90deg,var(--violet),var(--fuchsia));color:#fff;font-weight:600;}
+  .open-modal-btn{
+    all:unset;height:44px;padding:0 20px;border-radius:22px;background:var(--surface-2);border:1px solid var(--line);
+    color:var(--ink);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  }
+  .open-modal-btn:hover{border-color:var(--violet);}
+
+  /* =====================================================
+     10) COMMAND PALETTE — pill → full search modal
+  ===================================================== */
+  .cmdk-trigger{
+    all:unset;height:44px;padding:0 16px;border-radius:22px;background:var(--surface-2);border:1px solid var(--line);
+    color:var(--ink-dim);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:10px;
+  }
+  .cmdk-trigger:hover{border-color:var(--violet);}
+  .cmdk-trigger kbd{
+    font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--ink-faint);background:var(--surface-3);
+    border:1px solid var(--line);padding:2px 6px;border-radius:6px;
+  }
+  .cmdk-backdrop{
+    position:fixed;inset:0;background:rgba(6,4,10,0.6);backdrop-filter:blur(4px);
+    opacity:0;pointer-events:none;transition:opacity var(--morph-open-dur) var(--morph-ease);z-index:50;
+  }
+  .cmdk-backdrop[data-open="true"]{opacity:1;pointer-events:auto;}
+  .cmdk-panel{
+    position:fixed;left:50%;top:18%;width:420px;max-width:90vw;border-radius:18px;
+    background:linear-gradient(165deg,var(--surface),#140d20);border:1px solid var(--violet);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);overflow:hidden;z-index:51;
+    transform:translate(-50%,-30px) scale(.92);opacity:0;filter:blur(6px);pointer-events:none;
+    transition:transform var(--morph-open-dur) var(--morph-ease), opacity var(--morph-fade-dur) var(--morph-close-ease), filter var(--morph-fade-dur) var(--morph-close-ease);
+  }
+  .cmdk-backdrop[data-open="true"] .cmdk-panel{transform:translate(-50%,0) scale(1);opacity:1;filter:blur(0);pointer-events:auto;}
+  .cmdk-panel input{
+    all:unset;box-sizing:border-box;width:100%;padding:16px 18px;font-size:15px;color:var(--ink);border-bottom:1px solid var(--line);
+  }
+  .cmdk-list{padding:8px;}
+  .cmdk-list .row{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:10px;color:var(--ink-dim);font-size:13px;}
+  .cmdk-list .row:hover{background:rgba(255,255,255,0.06);color:var(--ink);}
+  .cmdk-list .row svg{color:var(--violet-2);flex-shrink:0;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  footer{text-align:center;margin-top:72px;color:var(--ink-dim);font-size:12px;font-family:'Space Grotesk',sans-serif;letter-spacing:.06em;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Transitions.dev / motion primitives</div>
+      <h1>Morph <span>components</span></h1>
+      <p>Десять паттернов морфинга в тёмно-фиолетовой теме. Первые четыре — доработаны: анимация теперь заякорена в углу карточки (position:absolute + reserved footprint), так что при открытии ничего не «прыгает», и кликабельная зона всегда совпадает с видимым элементом.</p>
+    </header>
+
+    <div class="sec-label">Обновлено</div>
+    <div class="grid">
+
+      <!-- 1: PLUS -> MENU -->
+      <div class="card">
+        <div class="card-index">01 · shape morph</div>
+        <div class="card-title">Плюс → меню</div>
+        <p class="card-desc">Круглая кнопка разворачивается в панель, иконка крутится в крестик.</p>
+        <div class="stage">
+          <div class="anchor br">
+            <div class="t-morph" data-open="false" id="m1">
+              <div class="t-morph-menu">
+                <button>Профиль</button>
+                <button>Настройки</button>
+                <button>Уведомления</button>
+                <button>Выйти</button>
+              </div>
+              <button class="t-morph-plus" aria-expanded="false" id="m1-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2: SEARCH -->
+      <div class="card">
+        <div class="card-index">02 · size morph</div>
+        <div class="card-title">Иконка → поле поиска</div>
+        <p class="card-desc">Кружок растягивается в инпут; поле не перехватывает фокус пока закрыто.</p>
+        <div class="stage" style="display:flex;align-items:center;">
+          <div class="s-morph" data-open="false" id="m2">
+            <button class="s-morph-btn" id="m2-btn" aria-label="Search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+            </button>
+            <input type="text" placeholder="Найти что-нибудь…" id="m2-input" tabindex="-1">
+            <button class="s-morph-close" id="m2-close" aria-label="Close" tabindex="-1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: HAMBURGER -> DRAWER -->
+      <div class="card">
+        <div class="card-index">03 · icon morph</div>
+        <div class="card-title">Гамбургер → панель</div>
+        <p class="card-desc">Хит-зона кнопки теперь всегда 44×44, а не всё открытое окно.</p>
+        <div class="stage">
+          <div class="anchor tl">
+            <div class="d-morph" data-open="false" id="m3">
+              <div class="d-morph-panel">
+                <div class="title">Навигация</div>
+                <a href="#">Главная</a>
+                <a href="#">Проекты</a>
+                <a href="#">Контакты</a>
+              </div>
+              <button class="d-morph-btn" id="m3-btn" aria-expanded="false">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4: BUTTON STATE -->
+      <div class="card">
+        <div class="card-index">04 · state morph</div>
+        <div class="card-title">Кнопка → загрузка → готово</div>
+        <p class="card-desc">Ширина теперь фиксирована заранее — без «дёргания» текста перед схлопыванием.</p>
+        <div class="stage" style="display:flex;align-items:center;justify-content:center;">
+          <button class="b-morph" id="m4" data-state="idle">
+            <span class="label">Отправить</span>
+            <span class="spinner"></span>
+            <svg class="check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">Новые</div>
+    <div class="grid">
+
+      <!-- 5: FLOATING LABEL INPUT -->
+      <div class="card">
+        <div class="card-index">05 · label morph</div>
+        <div class="card-title">Поле ввода с плавающим лейблом</div>
+        <p class="card-desc">Метка живёт внутри поля и всплывает наверх при фокусе/вводе.</p>
+        <div class="stage" style="display:flex;align-items:center;">
+          <div class="f-field">
+            <input type="text" id="f1" placeholder=" ">
+            <label for="f1">Имя</label>
+            <div class="hint">Как к вам обращаться в письмах</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6: THINKING / REASONING -->
+      <div class="card">
+        <div class="card-index">06 · reasoning morph</div>
+        <div class="card-title">Размышления → трейс</div>
+        <p class="card-desc">Пилюля с пульсирующими точками разворачивается в шаги рассуждения.</p>
+        <div class="stage">
+          <div class="anchor tl">
+            <div class="r-morph" data-open="false" id="m6">
+              <button class="r-morph-head" id="m6-btn" aria-expanded="false">
+                <span class="r-dots"><span></span><span></span><span></span></span>
+                <span class="r-label">Думаю…</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="r-morph-body">
+                <div class="line">Проверяю условия задачи</div>
+                <div class="line">Сравниваю два подхода</div>
+                <div class="line">Выбираю оптимальный вариант</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7: DOCK BAR -->
+      <div class="card">
+        <div class="card-index">07 · dock morph</div>
+        <div class="card-title">Докбар</div>
+        <p class="card-desc">Иконки увеличиваются при наведении, клик — короткий «запуск» с индикатором.</p>
+        <div class="stage" style="display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;">
+          <div class="dock" id="dock">
+            <button class="dock-item" data-launched="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/></svg></button>
+            <button class="dock-item" data-launched="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></button>
+            <button class="dock-item" data-launched="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3z"/></svg></button>
+            <button class="dock-item" data-launched="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8: NAVBAR -->
+      <div class="card">
+        <div class="card-index">08 · navbar morph</div>
+        <div class="card-title">Компактный навбар → полный</div>
+        <p class="card-desc">Логотип-пилюля растягивается в навбар со ссылками.</p>
+        <div class="stage" style="display:flex;align-items:center;">
+          <nav class="n-morph" data-open="false" id="m8">
+            <div class="n-logo">M</div>
+            <div class="n-links">
+              <a href="#">Продукт</a>
+              <a href="#">Цены</a>
+              <a href="#">О нас</a>
+            </div>
+            <button class="n-toggle" id="m8-btn" aria-expanded="false" aria-label="Toggle nav">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- 9: MODAL -->
+      <div class="card">
+        <div class="card-index">09 · window morph</div>
+        <div class="card-title">Кнопка → модальное окно</div>
+        <p class="card-desc">Диалог вырастает из точки клика с блюром фона.</p>
+        <div class="stage" style="display:flex;align-items:center;justify-content:center;">
+          <button class="open-modal-btn" id="m9-open">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
+            Удалить проект
+          </button>
+        </div>
+      </div>
+
+      <!-- 10: COMMAND PALETTE -->
+      <div class="card">
+        <div class="card-index">10 · search modal</div>
+        <div class="card-title">Command palette (⌘K)</div>
+        <p class="card-desc">Пилюля поиска морфится в полноценную модалку со списком.</p>
+        <div class="stage" style="display:flex;align-items:center;justify-content:center;">
+          <button class="cmdk-trigger" id="m10-open">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+            Поиск…
+            <kbd>⌘K</kbd>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>tap each card to try it</footer>
+  </div>
+
+  <!-- MODAL markup (shared overlay) -->
+  <div class="modal-backdrop" data-open="false" id="m9-backdrop">
+    <div class="modal-card">
+      <h3>Удалить проект?</h3>
+      <p>Это действие необратимо. Все файлы, история и совместный доступ будут удалены.</p>
+      <div class="modal-actions">
+        <button class="ghost" id="m9-cancel">Отмена</button>
+        <button class="solid" id="m9-confirm">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMAND PALETTE markup -->
+  <div class="cmdk-backdrop" data-open="false" id="m10-backdrop">
+    <div class="cmdk-panel">
+      <input type="text" placeholder="Введите команду или поиск…" id="m10-input" tabindex="-1">
+      <div class="cmdk-list">
+        <div class="row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>Новый проект</div>
+        <div class="row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>Настройки</div>
+        <div class="row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>Профиль</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const bind = (el, on) => el && el.addEventListener('click', on);
+
+  // ===== 1: plus -> menu =====
+  const m1 = document.getElementById('m1'), m1btn = document.getElementById('m1-btn');
+  bind(m1btn, (e) => {
+    e.stopPropagation();
+    const open = m1.getAttribute('data-open') === 'true';
+    m1.setAttribute('data-open', !open);
+    m1btn.setAttribute('aria-expanded', !open);
+  });
+
+  // ===== 2: search =====
+  const m2 = document.getElementById('m2'), m2btn = document.getElementById('m2-btn'),
+        m2close = document.getElementById('m2-close'), m2input = document.getElementById('m2-input');
+  bind(m2btn, (e) => {
+    e.stopPropagation();
+    m2.setAttribute('data-open','true');
+    m2input.removeAttribute('tabindex'); m2close.removeAttribute('tabindex');
+    setTimeout(()=>m2input.focus(),380);
+  });
+  bind(m2close, (e) => {
+    e.stopPropagation();
+    m2.setAttribute('data-open','false'); m2input.value='';
+    m2input.setAttribute('tabindex','-1'); m2close.setAttribute('tabindex','-1');
+  });
+
+  // ===== 3: drawer =====
+  const m3 = document.getElementById('m3'), m3btn = document.getElementById('m3-btn');
+  bind(m3btn, (e) => {
+    e.stopPropagation();
+    const open = m3.getAttribute('data-open') === 'true';
+    m3.setAttribute('data-open', !open);
+    m3btn.setAttribute('aria-expanded', !open);
+  });
+
+  // ===== 4: button states =====
+  const m4 = document.getElementById('m4');
+  bind(m4, (e) => {
+    e.stopPropagation();
+    if (m4.getAttribute('data-state') === 'idle') {
+      m4.setAttribute('data-state','loading');
+      setTimeout(() => {
+        m4.setAttribute('data-state','done');
+        setTimeout(() => m4.setAttribute('data-state','idle'), 1600);
+      }, 1100);
+    }
+  });
+
+  // ===== 6: thinking/reasoning =====
+  const m6 = document.getElementById('m6'), m6btn = document.getElementById('m6-btn');
+  function sizeReasoning(){
+    const open = m6.getAttribute('data-open') === 'true';
+    m6.style.height = open ? (44 + m6.querySelector('.r-morph-body').scrollHeight) + 'px' : '44px';
+  }
+  bind(m6btn, (e) => {
+    e.stopPropagation();
+    const open = m6.getAttribute('data-open') === 'true';
+    m6.setAttribute('data-open', !open);
+    m6btn.setAttribute('aria-expanded', !open);
+    requestAnimationFrame(sizeReasoning);
+  });
+  m6.style.height = '44px';
+
+  // ===== 7: dock =====
+  document.querySelectorAll('.dock-item').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.setAttribute('data-launched','true');
+      btn.addEventListener('animationend', () => {}, {once:true});
+    });
+  });
+
+  // ===== 8: navbar =====
+  const m8 = document.getElementById('m8'), m8btn = document.getElementById('m8-btn');
+  bind(m8btn, (e) => {
+    e.stopPropagation();
+    const open = m8.getAttribute('data-open') === 'true';
+    m8.setAttribute('data-open', !open);
+    m8btn.setAttribute('aria-expanded', !open);
+  });
+
+  // ===== 9: modal =====
+  const m9backdrop = document.getElementById('m9-backdrop'), m9open = document.getElementById('m9-open'),
+        m9cancel = document.getElementById('m9-cancel'), m9confirm = document.getElementById('m9-confirm');
+  bind(m9open, (e) => { e.stopPropagation(); m9backdrop.setAttribute('data-open','true'); });
+  bind(m9cancel, (e) => { e.stopPropagation(); m9backdrop.setAttribute('data-open','false'); });
+  bind(m9confirm, (e) => { e.stopPropagation(); m9backdrop.setAttribute('data-open','false'); });
+  bind(m9backdrop, (e) => { if (e.target === m9backdrop) m9backdrop.setAttribute('data-open','false'); });
+
+  // ===== 10: command palette =====
+  const m10backdrop = document.getElementById('m10-backdrop'), m10open = document.getElementById('m10-open'),
+        m10input = document.getElementById('m10-input');
+  bind(m10open, (e) => {
+    e.stopPropagation();
+    m10backdrop.setAttribute('data-open','true');
+    m10input.removeAttribute('tabindex');
+    setTimeout(()=>m10input.focus(),300);
+  });
+  bind(m10backdrop, (e) => { if (e.target === m10backdrop) { m10backdrop.setAttribute('data-open','false'); m10input.setAttribute('tabindex','-1'); } });
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      m10backdrop.setAttribute('data-open','true');
+      m10input.removeAttribute('tabindex');
+      setTimeout(()=>m10input.focus(),300);
+    }
+    if (e.key === 'Escape') {
+      m10backdrop.setAttribute('data-open','false'); m10input.setAttribute('tabindex','-1');
+      m9backdrop.setAttribute('data-open','false');
+    }
+  });
+
+  // ===== GLOBAL: close m1, m3, m6, m8 on outside click =====
+  document.addEventListener('click', (e) => {
+    // m1: plus -> menu
+    if (m1 && m1.getAttribute('data-open') === 'true' && !m1.contains(e.target)) {
+      m1.setAttribute('data-open', 'false');
+      m1btn.setAttribute('aria-expanded', 'false');
+    }
+    // m3: hamburger -> drawer
+    if (m3 && m3.getAttribute('data-open') === 'true' && !m3.contains(e.target)) {
+      m3.setAttribute('data-open', 'false');
+      m3btn.setAttribute('aria-expanded', 'false');
+    }
+    // m6: reasoning
+    if (m6 && m6.getAttribute('data-open') === 'true' && !m6.contains(e.target)) {
+      m6.setAttribute('data-open', 'false');
+      m6btn.setAttribute('aria-expanded', 'false');
+      requestAnimationFrame(sizeReasoning);
+    }
+    // m8: navbar
+    if (m8 && m8.getAttribute('data-open') === 'true' && !m8.contains(e.target)) {
+      m8.setAttribute('data-open', 'false');
+      m8btn.setAttribute('aria-expanded', 'false');
+    }
+    // m2: search (close when clicking outside)
+    if (m2 && m2.getAttribute('data-open') === 'true' && !m2.contains(e.target)) {
+      m2.setAttribute('data-open', 'false');
+      m2input.value = '';
+      m2input.setAttribute('tabindex', '-1');
+      m2close.setAttribute('tabindex', '-1');
+    }
+  });
+</script>
+</body>
+</html>

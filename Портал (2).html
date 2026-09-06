@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aubeig Games | Blackjack, Slots & Dice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050510;
+            --surface: rgba(20, 20, 35, 0.3);
+            --primary: #7000FF;
+            --primary-glow: #8A2BE2;
+            --accent: #00F0FF;
+            --hydra: #FF003C;
+            --gold: #FFB800;
+            --xgo: #2FD9FF;
+            --anonshare: #00FF9C;
+            --text: #E8E8FF;
+            --text-sec: #A0A0C0;
+            --font-main: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --dock-bg: rgba(15, 15, 25, 0.15);
+            --blur-val: 25px;
+            --card-radius: 24px;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --table-felt: #0d2818;
+            --table-felt-2: #1a472a;
+            --table-line: rgba(255,255,255,0.06);
+            --tint-weak: rgba(255,255,255,0.04);
+            --tint-med: rgba(255,255,255,0.06);
+        }
+
+        /* ---------- Table felt themes (background of the game panel) ---------- */
+        [data-table="green"]   { --table-felt: #0d2818; --table-felt-2: #1a472a; }
+        [data-table="crimson"] { --table-felt: #3a0a0a; --table-felt-2: #6b1111; }
+        [data-table="royal"]   { --table-felt: #1a0533; --table-felt-2: #3d1466; }
+        [data-table="midnight"]{ --table-felt: #050b24; --table-felt-2: #0c2461; }
+        [data-table="gold"]    { --table-felt: #2b2103; --table-felt-2: #4a3a06; }
+
+        [data-theme="light"] {
+            --bg: #F5F7FF;
+            --surface: rgba(255, 255, 255, 0.7);
+            --primary: #8A4FFF;
+            --primary-glow: #9D6BFF;
+            --accent: #00C2D6;
+            --hydra: #FF3366;
+            --gold: #E6A600;
+            --xgo: #0BA5D6;
+            --anonshare: #00C97A;
+            --text: #2D2D5A;
+            --text-sec: #6B6B8B;
+            --dock-bg: rgba(255, 255, 255, 0.2);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --tint-weak: rgba(0,0,0,0.035);
+            --tint-med: rgba(0,0,0,0.055);
+        }
+
+        [data-glass="false"] {
+            --surface: #151525;
+            --dock-bg: #101015;
+            --blur-val: 0px;
+            --border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"][data-glass="false"] {
+            --surface: #FFFFFF;
+            --dock-bg: #F0F0F5;
+            --border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            user-select: none;
+        }
+
+        input, textarea {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            position: relative;
+        }
+
+        body.modal-open { overflow: hidden; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #4A4A4A; border-radius: 3px; }
+        [data-theme="light"] ::-webkit-scrollbar-thumb { background: #A0A0A0; }
+        ::selection { background: var(--primary); color: white; }
+
+        /* ---------- Ripple click effect (from reference design) ---------- */
+        .has-ripple { position: relative; overflow: hidden; transform: translateZ(0); }
+        .ripple {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 70%);
+            transform: scale(0); animation: rippleFx 0.8s ease-out; pointer-events: none; filter: blur(8px); opacity: 0.7;
+        }
+        [data-theme="light"] .ripple {
+            background: radial-gradient(circle, rgba(138,79,255,0.6) 0%, rgba(138,79,255,0.3) 50%, rgba(138,79,255,0) 70%);
+        }
+        @keyframes rippleFx {
+            0% { transform: scale(0); opacity: 0.7; }
+            50% { opacity: 0.4; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+
+        @keyframes liquidMorph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        @keyframes shimmerBg {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- Preloader ---------- */
+        .preloader {
+            position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .clock-container { position: relative; width: 120px; height: 120px; display: flex; justify-content: center; align-items: center; }
+        .clock-blob {
+            position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(112,0,255,0.15), rgba(0,240,255,0.05));
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: liquidMorph 8s infinite ease-in-out, spin 6s infinite linear;
+            box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
+        }
+        .preloader-icon { font-size: 2.6rem; position: relative; z-index: 2; }
+        .preloader-text {
+            margin-top: 22px; letter-spacing: 3px; font-weight: 800;
+            background: linear-gradient(100deg, var(--primary) 40%, #fff 50%, var(--primary) 60%);
+            background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+            color: transparent; animation: shimmerBg 2.2s ease-in-out infinite alternate;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; min-height: 100vh; padding-bottom: 140px; position: relative; }
+        .container.theme-flip { animation: themeSpring 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes themeSpring {
+            0% { transform: scale(1); }
+            35% { transform: scale(0.965); }
+            70% { transform: scale(1.015); }
+            100% { transform: scale(1); }
+        }
+
+        /* Radial flash that expands from the theme toggle when switched */
+        .theme-flash {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 9998;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            opacity: 0.35; transform: scale(0); animation: themeFlashFx 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes themeFlashFx {
+            0% { transform: scale(0); opacity: 0.45; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        .section {
+            display: none; opacity: 0; transform: scale(0.92); transform-origin: center center;
+            transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            padding-bottom: 40px;
+        }
+        /* Game screens have interactive controls (bet chips, spin/roll buttons) near the
+           bottom — give them extra clearance so the fixed dock never sits on top of them. */
+        .game-view { padding-bottom: 90px; }
+        .section.entering { display: block; opacity: 0; transform: scale(0.92); }
+        .section.active { display: block; opacity: 1; transform: scale(1); }
+        .section.leaving { display: block; opacity: 0; transform: scale(1.06); position: absolute; inset: 0; pointer-events: none; }
+
+        /* ---------- Hero / lobby ---------- */
+        .hero { text-align: center; margin: 30px 0 50px; animation: fadeInUp 0.7s ease-out; }
+        .logo-badge {
+            position: relative; width: 110px; height: 110px; margin: 0 auto 20px;
+            display: grid; place-items: center; border-radius: 50%;
+        }
+        .logo-blob {
+            position: absolute; inset: -8px; background: var(--primary); opacity: 0.35; filter: blur(20px);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: liquidMorph 6s infinite reverse;
+        }
+        .logo-icon {
+            position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%;
+            display: grid; place-items: center; font-size: 2.4rem;
+            background: var(--surface); border: 3px solid var(--primary); box-shadow: 0 0 50px var(--primary-glow);
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        h1 { font-size: 2.6rem; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; }
+        .role { color: var(--accent); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 16px; }
+        .desc { max-width: 640px; margin: 0 auto; color: var(--text-sec); line-height: 1.6; }
+
+        /* ---------- Dynamic Island balance pill (elastic morph) ---------- */
+        .di-morph {
+            position: relative; height: 46px; width: 190px; margin: 22px auto 0; border-radius: 23px;
+            background: #050308; overflow: hidden; cursor: pointer; box-sizing: border-box;
+            box-shadow: 0 14px 34px -12px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 0 rgba(255,184,0,0.25);
+            transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        border-radius 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 3s ease-in-out infinite;
+            animation: pillGlow 3s ease-in-out infinite;
+        }
+        .di-morph[data-open="true"] {
+            width: min(320px, 88vw); height: 108px; border-radius: 28px;
+            transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        border-radius 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .di-compact {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+        .di-morph[data-open="true"] .di-compact { opacity: 0; filter: blur(3px); pointer-events: none; }
+        .di-compact i { color: var(--gold); }
+        .di-compact-label { color: #f0f0ff; font-weight: 800; font-size: 1.05rem; }
+        .di-expanded {
+            position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px;
+            padding: 14px 20px; opacity: 0; transform: scale(0.9); filter: blur(3px); pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+        }
+        .di-morph[data-open="true"] .di-expanded { opacity: 1; transform: scale(1); filter: blur(0); pointer-events: auto; transition-delay: 0.08s; }
+        .di-expanded-top { display: flex; align-items: center; justify-content: space-between; }
+        .di-expanded-balance { color: #fff; font-weight: 900; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; }
+        .di-expanded-balance i { color: var(--gold); }
+        .di-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--anonshare); box-shadow: 0 0 10px var(--anonshare); flex-shrink: 0; animation: pulse 1.6s ease-in-out infinite; }
+        .di-mini-stats { display: flex; gap: 14px; font-size: 0.75rem; color: #b0b0d0; }
+        .di-mini-stats b { color: #fff; }
+        @keyframes pulse { 0%,80%,100% { opacity: .3; transform: scale(.85); } 40% { opacity: 1; transform: scale(1); } }
+
+        .balance-pill i { color: var(--gold); }
+        @keyframes pillGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,184,0,0.15); }
+            50% { box-shadow: 0 0 24px 2px rgba(255,184,0,0.22); }
+        }
+
+        /* ---------- Game grid / cards ---------- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+
+        /* ---------- Lobby tile grid (large game-select cards) ---------- */
+        .tile-grid { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; perspective: 1000px; margin-bottom: 30px; }
+        .game-tile {
+            width: 220px; border-radius: var(--card-radius); overflow: hidden; cursor: pointer; position: relative;
+            background: var(--surface); border: 1px solid var(--border-color); backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s, border-color 0.4s, box-shadow 0.4s;
+            opacity: 0; transform: translateY(30px) scale(0.9);
+            will-change: transform;
+        }
+        .game-tile.visible { opacity: 1; transform: translateY(0) scale(1); }
+        .game-tile.tilting { transition: box-shadow 0.3s, border-color 0.3s; }
+        .tile-glare {
+            position: absolute; inset: 0; pointer-events: none; z-index: 3; opacity: 0; transition: opacity 0.3s ease;
+            background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.35), transparent 55%);
+        }
+        .game-tile:hover .tile-glare, .game-tile.tilting .tile-glare { opacity: 1; }
+        .game-tile:nth-child(1) { transition-delay: 0.05s; }
+        .game-tile:nth-child(2) { transition-delay: 0.15s; }
+        .game-tile:nth-child(3) { transition-delay: 0.25s; }
+
+        .game-tile[data-theme="blackjack"] { --card-accent: var(--hydra); }
+        .game-tile[data-theme="slots"] { --card-accent: var(--xgo); }
+        .game-tile[data-theme="dice"] { --card-accent: var(--anonshare); }
+        .game-tile[data-theme="plinko"] { --card-accent: var(--gold); }
+
+        .game-tile:hover { transform: translateY(-8px) scale(1.03); border-color: var(--card-accent); box-shadow: 0 20px 45px rgba(0,0,0,0.35); }
+        .game-tile.selected { transform: translateY(-10px) scale(1.06); border-color: var(--card-accent); box-shadow: 0 0 0 2px var(--card-accent), 0 20px 45px rgba(0,0,0,0.4); }
+
+        .tile-visual {
+            height: 160px; display: grid; place-items: center; position: relative; overflow: hidden;
+            background: var(--tint-weak);
+        }
+        .game-tile[data-theme="blackjack"] .tile-visual { background: linear-gradient(150deg, rgba(255,0,60,0.22), rgba(255,0,60,0.05)); }
+        .game-tile[data-theme="slots"] .tile-visual { background: linear-gradient(150deg, rgba(47,217,255,0.22), rgba(47,217,255,0.05)); }
+        .game-tile[data-theme="dice"] .tile-visual { background: linear-gradient(150deg, rgba(0,255,156,0.22), rgba(0,255,156,0.05)); }
+        .game-tile[data-theme="plinko"] .tile-visual { background: linear-gradient(150deg, rgba(255,184,0,0.22), rgba(255,184,0,0.05)); }
+        .tile-emoji { font-size: 4.4rem; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.4)); transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+        .game-tile:hover .tile-emoji { transform: scale(1.12) rotate(-4deg); }
+
+        .tile-info { padding: 16px 18px 20px; text-align: center; }
+        .tile-info h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; }
+        .tile-info p { font-size: 0.8rem; color: var(--text-sec); line-height: 1.4; }
+
+        .card {
+            background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--card-radius);
+            padding: 28px; backdrop-filter: blur(var(--blur-val)); position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow: hidden; isolation: isolate;
+            cursor: pointer;
+            opacity: 0; transform: translateY(30px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card:nth-child(1) { transition-delay: 0.05s; }
+        .card:nth-child(2) { transition-delay: 0.15s; }
+        .card:nth-child(3) { transition-delay: 0.25s; }
+
+        .card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--card-accent, var(--primary-glow)); transform: scaleX(0); transform-origin: left;
+            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3;
+        }
+        .card:hover::after { transform: scaleX(1); }
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-accent, var(--primary-glow));
+            box-shadow: 0 15px 40px rgba(112,0,255,0.2);
+        }
+
+        .card[data-theme="blackjack"] { --card-accent: var(--hydra); border-color: rgba(255,0,60,0.3); }
+        .card[data-theme="blackjack"]:hover { box-shadow: 0 15px 40px rgba(255,0,60,0.2); }
+        .card[data-theme="slots"] { --card-accent: var(--xgo); border-color: rgba(47,217,255,0.3); }
+        .card[data-theme="slots"]:hover { box-shadow: 0 15px 40px rgba(47,217,255,0.25); }
+        .card[data-theme="dice"] { --card-accent: var(--anonshare); border-color: rgba(0,255,156,0.3); }
+        .card[data-theme="dice"]:hover { box-shadow: 0 15px 40px rgba(0,255,156,0.25); }
+
+        .card-icon {
+            width: 64px; height: 64px; display: grid; place-items: center;
+            background: var(--tint-weak); border-radius: 18px; font-size: 1.7rem; margin-bottom: 18px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; z-index: 2; color: var(--card-accent, var(--text));
+        }
+        .card:hover .card-icon { transform: scale(1.08) rotate(-4deg); }
+        .card[data-theme="blackjack"] .card-icon { background: rgba(255,0,60,0.1); }
+        .card[data-theme="slots"] .card-icon { background: rgba(47,217,255,0.12); }
+        .card[data-theme="dice"] .card-icon { background: rgba(0,255,156,0.12); }
+
+        .card h3 { font-size: 1.4rem; margin-bottom: 8px; font-weight: 800; position: relative; z-index: 2; }
+        .card p { color: var(--text-sec); line-height: 1.6; margin-bottom: 18px; font-size: 0.92rem; position: relative; z-index: 2; }
+
+        .badge {
+            position: absolute; top: 18px; right: 18px; padding: 5px 12px; border-radius: 8px;
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; z-index: 2;
+        }
+        .bg-anonshare { background: var(--anonshare); color: #001a10; animation: badgePulse 2.2s ease-in-out infinite; }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,156,0.55); }
+            50% { box-shadow: 0 0 0 6px rgba(0,255,156,0); }
+        }
+
+        .btn {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: 700;
+            transition: 0.3s; background: var(--primary); color: white; border: none; cursor: pointer;
+            position: relative; z-index: 2; overflow: hidden; font-family: var(--font-main); font-size: 0.95rem;
+        }
+        .btn:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(112,0,255,0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn-outline { background: transparent; border: 1px solid var(--text-sec); color: var(--text-sec); }
+        .btn-outline:hover { background: rgba(0,0,0,0.06); color: var(--text); border-color: var(--text); }
+        [data-theme="light"] .btn-outline:hover { background: rgba(0,0,0,0.06); }
+        [data-theme="dark"] .btn-outline:hover, body:not([data-theme]) .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+        /* ---------- Game view (shared) ---------- */
+        .game-view { display: none; }
+        .game-view.active { display: block; }
+
+        .game-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            margin-bottom: 24px; flex-wrap: wrap;
+        }
+        .icon-btn {
+            width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+            background: var(--surface); border: 1px solid var(--border-color); color: var(--text);
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(var(--blur-val)); font-size: 1.1rem;
+        }
+        .icon-btn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); }
+
+        .game-title-wrap { text-align: center; flex: 1; }
+        .game-title { font-size: 1.7rem; font-weight: 900; letter-spacing: 0.5px; }
+        .game-subtitle { color: var(--text-sec); font-size: 0.85rem; margin-top: 2px; }
+
+        .stats-bar {
+            display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+            padding: 16px 20px; background: var(--surface); border: 1px solid var(--border-color);
+            border-radius: 18px; margin-bottom: 20px; backdrop-filter: blur(var(--blur-val));
+        }
+        .stat-chip { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; }
+
+        /* ---------- Game Dynamic Island (balance + bet, tap to expand) ---------- */
+        .game-island {
+            position: relative; margin: 0 auto 20px; background: #050308; overflow: hidden; cursor: pointer;
+            box-sizing: border-box; width: min(320px, 100%); height: 52px; border-radius: 26px;
+            box-shadow: 0 14px 34px -12px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.08);
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-radius 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .game-island[data-open="true"] { height: 118px; border-radius: 26px; }
+        .gi-compact {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 18px;
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+        .game-island[data-open="true"] .gi-compact { opacity: 0; filter: blur(3px); pointer-events: none; }
+        .gi-compact-item { display: flex; align-items: center; gap: 7px; color: #f0f0ff; font-weight: 800; font-size: 0.95rem; }
+        .gi-compact-item i.gold { color: var(--gold); }
+        .gi-compact-item i.silver { color: #c8c8e0; }
+        .gi-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+        .gi-expanded {
+            position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 10px;
+            padding: 14px 22px; opacity: 0; transform: scale(0.9); filter: blur(3px); pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+        }
+        .game-island[data-open="true"] .gi-expanded { opacity: 1; transform: scale(1); filter: blur(0); pointer-events: auto; transition-delay: 0.1s; }
+        .gi-expanded-row { display: flex; align-items: center; justify-content: space-between; }
+        .gi-expanded-main { color: #fff; font-weight: 900; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
+        .gi-expanded-main i { color: var(--gold); }
+        .gi-expanded-sub { font-size: 0.78rem; color: #b0b0d0; font-weight: 700; }
+        .gi-expanded-sub b { color: #fff; }
+        .gi-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--anonshare); box-shadow: 0 0 10px var(--anonshare); animation: pulse 1.6s ease-in-out infinite; }
+        .stat-chip .chip-icon {
+            width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 0.95rem;
+        }
+        .chip-icon.gold { background: radial-gradient(circle at 30% 30%, var(--gold), #B8860B); color: #201400; }
+        .chip-icon.silver { background: radial-gradient(circle at 30% 30%, #C8C8E0, #8080A0); color: #10101a; }
+
+        .game-panel {
+            background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--card-radius);
+            padding: 24px; backdrop-filter: blur(var(--blur-val)); position: relative; overflow: hidden;
+        }
+
+        /* ---------- Felt table background (behind cards/dealer/player areas) ---------- */
+        .felt-table {
+            position: relative; border-radius: 18px; padding: 20px; margin-bottom: 16px; overflow: hidden;
+            background:
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 26px),
+                radial-gradient(ellipse at 50% 0%, var(--table-felt-2) 0%, var(--table-felt) 70%);
+            border: 3px solid rgba(0,0,0,0.35);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .felt-table::before {
+            content: ''; position: absolute; inset: 8px; border-radius: 12px;
+            border: 1px dashed rgba(255,255,255,0.12); pointer-events: none;
+        }
+        .table-area { padding: 10px 0; }
+        .table-area + .table-area { border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 4px; padding-top: 16px; }
+        .area-title {
+            text-align: center; margin-bottom: 12px; font-size: 1rem; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 800;
+        }
+        .cards-container { display: flex; justify-content: center; gap: 12px; min-height: 130px; align-items: center; flex-wrap: wrap; }
+
+        .playing-card {
+            width: 88px; height: 124px; background: linear-gradient(160deg, #ffffff, #f0f0f5); border-radius: 10px;
+            padding: 0; color: #111;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.06); position: relative; animation: dealCard 0.45s ease-out;
+            overflow: hidden;
+        }
+        .playing-card.red { color: var(--hydra); }
+        .playing-card.black { color: #14141c; }
+        .playing-card.back {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
+            border: 2px solid var(--accent);
+        }
+        .playing-card.back::before {
+            content: ''; position: absolute; inset: 6px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 8px, transparent 8px 16px);
+        }
+        .pc-corner {
+            position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; z-index: 2;
+            top: 7px; left: 7px;
+        }
+        .pc-corner.bottom { top: auto; left: auto; bottom: 7px; right: 7px; transform: rotate(180deg); }
+        .pc-corner .pc-v { font-size: 1.05rem; font-weight: 900; }
+        .pc-corner .pc-s { font-size: 0.85rem; margin-top: 1px; }
+        .pc-value { font-size: 1.3rem; font-weight: 900; z-index: 2; }
+        .pc-value.bottom { align-self: flex-end; transform: rotate(180deg); }
+        .pc-suit {
+            position: absolute; inset: 0; font-size: 2rem; display: flex; align-items: center; justify-content: center;
+        }
+
+        @keyframes dealCard {
+            0% { transform: translateY(-200px) rotate(8deg); opacity: 0; }
+            70% { transform: translateY(12px) rotate(-4deg); }
+            100% { transform: translateY(0) rotate(0); opacity: 1; }
+        }
+
+        .score-label { text-align: center; margin-top: 10px; font-weight: 700; color: var(--text-sec); font-size: 0.95rem; }
+
+        .result-message {
+            text-align: center; font-size: 1.3rem; min-height: 50px; margin: 16px 0; font-weight: 800;
+            padding: 12px; border-radius: 14px; background: rgba(255,255,255,0.04);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .result-message.win { color: var(--anonshare); animation: pulseGlow 1.6s infinite; }
+        .result-message.lose { color: var(--hydra); }
+        .result-message.tie { color: var(--gold); }
+        @keyframes pulseGlow {
+            0%, 100% { text-shadow: 0 0 8px rgba(0,255,156,0.4); }
+            50% { text-shadow: 0 0 18px rgba(0,255,156,0.9); }
+        }
+        .win-shake { animation: winPop 0.5s ease-in-out 2; }
+        .lose-shake { animation: loseShake 0.4s ease-in-out 2; }
+        @keyframes winPop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes loseShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        .bet-controls { display: flex; justify-content: center; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+        .bet-chip {
+            width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+            font-weight: 900; font-size: 1rem; cursor: pointer; transition: all 0.3s; color: #14141c;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3); border: 2px solid transparent; position: relative;
+        }
+        .bet-chip:hover { transform: scale(1.08); }
+        .bet-chip.active { transform: scale(1.12); border-color: var(--accent); box-shadow: 0 0 18px var(--accent); }
+        .bet-chip[data-bet="10"] { background: radial-gradient(circle at 30% 30%, #ff8a8a, var(--hydra)); color: #fff; }
+        .bet-chip[data-bet="25"] { background: radial-gradient(circle at 30% 30%, #8ab4ff, #2050d0); color: #fff; }
+        .bet-chip[data-bet="50"] { background: radial-gradient(circle at 30% 30%, #8affb0, #00a850); color: #04160c; }
+        .bet-chip[data-bet="100"] { background: radial-gradient(circle at 30% 30%, var(--gold), #b88400); }
+        .bet-chip[data-bet="500"] { background: radial-gradient(circle at 30% 30%, var(--primary-glow), var(--primary)); color: #fff; }
+
+        .quick-bet-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .quick-bet-btn {
+            padding: 7px 16px; font-size: 0.82rem; background: rgba(112,0,255,0.12); color: var(--text);
+            border: 1px solid var(--primary-glow); border-radius: 999px; cursor: pointer; transition: 0.25s; font-weight: 700;
+        }
+        .quick-bet-btn:hover { background: var(--primary); color: #fff; }
+
+        .controls-row { display: flex; justify-content: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+        .action-btn {
+            padding: 12px 22px; font-size: 0.95rem; border: none; border-radius: 999px;
+            background: var(--surface); border: 1px solid var(--border-color); color: var(--text); cursor: pointer;
+            transition: all 0.3s; font-weight: 800; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px;
+            backdrop-filter: blur(var(--blur-val));
+        }
+        .action-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .action-btn.primary:hover { box-shadow: 0 8px 20px rgba(112,0,255,0.4); transform: translateY(-2px); }
+        .action-btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--primary-glow); }
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ---------- Slots ---------- */
+        .slots-machine {
+            background:
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 26px),
+                radial-gradient(ellipse at 50% 0%, var(--table-felt-2) 0%, var(--table-felt) 70%);
+            border-radius: 18px; padding: 26px; margin-bottom: 20px; position: relative; overflow: hidden;
+            border: 3px solid rgba(0,0,0,0.35); box-shadow: inset 0 0 40px rgba(0,0,0,0.55);
+        }
+        .reels-row { display: flex; justify-content: center; gap: 14px; margin-bottom: 22px; }
+        .reel-wrap {
+            position: relative; width: 92px; height: 246px; overflow: hidden; border-radius: 12px;
+            background: rgba(0,0,0,0.35); border: 2px solid var(--xgo);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 20px rgba(47,217,255,0.15);
+        }
+        .reel-strip { position: absolute; left: 0; top: 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; will-change: transform; }
+        .reel-cell { width: 74px; height: 74px; display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0; border-radius: 10px; background: rgba(255,255,255,0.04); transition: transform 0.25s, box-shadow 0.25s; flex-shrink: 0; }
+        .reel-cell.hit { transform: scale(1.12); box-shadow: 0 0 22px var(--gold); background: rgba(255,184,0,0.15); }
+        .reel-overlay {
+            position: absolute; inset: 0; pointer-events: none; border-radius: 10px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 32%, transparent 68%, rgba(0,0,0,0.65) 100%);
+        }
+        .payline {
+            position: absolute; left: 4px; right: 4px; top: 50%; height: var(--cell-size, 82px); transform: translateY(-50%);
+            border-top: 2px dashed rgba(255,184,0,0.55); border-bottom: 2px dashed rgba(255,184,0,0.55);
+            pointer-events: none; z-index: 2;
+        }
+        .slots-controls { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+        .bet-stepper { display: flex; align-items: center; gap: 14px; }
+        .stepper-btn {
+            width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--primary-glow); background: rgba(112,0,255,0.1);
+            color: var(--primary-glow); font-size: 1.2rem; font-weight: 900; cursor: pointer; display: grid; place-items: center;
+            transition: 0.25s; box-shadow: 0 0 0 0 rgba(112,0,255,0);
+        }
+        .stepper-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 18px rgba(112,0,255,0.5); }
+        .stepper-btn:active { transform: scale(0.92); box-shadow: 0 0 24px rgba(112,0,255,0.7); }
+        .stepper-btn.holding { animation: stepperPulse 0.5s ease-in-out infinite; }
+        @keyframes stepperPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(112,0,255,0.4); }
+            50% { box-shadow: 0 0 26px rgba(112,0,255,0.85); }
+        }
+        .stepper-val {
+            font-size: 1.3rem; font-weight: 900; width: 80px; text-align: center;
+            background: var(--tint-med); border: 1px solid var(--border-color); border-radius: 10px;
+            color: var(--text); padding: 8px 4px; font-family: var(--font-main); transition: 0.25s;
+        }
+        .stepper-val:focus { border-color: var(--primary-glow); background: var(--tint-med); }
+        .stepper-val::-webkit-inner-spin-button, .stepper-val::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .stepper-val[type="number"] { -moz-appearance: textfield; }
+        /* Felt-backed control clusters (slot reels, dice stage) are always a dark green
+           felt regardless of the light/dark theme toggle, so their text must stay a fixed
+           light color instead of following the theme-adaptive --text/--text-sec vars —
+           otherwise the light theme flips this text dark and it disappears into the felt. */
+        .slots-machine .stepper-val,
+        .dice-stage .stepper-val {
+            color: #EDEDF7; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18);
+        }
+        .dice-stage .dice-info-row { color: rgba(237,237,247,0.75); }
+        .dice-stage .dice-info-row span b { color: #EDEDF7; }
+        .dice-stage .dice-mode-btn { color: rgba(237,237,247,0.75); }
+        .spin-btn {
+            background: linear-gradient(45deg, var(--xgo), #0090b8); border: none; border-radius: 999px; padding: 14px 44px;
+            font-size: 1.05rem; color: #001318; cursor: pointer; font-weight: 900; letter-spacing: 1px;
+            box-shadow: 0 8px 22px rgba(47,217,255,0.35); transition: all 0.3s;
+        }
+        .spin-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(47,217,255,0.5); }
+        .spin-btn:disabled { background: #444; color: #999; box-shadow: none; cursor: not-allowed; transform: none; }
+        .spin-btn.spinning { animation: spinPulse 0.7s ease-in-out infinite; }
+        .spin-btn.success-state { background: linear-gradient(45deg, var(--anonshare), #00e884); animation: btnMorphPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+        .spin-btn.fail-state { background: linear-gradient(45deg, var(--hydra), #c00030); animation: btnMorphPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes spinPulse {
+            0%, 100% { box-shadow: 0 8px 22px rgba(47,217,255,0.35); }
+            50% { box-shadow: 0 8px 34px rgba(47,217,255,0.7); }
+        }
+        .reels-active .reel-wrap { box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 28px rgba(47,217,255,0.4); }
+        .paytable-mini { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+        .paytable-mini .pt-item {
+            display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: rgba(255,255,255,0.04);
+            border-radius: 10px; font-size: 0.78rem; color: var(--text-sec); font-weight: 700;
+        }
+        .paytable-mini .pt-item b { color: var(--gold); }
+
+        /* ---------- Slots paytable accordion (symbol -> payout reference) ---------- */
+        .paytable-acc {
+            margin-top: 16px; border-radius: 16px; background: var(--tint-weak);
+            border: 1px solid var(--border-color); overflow: hidden;
+        }
+        .paytable-acc-head {
+            all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 14px 16px; cursor: pointer; font-size: 0.88rem; font-weight: 800;
+            color: var(--text); gap: 10px;
+        }
+        .paytable-chevron { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--text-sec); flex-shrink: 0; }
+        .paytable-acc-head[aria-expanded="true"] .paytable-chevron { transform: rotate(180deg); color: var(--primary-glow); }
+        /* grid-template-rows 0fr -> 1fr animates height without a hardcoded max-height guess */
+        .paytable-acc-body-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .paytable-acc[data-open="true"] .paytable-acc-body-wrap { grid-template-rows: 1fr; }
+        .paytable-acc-body { overflow: hidden; min-height: 0; padding: 0 16px; }
+        .paytable-row {
+            display: grid; grid-template-columns: 1.5fr 1fr 1fr; align-items: center; gap: 8px;
+            padding: 9px 0; border-top: 1px dashed var(--border-color); font-size: 0.85rem;
+        }
+        .paytable-row:first-child { border-top: none; }
+        .paytable-row-head { color: var(--text-sec); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 800; padding-bottom: 10px; }
+        .pt-symbol { font-weight: 700; color: var(--text); white-space: nowrap; }
+        .pt-mult { font-weight: 900; text-align: center; padding: 3px 8px; border-radius: 8px; }
+        .pt-mult.pt-high { color: var(--hydra); background: rgba(255,0,60,0.12); }
+        .pt-mult.pt-mid { color: var(--gold); background: rgba(255,184,0,0.12); }
+        .pt-mult.pt-low { color: var(--anonshare); background: rgba(0,255,156,0.1); }
+        .pt-mult.pt-flat { color: var(--text-sec); background: transparent; font-weight: 700; }
+        .paytable-note { font-size: 0.76rem; color: var(--text-sec); line-height: 1.5; margin: 10px 0 14px; }
+
+        /* ---------- Accent color picker (gooey long-press menu) ---------- */
+        .accent-gooey { position: fixed; width: 44px; height: 44px; z-index: 4000; pointer-events: none; }
+        .accent-gooey-blobs { position: absolute; inset: 0; filter: url(#accent-goo-filter); }
+        .accent-gooey-blob {
+            all: unset; box-sizing: border-box; position: absolute; left: 2px; top: 2px;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            transform: translate(0, 0) scale(0);
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        }
+        .accent-gooey-blob.active { box-shadow: 0 0 0 3px #fff, 0 2px 10px rgba(0,0,0,0.4); }
+        .accent-gooey[data-open="true"] .accent-gooey-blob {
+            transform: translate(var(--tx), var(--ty)) scale(1);
+            pointer-events: auto;
+        }
+        .accent-gooey[data-open="true"] .accent-gooey-blob:nth-child(2) { transition-delay: 0.03s; }
+        .accent-gooey[data-open="true"] .accent-gooey-blob:nth-child(3) { transition-delay: 0.06s; }
+        .accent-gooey[data-open="true"] .accent-gooey-blob:nth-child(4) { transition-delay: 0.09s; }
+        .accent-gooey[data-open="true"] .accent-gooey-blob:nth-child(5) { transition-delay: 0.12s; }
+
+        /* ---------- Dice ---------- */
+        .dice-stage {
+            display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 26px 16px;
+            border-radius: 18px; margin-bottom: 4px;
+            background:
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 26px),
+                radial-gradient(ellipse at 50% 0%, var(--table-felt-2) 0%, var(--table-felt) 70%);
+            border: 3px solid rgba(0,0,0,0.35); box-shadow: inset 0 0 40px rgba(0,0,0,0.55);
+        }
+        .dice-cube-wrap { width: 110px; height: 110px; perspective: 600px; }
+        .dice-cube {
+            width: 100%; height: 100%; display: grid; place-items: center; border-radius: 22px;
+            background: linear-gradient(135deg, var(--anonshare), #00b874); color: #04160c; font-size: 3.2rem; font-weight: 900;
+            box-shadow: 0 10px 30px rgba(0,255,156,0.35), inset 0 -6px 0 rgba(0,0,0,0.15), inset 0 4px 0 rgba(255,255,255,0.25);
+            transition: transform 0.2s;
+        }
+        .dice-cube.rolling { animation: diceRoll 0.6s linear infinite; }
+        .dice-cube.landed { animation: diceLand 0.45s ease-out; }
+        @keyframes diceLand {
+            0% { transform: scale(1.3); }
+            60% { transform: scale(0.92); }
+            100% { transform: scale(1); }
+        }
+        @keyframes diceRoll {
+            0% { transform: rotateX(0) rotateY(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+        .dice-target-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: center; }
+        .dice-slider-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 260px; max-width: 90vw; }
+        .dice-slider-wrap input[type="range"] {
+            width: 100%; accent-color: var(--anonshare); cursor: pointer;
+        }
+        .dice-mode-row {
+            position: relative; display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+        }
+        .dice-mode-indicator {
+            position: absolute; top: 4px; left: 4px; height: calc(100% - 8px); border-radius: 999px;
+            background: linear-gradient(90deg, var(--anonshare), #00b874);
+            box-shadow: 0 8px 18px -6px rgba(0,255,156,0.55); z-index: 0;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .dice-mode-btn {
+            position: relative; z-index: 1; padding: 8px 18px; border-radius: 999px; border: none; background: transparent;
+            color: var(--text-sec); cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: color 0.3s ease;
+            font-family: var(--font-main); white-space: nowrap;
+        }
+        .dice-mode-btn.active { color: #04160c; }
+        .dice-info-row { display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; font-size: 0.9rem; color: var(--text-sec); font-weight: 700; }
+        .dice-info-row span b { color: var(--text); }
+        .roll-btn {
+            background: linear-gradient(45deg, var(--anonshare), #00b874); border: none; border-radius: 999px; padding: 14px 44px;
+            font-size: 1.05rem; color: #04160c; cursor: pointer; font-weight: 900; letter-spacing: 1px;
+            box-shadow: 0 8px 22px rgba(0,255,156,0.3); transition: all 0.3s;
+        }
+        .roll-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,255,156,0.45); }
+        .roll-btn:disabled { background: #444; color: #999; box-shadow: none; cursor: not-allowed; transform: none; }
+        .roll-btn.rolling-state { animation: rollPulse 0.6s ease-in-out infinite; }
+        @keyframes rollPulse {
+            0%, 100% { box-shadow: 0 8px 22px rgba(0,255,156,0.3); }
+            50% { box-shadow: 0 8px 34px rgba(0,255,156,0.65); }
+        }
+        .roll-btn.success-state { background: linear-gradient(45deg, var(--anonshare), #00e884); animation: btnMorphPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+        .roll-btn.fail-state { background: linear-gradient(45deg, var(--hydra), #c00030); animation: btnMorphPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+
+        /* ---------- Plinko ---------- */
+        .plinko-board-wrap {
+            position: relative;
+            background:
+                repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 26px),
+                radial-gradient(ellipse at 50% 0%, var(--table-felt-2) 0%, var(--table-felt) 70%);
+            border-radius: 18px; padding: 22px 6px 10px; margin-bottom: 16px;
+            border: 3px solid rgba(0,0,0,0.35); box-shadow: inset 0 0 40px rgba(0,0,0,0.55);
+            overflow: hidden;
+        }
+        .plinko-board { position: relative; }
+        .plinko-peg {
+            position: absolute; width: var(--peg-size, 10px); height: var(--peg-size, 10px); border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 30% 30%, #fff, var(--gold));
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 8px rgba(255,184,0,0.45);
+        }
+        .plinko-ball {
+            position: absolute; width: var(--ball-size, 16px); height: var(--ball-size, 16px); border-radius: 50%; z-index: 5;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 30% 30%, #fff, var(--hydra));
+            box-shadow: 0 0 14px rgba(255,0,60,0.7); pointer-events: none; opacity: 0;
+            transition: left 0.28s cubic-bezier(0.5, 0, 0.5, 1), top 0.28s cubic-bezier(0.5, 0, 0.5, 1);
+        }
+        .plinko-ball.active { opacity: 1; }
+        .plinko-ball.impact { transition: transform 0.12s ease-out; transform: translate(-50%, -50%) scale(0.72, 1.22); }
+        .plinko-slots { position: relative; height: 34px; margin-top: 8px; }
+        .plinko-slot {
+            position: absolute; top: 0; height: 100%; box-sizing: border-box; text-align: center; padding-top: 8px;
+            border-radius: 8px; font-size: 0.68rem; font-weight: 900; overflow: hidden;
+            background: var(--tint-med); color: var(--text-sec); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background 0.3s; border: 1px solid transparent;
+        }
+        .plinko-slot.high { background: rgba(255,0,60,0.18); color: var(--hydra); }
+        .plinko-slot.mid { background: rgba(255,184,0,0.15); color: var(--gold); }
+        .plinko-slot.low { background: rgba(0,255,156,0.12); color: var(--anonshare); }
+        .plinko-slot.landed { transform: scale(1.15) translateY(-4px); border-color: currentColor; box-shadow: 0 0 16px currentColor; }
+        .plinko-risk-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 4px 0 16px; flex-wrap: wrap; }
+        .plinko-risk-label { font-size: 0.85rem; color: var(--text-sec); font-weight: 700; }
+        @keyframes btnMorphPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        /* ---------- Modal ---------- */
+        .modal {
+            position: fixed; inset: 0; background: rgba(2,2,10,0.72); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center; z-index: 3000;
+            opacity: 0; visibility: hidden; transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.35s, backdrop-filter 0.35s; padding: 20px;
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--card-radius);
+            padding: 28px; max-width: 420px; width: 100%; max-height: 82vh; overflow-y: auto;
+            backdrop-filter: blur(30px); position: relative;
+            transform: translateY(40px) scale(0.85); opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .modal.active .modal-box { transform: translateY(0) scale(1); opacity: 1; }
+        [data-glass="false"] .modal-box { backdrop-filter: none; }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%;
+            background: var(--tint-med); border: none; color: var(--text); font-size: 1rem; cursor: pointer;
+            display: grid; place-items: center; transition: 0.25s;
+        }
+        .modal-close:hover { background: var(--hydra); color: #fff; transform: rotate(90deg); }
+        .modal-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+        .modal-title i { color: var(--primary-glow); }
+
+        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-row span { font-weight: 700; font-size: 0.95rem; }
+
+        .toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); transition: .3s; border-radius: 26px; cursor: pointer; }
+        [data-theme="light"] .toggle-slider { background: rgba(0,0,0,0.15); }
+        .toggle-slider::before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: #fff; transition: .3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input:checked + .toggle-slider { background: var(--primary); }
+        input:checked + .toggle-slider::before { transform: translateX(22px); }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .stat-box { background: var(--tint-weak); border-radius: 12px; padding: 12px; text-align: center; }
+        .stat-box .stat-num { font-size: 1.3rem; font-weight: 900; }
+        .stat-box .stat-lbl { font-size: 0.72rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .stat-box.win .stat-num { color: var(--anonshare); }
+        .stat-box.lose .stat-num { color: var(--hydra); }
+
+        .rules-list { list-style: none; padding: 0; }
+        .rules-list li { padding: 8px 0; border-bottom: 1px solid var(--border-color); color: var(--text-sec); font-size: 0.9rem; line-height: 1.5; display: flex; gap: 10px; }
+        .rules-list li:last-child { border-bottom: none; }
+
+        .table-theme-row { display: flex; gap: 10px; flex-wrap: wrap; padding: 4px 0 8px; }
+        .table-theme-btn {
+            width: 42px; height: 42px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+            transition: 0.25s; box-shadow: inset 0 0 6px rgba(0,0,0,0.4);
+        }
+        .table-theme-btn:hover { transform: translateY(-2px); }
+        .table-theme-btn.active { border-color: var(--primary-glow); box-shadow: 0 0 0 3px rgba(112,0,255,0.25); transform: scale(1.08); }
+        .rules-list li i { color: var(--primary-glow); margin-top: 3px; flex-shrink: 0; }
+
+        /* ---------- Toast / floating fx ---------- */
+        .confetti-piece { position: fixed; width: 9px; height: 9px; opacity: 0; z-index: 3500; pointer-events: none; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        /* ---------- Footer nav dock ---------- */
+        /* ---------- Dock (from reference design: floating blob indicator) ---------- */
+        .dock-wrapper {
+            position: fixed; bottom: 18px; left: 0; width: 100%;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            z-index: 500; pointer-events: none; perspective: 1000px;
+            opacity: 0; transform: translateY(100px) scale(0.9);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .dock-wrapper.loaded { opacity: 1; transform: translateY(0) scale(1); }
+
+        .dock {
+            pointer-events: auto; background: var(--dock-bg); backdrop-filter: blur(calc(var(--blur-val) + 10px));
+            border-radius: 30px; padding: 10px 22px; display: flex; gap: 20px; position: relative;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+        }
+        .dock::after {
+            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 32px; z-index: 0; pointer-events: none;
+            box-shadow: 0 0 10px rgba(112,0,255,0.5), 0 0 15px 5px rgba(0,240,255,0.2);
+            opacity: 0.3; filter: blur(5px);
+        }
+        [data-theme="light"] .dock::after { box-shadow: 0 0 10px rgba(138,79,255,0.3), 0 0 15px 5px rgba(0,194,214,0.1); }
+        .dock::before {
+            content: ''; position: absolute; inset: 0; border-radius: 30px; z-index: 1;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.1) 100%);
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+        }
+        [data-theme="light"] .dock::before {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.15) 100%);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        .dock-item {
+            position: relative; width: 46px; height: 46px; display: grid; place-items: center;
+            color: rgba(255,255,255,0.8); font-size: 1.15rem; z-index: 2; cursor: pointer;
+            background: transparent; border: none; border-radius: 15px; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        [data-theme="light"] .dock-item { color: rgba(45,45,90,0.8); }
+        .dock-item.active { color: white; transform: translateY(-5px) scale(1.1); }
+        [data-theme="light"] .dock-item.active { color: var(--text); }
+        .dock-item:hover { transform: translateY(-8px) scale(1.1); }
+        .dock-item:active { transform: translateY(-5px) scale(0.95); }
+
+        .active-blob {
+            position: absolute; top: 6px; left: 0; width: 46px; height: 46px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-glow)); border-radius: 15px; z-index: 1;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 5px 20px var(--primary), 0 0 0 1px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        /* Play CTA pill that slides up above the dock once a lobby tile is selected */
+        .play-cta-pill {
+            pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 12px 26px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-glow)); color: #fff;
+            border: none; border-radius: 999px; font-weight: 900; font-size: 0.95rem; font-family: var(--font-main);
+            cursor: pointer; box-shadow: 0 8px 24px rgba(112,0,255,0.45);
+            opacity: 0; transform: translateY(40px) scale(0.85); pointer-events: none;
+            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .play-cta-pill.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+        .play-cta-pill:active { transform: translateY(0) scale(0.94); }
+        .play-cta-pill i { font-size: 0.85rem; }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 640px) {
+            h1 { font-size: 2rem; }
+            .game-title { font-size: 1.3rem; }
+            .playing-card { width: 64px; height: 92px; }
+            .pc-corner { top: 5px; left: 5px; }
+            .pc-corner.bottom { bottom: 5px; right: 5px; }
+            .pc-corner .pc-v { font-size: 0.85rem; }
+            .pc-corner .pc-s { font-size: 0.7rem; }
+            .pc-suit { font-size: 1.4rem; }
+            .reel-wrap { width: 74px; height: 198px; }
+            .reel-cell { width: 60px; height: 60px; font-size: 30px; }
+            .bet-chip { width: 48px; height: 48px; font-size: 0.85rem; }
+            .stats-bar { flex-direction: column; gap: 10px; }
+            .dice-cube-wrap { width: 90px; height: 90px; }
+            .dice-cube { font-size: 2.6rem; }
+            .tile-grid { gap: 16px; }
+            .game-tile { width: 47%; min-width: 140px; }
+            .tile-visual { height: 120px; }
+            .tile-emoji { font-size: 3.2rem; }
+            .controls-row { gap: 8px; }
+            .action-btn { padding: 11px 16px; font-size: 0.85rem; }
+            .modal-box { padding: 22px; }
+            .table-theme-row { justify-content: center; }
+        }
+
+        @media (max-width: 400px) {
+            .container { padding: 14px; }
+            h1 { font-size: 1.7rem; }
+            .desc { font-size: 0.85rem; }
+            .balance-pill { font-size: 0.95rem; padding: 8px 16px; }
+            .playing-card { width: 54px; height: 78px; }
+            .pc-corner .pc-v { font-size: 0.72rem; }
+            .pc-corner .pc-s { font-size: 0.6rem; }
+            .pc-suit { font-size: 1.15rem; }
+            .reel-wrap { width: 64px; height: 168px; }
+            .reel-cell { width: 50px; height: 50px; font-size: 24px; }
+            .bet-chip { width: 42px; height: 42px; font-size: 0.75rem; }
+            .game-tile { width: 100%; }
+            .stepper-btn { width: 40px; height: 40px; font-size: 1rem; }
+            .stepper-val { width: 64px; font-size: 1.1rem; }
+            .spin-btn, .roll-btn { padding: 12px 32px; font-size: 0.95rem; }
+            .dock { padding: 8px 14px; gap: 14px; }
+            .dock-item { width: 40px; height: 40px; font-size: 1rem; }
+            .active-blob { width: 40px; height: 40px; }
+        }
+
+        @media (max-width: 640px) and (orientation: landscape) {
+            .container { padding-bottom: 80px; }
+            .hero { margin: 14px 0 24px; }
+            .logo-badge { width: 70px; height: 70px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="clock-container">
+            <div class="clock-blob"></div>
+            <div class="preloader-icon">🎲</div>
+        </div>
+        <div class="preloader-text">AUBEIG GAMES</div>
+    </div>
+
+    <!-- Goo filter for the accent-color long-press picker -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden;">
+        <defs>
+            <filter id="accent-goo-filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8" result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Accent color picker: pops out on long-press of any settings gear icon -->
+    <div class="accent-gooey" id="accentGooey" data-open="false">
+        <div class="accent-gooey-blobs">
+            <button class="accent-gooey-blob" data-table="green" style="--tx:-64px;--ty:8px; background:linear-gradient(135deg,#1a472a,#0d2818);" title="Зелёный"></button>
+            <button class="accent-gooey-blob" data-table="crimson" style="--tx:-56px;--ty:44px; background:linear-gradient(135deg,#6b1111,#3a0a0a);" title="Бордовый"></button>
+            <button class="accent-gooey-blob" data-table="royal" style="--tx:-30px;--ty:70px; background:linear-gradient(135deg,#3d1466,#1a0533);" title="Королевский"></button>
+            <button class="accent-gooey-blob" data-table="midnight" style="--tx:4px;--ty:78px; background:linear-gradient(135deg,#0c2461,#050b24);" title="Полночь"></button>
+            <button class="accent-gooey-blob" data-table="gold" style="--tx:38px;--ty:66px; background:linear-gradient(135deg,#4a3a06,#2b2103);" title="Золотой"></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- ================= LOBBY ================= -->
+        <section class="section" id="section-lobby">
+            <div class="hero">
+                <div class="logo-badge">
+                    <div class="logo-blob"></div>
+                    <div class="logo-icon">🎲</div>
+                </div>
+                <h1>Aubeig Games</h1>
+                <div class="role">Игровой портал</div>
+                <p class="desc">Blackjack, Слоты, Кости и Плинко — играйте на виртуальную валюту Виолы, следите за статистикой и настраивайте тему. Выберите игру ниже.</p>
+                <div class="di-morph" id="balanceIsland">
+                    <div class="di-compact">
+                        <i class="fas fa-coins"></i>
+                        <span class="di-compact-label"><span id="lobby-balance">1000</span></span>
+                    </div>
+                    <div class="di-expanded">
+                        <div class="di-expanded-top">
+                            <div class="di-expanded-balance"><i class="fas fa-coins"></i> <span id="island-balance">1000</span></div>
+                            <div class="di-dot"></div>
+                        </div>
+                        <div class="di-mini-stats">
+                            <span>Побед: <b id="island-wins">0</b></span>
+                            <span>Поражений: <b id="island-losses">0</b></span>
+                            <span>Win rate: <b id="island-winrate">0%</b></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tile-grid">
+                <div class="game-tile has-ripple" data-theme="blackjack" data-game="blackjack">
+                    <div class="tile-glare"></div>
+                    <div class="tile-visual">
+                        <span class="tile-emoji">🃏</span>
+                    </div>
+                    <div class="tile-info">
+                        <h3>Blackjack 21</h3>
+                        <p>Наберите 21 очко и обыграйте дилера</p>
+                    </div>
+                </div>
+                <div class="game-tile has-ripple" data-theme="slots" data-game="slots">
+                    <div class="tile-glare"></div>
+                    <div class="tile-visual">
+                        <span class="tile-emoji">🎰</span>
+                    </div>
+                    <div class="tile-info">
+                        <h3>Слоты</h3>
+                        <p>Крутите барабаны и ловите комбинации</p>
+                    </div>
+                </div>
+                <div class="game-tile has-ripple" data-theme="dice" data-game="dice">
+                    <div class="tile-glare"></div>
+                    <div class="tile-visual">
+                        <span class="tile-emoji">🎲</span>
+                    </div>
+                    <div class="tile-info">
+                        <h3>Кости</h3>
+                        <p>Угадайте диапазон и умножьте ставку</p>
+                    </div>
+                </div>
+                <div class="game-tile has-ripple" data-theme="plinko" data-game="plinko">
+                    <span class="badge bg-anonshare">New</span>
+                    <div class="tile-glare"></div>
+                    <div class="tile-visual">
+                        <span class="tile-emoji">🔴</span>
+                    </div>
+                    <div class="tile-info">
+                        <h3>Плинко</h3>
+                        <p>Бросайте шарик и ловите множители</p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= BLACKJACK ================= -->
+        <section class="section game-view" id="section-blackjack">
+            <div class="game-header">
+                <button class="icon-btn has-ripple" data-back><i class="fas fa-arrow-left"></i></button>
+                <div class="game-title-wrap">
+                    <div class="game-title">Blackjack 21</div>
+                    <div class="game-subtitle">Наберите 21 очко и обыграйте дилера</div>
+                </div>
+                <button class="icon-btn has-ripple" data-menu="blackjack"><i class="fas fa-cog"></i></button>
+            </div>
+
+            <div class="game-island" id="bj-island">
+                <div class="gi-compact">
+                    <div class="gi-compact-item"><i class="fas fa-coins gold"></i> <span id="bj-balance">1000</span></div>
+                    <div class="gi-sep"></div>
+                    <div class="gi-compact-item"><i class="fas fa-dice silver"></i> <span id="bj-current-bet">0</span></div>
+                </div>
+                <div class="gi-expanded">
+                    <div class="gi-expanded-row">
+                        <div class="gi-expanded-main"><i class="fas fa-coins"></i> <span id="bj-balance-2">1000</span></div>
+                        <div class="gi-live-dot"></div>
+                    </div>
+                    <div class="gi-expanded-sub">Текущая ставка: <b id="bj-bet-2">0</b> · Раунд: <b id="bj-round">—</b></div>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <div class="felt-table">
+                    <div class="table-area">
+                        <div class="area-title">Дилер</div>
+                        <div class="cards-container" id="bj-dealer-cards"></div>
+                        <div class="score-label" id="bj-dealer-score">Счёт: 0</div>
+                    </div>
+
+                    <div class="result-message" id="bj-result">Сделайте ставку и начните игру!</div>
+
+                    <div class="table-area">
+                        <div class="area-title">Игрок</div>
+                        <div class="cards-container" id="bj-player-cards"></div>
+                        <div class="score-label" id="bj-player-score">Счёт: 0</div>
+                    </div>
+                </div>
+
+                <div class="quick-bet-row" id="bj-quick-bet-controls">
+                    <button class="quick-bet-btn has-ripple" data-multiplier="0.5">1/2</button>
+                    <button class="quick-bet-btn has-ripple" data-multiplier="2">x2</button>
+                    <button class="quick-bet-btn has-ripple" data-multiplier="max">МАКС</button>
+                </div>
+
+                <div class="bet-controls">
+                    <div class="bet-chip has-ripple" data-bet="10">10</div>
+                    <div class="bet-chip has-ripple" data-bet="25">25</div>
+                    <div class="bet-chip has-ripple" data-bet="50">50</div>
+                    <div class="bet-chip has-ripple" data-bet="100">100</div>
+                    <div class="bet-chip has-ripple" data-bet="500">500</div>
+                </div>
+
+                <div class="controls-row">
+                    <button class="action-btn primary has-ripple" id="bj-deal-btn"><i class="fas fa-play"></i> Начать игру</button>
+                    <button class="action-btn has-ripple" id="bj-hit-btn" disabled><i class="fas fa-plus"></i> Ещё карту</button>
+                    <button class="action-btn has-ripple" id="bj-stand-btn" disabled><i class="fas fa-hand-paper"></i> Хватит</button>
+                    <button class="action-btn has-ripple" id="bj-reset-btn"><i class="fas fa-redo"></i> Сбросить</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLOTS ================= -->
+        <section class="section game-view" id="section-slots">
+            <div class="game-header">
+                <button class="icon-btn has-ripple" data-back><i class="fas fa-arrow-left"></i></button>
+                <div class="game-title-wrap">
+                    <div class="game-title">Слоты</div>
+                    <div class="game-subtitle">Испытайте удачу на барабанах</div>
+                </div>
+                <button class="icon-btn has-ripple" data-menu="slots"><i class="fas fa-cog"></i></button>
+            </div>
+
+            <div class="game-island" id="sl-island">
+                <div class="gi-compact">
+                    <div class="gi-compact-item"><i class="fas fa-coins gold"></i> <span id="sl-balance">1000</span></div>
+                    <div class="gi-sep"></div>
+                    <div class="gi-compact-item"><i class="fas fa-dice silver"></i> <span id="sl-bet-display">10</span></div>
+                </div>
+                <div class="gi-expanded">
+                    <div class="gi-expanded-row">
+                        <div class="gi-expanded-main"><i class="fas fa-coins"></i> <span id="sl-balance-2">1000</span></div>
+                        <div class="gi-live-dot"></div>
+                    </div>
+                    <div class="gi-expanded-sub">Ставка за спин: <b id="sl-bet-2">10</b> · Лучший приз: <b>x25</b></div>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <div class="slots-machine">
+                    <div class="reels-row" id="sl-reels"></div>
+                    <div class="slots-controls">
+                        <div class="bet-stepper">
+                            <button class="stepper-btn has-ripple" id="sl-bet-down">−</button>
+                            <input class="stepper-val" id="sl-bet-amount" type="number" inputmode="numeric" value="10" min="5" max="500">
+                            <button class="stepper-btn has-ripple" id="sl-bet-up">+</button>
+                        </div>
+                        <button class="spin-btn has-ripple" id="sl-spin-btn">Крутить!</button>
+                    </div>
+                </div>
+
+                <div class="result-message" id="sl-result">Сделайте ставку и крутите барабан!</div>
+
+                <div class="controls-row">
+                    <button class="action-btn has-ripple" id="sl-reset-btn"><i class="fas fa-redo"></i> Сбросить</button>
+                </div>
+
+                <!-- Paytable: which symbol pays what — collapsible so it doesn't
+                     crowd the game screen, expand for the full breakdown. -->
+                <div class="paytable-acc" data-open="false" id="slPaytableAcc">
+                    <button class="paytable-acc-head has-ripple" id="slPaytableBtn" aria-expanded="false">
+                        <span><i class="fas fa-table"></i> Таблица выплат</span>
+                        <svg class="paytable-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="paytable-acc-body-wrap">
+                        <div class="paytable-acc-body">
+                            <div class="paytable-row paytable-row-head">
+                                <span>Символ</span><span>3 в ряд</span><span>2 подряд</span>
+                            </div>
+                            <div class="paytable-row"><span class="pt-symbol">💫 Комета</span><span class="pt-mult pt-high">x25</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">⭐ Звезда</span><span class="pt-mult pt-high">x15</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">🍀 Клевер</span><span class="pt-mult pt-high">x10</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">💎 Бриллиант</span><span class="pt-mult pt-mid">x8</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">🔔 Колокольчик</span><span class="pt-mult pt-mid">x6</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">🍇 Виноград</span><span class="pt-mult pt-low">x4</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">🍋 Лимон</span><span class="pt-mult pt-low">x3</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <div class="paytable-row"><span class="pt-symbol">🍒 Вишня</span><span class="pt-mult pt-low">x3</span><span class="pt-mult pt-flat">x1.5</span></div>
+                            <p class="paytable-note">«2 подряд» — первые два символа (слева) совпали, третий любой. Ставка выплачивается по левому столбцу, если совпали все три, иначе — по правому. Не более одной выплаты за спин.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= DICE ================= -->
+        <section class="section game-view" id="section-dice">
+            <div class="game-header">
+                <button class="icon-btn has-ripple" data-back><i class="fas fa-arrow-left"></i></button>
+                <div class="game-title-wrap">
+                    <div class="game-title">Кости</div>
+                    <div class="game-subtitle">Угадайте диапазон и умножьте ставку</div>
+                </div>
+                <button class="icon-btn has-ripple" data-menu="dice"><i class="fas fa-cog"></i></button>
+            </div>
+
+            <div class="game-island" id="dc-island">
+                <div class="gi-compact">
+                    <div class="gi-compact-item"><i class="fas fa-coins gold"></i> <span id="dc-balance">1000</span></div>
+                    <div class="gi-sep"></div>
+                    <div class="gi-compact-item"><i class="fas fa-dice silver"></i> <span id="dc-bet-display">10</span></div>
+                </div>
+                <div class="gi-expanded">
+                    <div class="gi-expanded-row">
+                        <div class="gi-expanded-main"><i class="fas fa-coins"></i> <span id="dc-balance-2">1000</span></div>
+                        <div class="gi-live-dot"></div>
+                    </div>
+                    <div class="gi-expanded-sub">Ставка: <b id="dc-bet-2">10</b> · Множитель: <b id="dc-mult-2">2.00x</b></div>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <div class="dice-stage">
+                    <div class="dice-cube-wrap"><div class="dice-cube" id="dc-cube">50</div></div>
+
+                    <div class="dice-mode-row" id="dc-mode-row">
+                        <div class="dice-mode-indicator" id="dc-mode-indicator"></div>
+                        <button class="dice-mode-btn active has-ripple" data-mode="under">Меньше</button>
+                        <button class="dice-mode-btn has-ripple" data-mode="over">Больше</button>
+                    </div>
+
+                    <div class="dice-slider-wrap">
+                        <input type="range" min="2" max="98" value="50" id="dc-slider">
+                        <div class="dice-info-row">
+                            <span>Порог: <b id="dc-target">50</b></span>
+                            <span>Шанс: <b id="dc-chance">49%</b></span>
+                            <span>Множитель: <b id="dc-multiplier">2.00x</b></span>
+                        </div>
+                    </div>
+
+                    <div class="bet-stepper">
+                        <button class="stepper-btn has-ripple" id="dc-bet-down">−</button>
+                        <input class="stepper-val" id="dc-bet-amount" type="number" inputmode="numeric" value="10" min="5" max="500">
+                        <button class="stepper-btn has-ripple" id="dc-bet-up">+</button>
+                    </div>
+
+                    <button class="roll-btn has-ripple" id="dc-roll-btn">Бросить кости</button>
+                </div>
+
+                <div class="result-message" id="dc-result">Выберите порог и бросайте кости!</div>
+
+                <div class="controls-row">
+                    <button class="action-btn has-ripple" id="dc-reset-btn"><i class="fas fa-redo"></i> Сбросить</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PLINKO ================= -->
+        <section class="section game-view" id="section-plinko">
+            <div class="game-header">
+                <button class="icon-btn has-ripple" data-back><i class="fas fa-arrow-left"></i></button>
+                <div class="game-title-wrap">
+                    <div class="game-title">Плинко</div>
+                    <div class="game-subtitle">Бросайте шарик и ловите множители</div>
+                </div>
+                <button class="icon-btn has-ripple" data-menu="plinko"><i class="fas fa-cog"></i></button>
+            </div>
+
+            <div class="game-island" id="pl-island">
+                <div class="gi-compact">
+                    <div class="gi-compact-item"><i class="fas fa-coins gold"></i> <span id="pl-balance">1000</span></div>
+                    <div class="gi-sep"></div>
+                    <div class="gi-compact-item"><i class="fas fa-dice silver"></i> <span id="pl-bet-display">10</span></div>
+                </div>
+                <div class="gi-expanded">
+                    <div class="gi-expanded-row">
+                        <div class="gi-expanded-main"><i class="fas fa-coins"></i> <span id="pl-balance-2">1000</span></div>
+                        <div class="gi-live-dot"></div>
+                    </div>
+                    <div class="gi-expanded-sub">Ставка: <b id="pl-bet-2">10</b> · Риск: <b id="pl-risk-2">Низкий</b></div>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <div class="plinko-board-wrap">
+                    <div class="plinko-board" id="pl-board"></div>
+                    <div class="plinko-slots" id="pl-slots"></div>
+                </div>
+
+                <div class="result-message" id="pl-result">Сделайте ставку и бросьте шарик!</div>
+
+                <div class="plinko-risk-row">
+                    <span class="plinko-risk-label">Риск:</span>
+                    <div class="dice-mode-row" id="pl-risk-row">
+                        <div class="dice-mode-indicator" id="pl-risk-indicator"></div>
+                        <button class="dice-mode-btn active has-ripple" data-risk="low">Низкий</button>
+                        <button class="dice-mode-btn has-ripple" data-risk="medium">Средний</button>
+                        <button class="dice-mode-btn has-ripple" data-risk="high">Высокий</button>
+                    </div>
+                </div>
+
+                <div class="bet-stepper">
+                    <button class="stepper-btn has-ripple" id="pl-bet-down">−</button>
+                    <input class="stepper-val" id="pl-bet-amount" type="number" inputmode="numeric" value="10" min="5" max="500">
+                    <button class="stepper-btn has-ripple" id="pl-bet-up">+</button>
+                </div>
+
+                <div class="controls-row">
+                    <button class="roll-btn has-ripple" id="pl-drop-btn">Бросить шарик</button>
+                    <button class="action-btn has-ripple" id="pl-reset-btn"><i class="fas fa-redo"></i> Сбросить</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Dock navigation -->
+    <div class="dock-wrapper" id="dockWrapper">
+        <button class="play-cta-pill has-ripple" id="lobbyPlayBtn"><i class="fas fa-play"></i> Играть</button>
+        <div class="dock">
+            <div class="active-blob" id="activeBlob"></div>
+            <button class="dock-item active has-ripple" data-nav="lobby"><i class="fas fa-home"></i></button>
+            <button class="dock-item has-ripple" data-nav="stats"><i class="fas fa-chart-bar"></i></button>
+            <button class="dock-item has-ripple" data-nav="settings"><i class="fas fa-sliders-h"></i></button>
+        </div>
+    </div>
+
+    <!-- Settings modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-box">
+            <button class="modal-close has-ripple" data-close="settingsModal"><i class="fas fa-times"></i></button>
+            <div class="modal-title"><i class="fas fa-sliders-h"></i> Настройки</div>
+
+            <div class="settings-row">
+                <span>Светлая тема</span>
+                <label class="toggle-switch"><input type="checkbox" id="themeCheck"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="settings-row">
+                <span>Стеклянный эффект</span>
+                <label class="toggle-switch"><input type="checkbox" id="glassCheck" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="settings-row">
+                <span>Конфетти при победе</span>
+                <label class="toggle-switch"><input type="checkbox" id="confettiCheck" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="settings-row">
+                <span>Эффект ripple при нажатии</span>
+                <label class="toggle-switch"><input type="checkbox" id="rippleCheck" checked><span class="toggle-slider"></span></label>
+            </div>
+
+            <div class="modal-title" style="margin-top:22px;"><i class="fas fa-swatchbook"></i> Цвет стола</div>
+            <div class="table-theme-row">
+                <button class="table-theme-btn active has-ripple" data-table-theme="green" style="background: linear-gradient(135deg,#1a472a,#0d2818);" title="Зелёный"></button>
+                <button class="table-theme-btn has-ripple" data-table-theme="crimson" style="background: linear-gradient(135deg,#6b1111,#3a0a0a);" title="Бордовый"></button>
+                <button class="table-theme-btn has-ripple" data-table-theme="royal" style="background: linear-gradient(135deg,#3d1466,#1a0533);" title="Королевский"></button>
+                <button class="table-theme-btn has-ripple" data-table-theme="midnight" style="background: linear-gradient(135deg,#0c2461,#050b24);" title="Полночь"></button>
+                <button class="table-theme-btn has-ripple" data-table-theme="gold" style="background: linear-gradient(135deg,#4a3a06,#2b2103);" title="Золотой"></button>
+            </div>
+
+            <div class="modal-title" style="margin-top:22px;"><i class="fas fa-book"></i> Правила</div>
+            <div id="rulesContent"></div>
+        </div>
+    </div>
+
+    <!-- Stats modal -->
+    <div class="modal" id="statsModal">
+        <div class="modal-box">
+            <button class="modal-close has-ripple" data-close="statsModal"><i class="fas fa-times"></i></button>
+            <div class="modal-title"><i class="fas fa-chart-bar"></i> Статистика</div>
+
+            <div class="stat-grid">
+                <div class="stat-box win"><div class="stat-num" id="st-wins">0</div><div class="stat-lbl">Побед</div></div>
+                <div class="stat-box lose"><div class="stat-num" id="st-losses">0</div><div class="stat-lbl">Поражений</div></div>
+                <div class="stat-box"><div class="stat-num" id="st-ties">0</div><div class="stat-lbl">Ничьих</div></div>
+                <div class="stat-box"><div class="stat-num" id="st-winrate">0%</div><div class="stat-lbl">Win rate</div></div>
+                <div class="stat-box win"><div class="stat-num" id="st-maxwin">0</div><div class="stat-lbl">Макс. выигрыш</div></div>
+                <div class="stat-box lose"><div class="stat-num" id="st-maxloss">0</div><div class="stat-lbl">Макс. проигрыш</div></div>
+            </div>
+
+            <button class="btn btn-outline has-ripple" id="resetStatsBtn" style="margin-top:18px;"><i class="fas fa-trash"></i> Сбросить статистику</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ============ Global state ============
+        let balance = 1000;
+        let stats = { wins: 0, losses: 0, ties: 0, maxWin: 0, maxLoss: 0, totalGames: 0 };
+        let settings = { theme: 'dark', glass: true, confetti: true, table: 'green', ripple: true };
+        let currentSection = 'lobby';
+
+        // Currency: "Виола" — Russian noun declension by count (1 Виола, 2-4 Виолы, 5+ Виол)
+        function violaWord(n) {
+            const abs = Math.abs(Math.floor(n));
+            const mod100 = abs % 100;
+            const mod10 = abs % 10;
+            if (mod100 >= 11 && mod100 <= 14) return 'Виол';
+            if (mod10 === 1) return 'Виола';
+            if (mod10 >= 2 && mod10 <= 4) return 'Виолы';
+            return 'Виол';
+        }
+        function violaText(n) {
+            return `${n} ${violaWord(n)}`;
+        }
+
+        function loadData() {
+            try {
+                const b = localStorage.getItem('ab_balance');
+                const s = localStorage.getItem('ab_stats');
+                const st = localStorage.getItem('ab_settings');
+                if (b !== null) balance = parseInt(b, 10) || 1000;
+                if (s) stats = { ...stats, ...JSON.parse(s) };
+                if (st) settings = { ...settings, ...JSON.parse(st) };
+            } catch (e) { /* ignore corrupt storage */ }
+        }
+
+        function saveData() {
+            localStorage.setItem('ab_balance', balance);
+            localStorage.setItem('ab_stats', JSON.stringify(stats));
+            localStorage.setItem('ab_settings', JSON.stringify(settings));
+        }
+
+        function updateBalanceDisplay() {
+            document.getElementById('lobby-balance').textContent = balance;
+            document.getElementById('bj-balance').textContent = balance;
+            document.getElementById('sl-balance').textContent = balance;
+            document.getElementById('dc-balance').textContent = balance;
+            const plBalance = document.getElementById('pl-balance');
+            if (plBalance) plBalance.textContent = balance;
+            const islandBalance = document.getElementById('island-balance');
+            if (islandBalance) islandBalance.textContent = violaText(balance);
+
+            // Mirror into each game island's expanded-view balance too (full currency name —
+            // there's room for it once the island is expanded)
+            ['bj', 'sl', 'dc', 'pl'].forEach(prefix => {
+                const el = document.getElementById(prefix + '-balance-2');
+                if (el) el.textContent = violaText(balance);
+            });
+        }
+
+        function updateStats(result, amount) {
+            stats.totalGames++;
+            if (result === 'win') {
+                stats.wins++;
+                if (amount > stats.maxWin) stats.maxWin = amount;
+            } else if (result === 'loss') {
+                stats.losses++;
+                if (amount > stats.maxLoss) stats.maxLoss = amount;
+            } else if (result === 'tie') {
+                stats.ties++;
+            }
+            saveData();
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('st-wins').textContent = stats.wins;
+            document.getElementById('st-losses').textContent = stats.losses;
+            document.getElementById('st-ties').textContent = stats.ties;
+            document.getElementById('st-maxwin').textContent = stats.maxWin;
+            document.getElementById('st-maxloss').textContent = stats.maxLoss;
+            const wr = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+            document.getElementById('st-winrate').textContent = wr + '%';
+
+            const islandWins = document.getElementById('island-wins');
+            const islandLosses = document.getElementById('island-losses');
+            const islandWinrate = document.getElementById('island-winrate');
+            if (islandWins) islandWins.textContent = stats.wins;
+            if (islandLosses) islandLosses.textContent = stats.losses;
+            if (islandWinrate) islandWinrate.textContent = wr + '%';
+        }
+
+        // ============ FX: theme switch spring + radial flash ============
+        function playThemeSpringFx(switchEl) {
+            const container = document.querySelector('.container');
+            if (container) {
+                container.classList.remove('theme-flip');
+                void container.offsetHeight;
+                container.classList.add('theme-flip');
+                setTimeout(() => container.classList.remove('theme-flip'), 650);
+            }
+            if (switchEl) {
+                const rect = switchEl.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const size = Math.max(window.innerWidth, window.innerHeight) * 1.8;
+                const flash = document.createElement('div');
+                flash.className = 'theme-flash';
+                flash.style.width = size + 'px';
+                flash.style.height = size + 'px';
+                flash.style.left = (cx - size / 2) + 'px';
+                flash.style.top = (cy - size / 2) + 'px';
+                document.body.appendChild(flash);
+                setTimeout(() => flash.remove(), 720);
+            }
+        }
+
+        // ============ FX: ripple click effect ============
+        function createRipple(event) {
+            if (!settings.ripple) return;
+            const button = event.currentTarget;
+            const circle = document.createElement('span');
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            const rect = button.getBoundingClientRect();
+            const clientX = event.clientX !== undefined ? event.clientX : (event.touches && event.touches[0] ? event.touches[0].clientX : rect.left + rect.width / 2);
+            const clientY = event.clientY !== undefined ? event.clientY : (event.touches && event.touches[0] ? event.touches[0].clientY : rect.top + rect.height / 2);
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${clientX - rect.left - radius}px`;
+            circle.style.top = `${clientY - rect.top - radius}px`;
+            circle.classList.add('ripple');
+
+            const existing = button.getElementsByClassName('ripple')[0];
+            if (existing) existing.remove();
+
+            button.appendChild(circle);
+            setTimeout(() => { if (circle.parentNode === button) button.removeChild(circle); }, 800);
+        }
+        function initializeRipple() {
+            document.querySelectorAll('.has-ripple').forEach(el => {
+                el.removeEventListener('click', createRipple);
+                if (settings.ripple) el.addEventListener('click', createRipple);
+            });
+        }
+
+        // ============ FX: confetti ============
+        function createConfetti() {
+            if (!settings.confetti) return;
+            const colors = ['#7000FF', '#00F0FF', '#FF003C', '#FFB800', '#00FF9C'];
+            for (let i = 0; i < 60; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = '-10px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = (5 + Math.random() * 8) + 'px';
+                el.style.height = el.style.width;
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                el.style.animation = `confettiFall ${1 + Math.random() * 2}s ease-out forwards`;
+                el.style.animationDelay = (Math.random() * 0.4) + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3500);
+            }
+        }
+
+        // ============ Navigation ============
+        const activeBlob = document.getElementById('activeBlob');
+        function moveBlobTo(navId) {
+            const item = document.querySelector(`.dock-item[data-nav="${navId}"]`);
+            if (item && activeBlob) {
+                activeBlob.style.left = item.offsetLeft + 'px';
+            }
+        }
+
+        function showSection(id) {
+            const target = document.getElementById('section-' + id);
+            const current = document.querySelector('.section.active');
+
+            if (current && current !== target) {
+                current.classList.remove('active');
+                current.classList.add('leaving');
+                // Clean up after the leave transition so the old section goes back to
+                // display:none via its plain .section CSS rule — never leave an inline
+                // style around, or every previously-visited section stays in the page
+                // flow forever and the page keeps growing taller with each navigation.
+                const cleanup = () => { current.classList.remove('leaving'); };
+                current.addEventListener('transitionend', cleanup, { once: true });
+                setTimeout(cleanup, 550); // fallback in case transitionend doesn't fire
+            }
+
+            if (target && target !== current) {
+                target.classList.add('entering');
+                // Two-step class swap: paint the "entering" (display:block, scale(0.92), opacity:0)
+                // state on one frame, then flip to "active" on the next so the browser actually
+                // has something to transition from — going display:none straight to the final
+                // state in one frame would just skip the animation.
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        target.classList.remove('entering');
+                        target.classList.add('active');
+                    });
+                });
+            }
+            currentSection = id;
+
+            document.querySelectorAll('.dock-item[data-nav]').forEach(b => b.classList.remove('active'));
+            const navBtn = document.querySelector('.dock-item[data-nav="lobby"]');
+            if (navBtn) { navBtn.classList.add('active'); moveBlobTo('lobby'); }
+
+            // The play pill only makes sense while browsing the lobby
+            lobbyPlayBtn.classList.toggle('visible', id === 'lobby' && !!selectedGame);
+
+            if (id === 'lobby') {
+                setTimeout(() => {
+                    document.querySelectorAll('#section-lobby .game-tile').forEach(c => c.classList.add('visible'));
+                }, 50);
+            }
+        }
+
+        document.querySelectorAll('[data-back]').forEach(btn => {
+            btn.addEventListener('click', () => showSection('lobby'));
+        });
+
+        // Lobby tile selection: click a tile to select it, then the pill above the dock plays it
+        let selectedGame = null;
+        const lobbyPlayBtn = document.getElementById('lobbyPlayBtn');
+        document.querySelectorAll('.game-tile[data-game]').forEach(tile => {
+            tile.addEventListener('click', () => {
+                document.querySelectorAll('.game-tile').forEach(t => t.classList.remove('selected'));
+                tile.classList.add('selected');
+                selectedGame = tile.dataset.game;
+                lobbyPlayBtn.classList.add('visible');
+            });
+
+            // 3D pointer-tilt with a glare that follows the cursor/finger
+            const maxTilt = 10; // degrees
+            tile.addEventListener('pointermove', e => {
+                if (tile.classList.contains('selected')) return;
+                const rect = tile.getBoundingClientRect();
+                const px = (e.clientX - rect.left) / rect.width;
+                const py = (e.clientY - rect.top) / rect.height;
+                const rotY = (px - 0.5) * maxTilt * 2;
+                const rotX = (0.5 - py) * maxTilt * 2;
+                tile.classList.add('tilting');
+                tile.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.03)`;
+                tile.style.setProperty('--glare-x', (px * 100) + '%');
+                tile.style.setProperty('--glare-y', (py * 100) + '%');
+            });
+            tile.addEventListener('pointerleave', () => {
+                tile.classList.remove('tilting');
+                tile.style.transform = '';
+            });
+        });
+        lobbyPlayBtn.addEventListener('click', () => {
+            if (!selectedGame) return;
+            lobbyPlayBtn.classList.remove('visible');
+            showSection(selectedGame);
+        });
+
+        // Dynamic Island balance pill: tap to spring open into balance + quick stats
+        const balanceIsland = document.getElementById('balanceIsland');
+        if (balanceIsland) {
+            balanceIsland.addEventListener('click', () => {
+                const open = balanceIsland.getAttribute('data-open') === 'true';
+                balanceIsland.setAttribute('data-open', String(!open));
+            });
+        }
+
+        // Same tap-to-expand behaviour for every in-game balance/bet island
+        document.querySelectorAll('.game-island').forEach(island => {
+            island.addEventListener('click', () => {
+                const open = island.getAttribute('data-open') === 'true';
+                island.setAttribute('data-open', String(!open));
+            });
+        });
+
+        document.querySelector('.dock-item[data-nav="lobby"]').addEventListener('click', () => showSection('lobby'));
+        document.querySelector('.dock-item[data-nav="stats"]').addEventListener('click', () => {
+            document.querySelectorAll('.dock-item[data-nav]').forEach(b => b.classList.remove('active'));
+            document.querySelector('.dock-item[data-nav="stats"]').classList.add('active');
+            moveBlobTo('stats');
+            openModal('statsModal');
+        });
+        document.querySelector('.dock-item[data-nav="settings"]').addEventListener('click', () => {
+            document.querySelectorAll('.dock-item[data-nav]').forEach(b => b.classList.remove('active'));
+            document.querySelector('.dock-item[data-nav="settings"]').classList.add('active');
+            moveBlobTo('settings');
+            openModal('settingsModal', currentSection);
+        });
+
+        // Tap a gear icon -> open settings. Hold it -> a gooey accent-color picker pops
+        // out instead (the tap that ends the hold is swallowed so it doesn't also open
+        // the settings modal).
+        const accentGooey = document.getElementById('accentGooey');
+        let accentGooeyOpenerBtn = null;
+        function positionAccentGooey(btn) {
+            const r = btn.getBoundingClientRect();
+            accentGooey.style.left = (r.left + r.width / 2 - 22) + 'px';
+            accentGooey.style.top = (r.top + r.height / 2 - 22) + 'px';
+        }
+        function closeAccentGooey() { accentGooey.setAttribute('data-open', 'false'); accentGooeyOpenerBtn = null; }
+        document.querySelectorAll('[data-menu]').forEach(btn => {
+            let pressTimer = null, longFired = false;
+            const startPress = () => {
+                longFired = false;
+                pressTimer = setTimeout(() => {
+                    longFired = true;
+                    positionAccentGooey(btn);
+                    accentGooey.setAttribute('data-open', 'true');
+                    // The pointerup that ends this same press will synthesize a 'click' on
+                    // this button right after; remember it so the document-level
+                    // outside-click handler below doesn't treat that click as "clicked
+                    // outside" and close the menu before the user can pick a color.
+                    accentGooeyOpenerBtn = btn;
+                }, 480);
+            };
+            const cancelPress = () => clearTimeout(pressTimer);
+            btn.addEventListener('pointerdown', startPress);
+            btn.addEventListener('pointerup', cancelPress);
+            btn.addEventListener('pointerleave', cancelPress);
+            btn.addEventListener('click', () => {
+                if (longFired) { longFired = false; return; }
+                openModal('settingsModal', btn.dataset.menu);
+            });
+        });
+        document.querySelectorAll('.accent-gooey-blob').forEach(blob => {
+            blob.addEventListener('click', (e) => {
+                e.stopPropagation();
+                settings.table = blob.dataset.table;
+                document.querySelectorAll('.table-theme-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.tableTheme === settings.table);
+                });
+                applySettings();
+                saveData();
+                closeAccentGooey();
+            });
+        });
+        document.addEventListener('click', (e) => {
+            if (accentGooey.getAttribute('data-open') !== 'true') return;
+            if (e.target === accentGooeyOpenerBtn) { accentGooeyOpenerBtn = null; return; }
+            if (!accentGooey.contains(e.target)) closeAccentGooey();
+        });
+
+        // ============ Modals ============
+        function openModal(id, gameForRules) {
+            if (gameForRules) loadRules(gameForRules);
+            document.getElementById(id).classList.add('active');
+            document.body.classList.add('modal-open');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+        document.querySelectorAll('[data-close]').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(btn.dataset.close));
+        });
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal.id);
+            });
+        });
+
+        const RULES = {
+            blackjack: [
+                'Цель — набрать сумму очков ближе к 21, но не больше.',
+                'Карты 2–10 равны своему номиналу, J/Q/K — 10 очков.',
+                'Туз считается за 1 или 11 очков — как выгоднее.',
+                'После вашего хода дилер открывает карты и добирает до 17.',
+                'Blackjack (туз + 10-очковая карта) оплачивается 3:2.',
+                'Перебор 21 очка — мгновенное поражение.'
+            ],
+            slots: [
+                'Сделайте ставку и нажмите «Крутить», чтобы запустить барабаны.',
+                'Три одинаковых символа на линии дают максимальный выигрыш.',
+                'Два одинаковых символа подряд дают меньший выигрыш.',
+                'Чем выше ставка — тем больше потенциальный выигрыш.',
+                'Играйте ответственно и устанавливайте лимиты.'
+            ],
+            dice: [
+                'Выберите «Меньше» или «Больше» и порог броска.',
+                'Чем ниже шанс выигрыша — тем выше множитель ставки.',
+                'Бросок — случайное число от 0 до 99.',
+                'При совпадении условия ставка умножается на множитель.',
+                'Порог и режим можно менять до броска.'
+            ],
+            plinko: [
+                'Бросьте шарик — он случайно отскакивает влево-вправо через ряды колышков.',
+                'Множитель зависит от слота, куда шарик упадёт внизу.',
+                'Крайние слоты дают наибольший множитель, средние — наименьший.',
+                'Чем выше уровень риска, тем больше разброс множителей.',
+                'Ставка умножается на множитель выпавшего слота.'
+            ]
+        };
+        function loadRules(game) {
+            const el = document.getElementById('rulesContent');
+            const items = RULES[game] || RULES.blackjack;
+            el.innerHTML = '<ul class="rules-list">' + items.map(t => `<li><i class="fas fa-check-circle"></i>${t}</li>`).join('') + '</ul>';
+        }
+
+        // ============ Settings toggles ============
+        function applySettings() {
+            document.body.setAttribute('data-theme', settings.theme);
+            document.body.setAttribute('data-glass', settings.glass);
+            document.body.setAttribute('data-table', settings.table || 'green');
+            document.querySelectorAll('.accent-gooey-blob').forEach(b => {
+                b.classList.toggle('active', b.dataset.table === (settings.table || 'green'));
+            });
+        }
+        document.getElementById('themeCheck').addEventListener('change', e => {
+            settings.theme = e.target.checked ? 'light' : 'dark';
+            applySettings(); saveData();
+            playThemeSpringFx(e.target);
+        });
+        document.getElementById('glassCheck').addEventListener('change', e => {
+            settings.glass = e.target.checked;
+            applySettings(); saveData();
+        });
+        document.getElementById('confettiCheck').addEventListener('change', e => {
+            settings.confetti = e.target.checked;
+            saveData();
+        });
+        document.getElementById('rippleCheck').addEventListener('change', e => {
+            settings.ripple = e.target.checked;
+            initializeRipple();
+            saveData();
+        });
+        document.querySelectorAll('.table-theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                settings.table = btn.dataset.tableTheme;
+                document.querySelectorAll('.table-theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applySettings();
+                saveData();
+            });
+        });
+        document.getElementById('resetStatsBtn').addEventListener('click', () => {
+            stats = { wins: 0, losses: 0, ties: 0, maxWin: 0, maxLoss: 0, totalGames: 0 };
+            saveData();
+            updateStatsDisplay();
+        });
+
+        function loadSettingsUI() {
+            document.getElementById('themeCheck').checked = settings.theme === 'light';
+            document.getElementById('glassCheck').checked = settings.glass !== false;
+            document.getElementById('confettiCheck').checked = settings.confetti !== false;
+            document.getElementById('rippleCheck').checked = settings.ripple !== false;
+            document.querySelectorAll('.table-theme-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tableTheme === (settings.table || 'green'));
+            });
+            applySettings();
+            initializeRipple();
+        }
+
+        // ============ BLACKJACK ============
+        const bj = {
+            balanceEl: document.getElementById('bj-balance'),
+            betEl: document.getElementById('bj-current-bet'),
+            dealerCardsEl: document.getElementById('bj-dealer-cards'),
+            playerCardsEl: document.getElementById('bj-player-cards'),
+            dealerScoreEl: document.getElementById('bj-dealer-score'),
+            playerScoreEl: document.getElementById('bj-player-score'),
+            resultEl: document.getElementById('bj-result'),
+            dealBtn: document.getElementById('bj-deal-btn'),
+            hitBtn: document.getElementById('bj-hit-btn'),
+            standBtn: document.getElementById('bj-stand-btn'),
+            resetBtn: document.getElementById('bj-reset-btn'),
+            betChips: document.querySelectorAll('.bet-chip'),
+            quickBtns: document.querySelectorAll('#bj-quick-bet-controls .quick-bet-btn'),
+            quickControls: document.getElementById('bj-quick-bet-controls'),
+
+            currentBet: 0,
+            deck: [],
+            dealerHand: [],
+            playerHand: [],
+            started: false,
+            over: false,
+
+            createDeck() {
+                this.deck = [];
+                const suits = ['♠', '♥', '♦', '♣'];
+                const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+                for (let d = 0; d < 6; d++) {
+                    for (const suit of suits) for (const value of values) this.deck.push({ suit, value });
+                }
+                for (let i = this.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+                }
+            },
+            drawCard(hidden = false) {
+                if (this.deck.length < 10) this.createDeck();
+                const card = this.deck.pop();
+                card.hidden = hidden;
+                return card;
+            },
+            placeBet(amount) {
+                amount = Math.floor(amount);
+                if (amount > 0 && amount <= balance) {
+                    this.currentBet += amount;
+                    balance -= amount;
+                    this.updateUI();
+                    this.updateButtons();
+                    saveData();
+                    updateBalanceDisplay();
+                }
+            },
+            startGame() {
+                if (this.currentBet === 0) {
+                    this.resultEl.textContent = 'Сначала сделайте ставку!';
+                    return;
+                }
+                this.started = true;
+                this.over = false;
+                this.dealerHand = [];
+                this.playerHand = [];
+                this.playerHand.push(this.drawCard());
+                this.dealerHand.push(this.drawCard(true));
+                this.playerHand.push(this.drawCard());
+                this.dealerHand.push(this.drawCard());
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = '';
+                this.updateButtons();
+                this.updateHands();
+                if (this.isBlackjack(this.playerHand) || this.isBlackjack(this.dealerHand)) {
+                    setTimeout(() => this.playerStand(), 400);
+                }
+            },
+            playerHit() {
+                if (!this.started || this.over) return;
+                this.playerHand.push(this.drawCard());
+                this.updateHands();
+                const val = this.calcValue(this.playerHand);
+                if (val > 21) this.endGame();
+                else if (val === 21) setTimeout(() => this.playerStand(), 500);
+            },
+            playerStand() {
+                if (!this.started || this.over) return;
+                this.over = true;
+                this.dealerHand[0].hidden = false;
+                const draw = () => {
+                    const val = this.calcValue(this.dealerHand);
+                    if (val < 17) {
+                        this.dealerHand.push(this.drawCard());
+                        this.updateHands();
+                        setTimeout(draw, 500);
+                    } else {
+                        this.endGame();
+                    }
+                };
+                setTimeout(draw, 400);
+            },
+            endGame() {
+                this.started = false;
+                this.over = true;
+                this.dealerHand[0].hidden = false;
+
+                const playerVal = this.calcValue(this.playerHand);
+                const dealerVal = this.calcValue(this.dealerHand);
+                let result = '';
+                let winAmount = 0;
+                const playerBJ = this.isBlackjack(this.playerHand);
+                const dealerBJ = this.isBlackjack(this.dealerHand);
+
+                if (playerBJ && dealerBJ) {
+                    result = 'Два Blackjack! Ничья!';
+                    balance += this.currentBet;
+                    this.resultEl.className = 'result-message tie';
+                    updateStats('tie', 0);
+                } else if (playerBJ) {
+                    winAmount = Math.floor(this.currentBet * 2.5);
+                    result = `Blackjack! Вы выиграли ${violaText(winAmount)} (3:2)!`;
+                    balance += winAmount;
+                    this.resultEl.className = 'result-message win win-shake';
+                    createConfetti();
+                    updateStats('win', winAmount);
+                } else if (dealerBJ) {
+                    result = 'У дилера Blackjack! Вы проиграли.';
+                    this.resultEl.className = 'result-message lose lose-shake';
+                    updateStats('loss', this.currentBet);
+                } else if (playerVal > 21) {
+                    result = 'Перебор! Вы проиграли.';
+                    this.resultEl.className = 'result-message lose lose-shake';
+                    updateStats('loss', this.currentBet);
+                } else if (dealerVal > 21) {
+                    winAmount = this.currentBet * 2;
+                    result = `Дилер перебрал! Вы выиграли ${violaText(winAmount)}!`;
+                    balance += winAmount;
+                    this.resultEl.className = 'result-message win win-shake';
+                    createConfetti();
+                    updateStats('win', winAmount);
+                } else if (playerVal > dealerVal) {
+                    winAmount = this.currentBet * 2;
+                    result = `Вы выиграли ${violaText(winAmount)}!`;
+                    balance += winAmount;
+                    this.resultEl.className = 'result-message win win-shake';
+                    createConfetti();
+                    updateStats('win', winAmount);
+                } else if (playerVal < dealerVal) {
+                    result = 'Вы проиграли.';
+                    this.resultEl.className = 'result-message lose lose-shake';
+                    updateStats('loss', this.currentBet);
+                } else {
+                    result = 'Ничья! Ставка возвращена.';
+                    balance += this.currentBet;
+                    this.resultEl.className = 'result-message tie';
+                    updateStats('tie', 0);
+                }
+
+                this.resultEl.textContent = result;
+                this.currentBet = 0;
+                saveData();
+                updateBalanceDisplay();
+                this.updateButtons();
+                this.updateUI();
+                this.betChips.forEach(c => c.classList.remove('active'));
+            },
+            resetGame() {
+                if (this.currentBet > 0) {
+                    balance += this.currentBet;
+                    updateBalanceDisplay();
+                }
+                this.started = false;
+                this.over = false;
+                this.currentBet = 0;
+                this.dealerHand = [];
+                this.playerHand = [];
+                this.createDeck();
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Сделайте ставку и начните игру!';
+                this.betChips.forEach(c => c.classList.remove('active'));
+                saveData();
+                this.updateButtons();
+                this.updateHands();
+                this.updateUI();
+            },
+            calcValue(hand) {
+                let value = 0, aces = 0;
+                for (const card of hand) {
+                    if (card.hidden) continue;
+                    if (card.value === 'A') { aces++; value += 11; }
+                    else if (['K','Q','J'].includes(card.value)) value += 10;
+                    else value += parseInt(card.value, 10);
+                }
+                while (value > 21 && aces > 0) { value -= 10; aces--; }
+                return value;
+            },
+            isBlackjack(hand) {
+                return hand.length === 2 && this.calcValue(hand) === 21;
+            },
+            updateUI() {
+                this.balanceEl.textContent = balance;
+                this.betEl.textContent = this.currentBet;
+                const bet2 = document.getElementById('bj-bet-2');
+                if (bet2) bet2.textContent = this.currentBet;
+                const round2 = document.getElementById('bj-round');
+                if (round2) round2.textContent = this.started ? (this.over ? 'финал' : 'в игре') : '—';
+                this.updateHands();
+            },
+            createCardEl(card, hidden) {
+                const el = document.createElement('div');
+                el.className = 'playing-card';
+                if (hidden) {
+                    el.classList.add('back');
+                } else {
+                    el.classList.add(card.suit === '♥' || card.suit === '♦' ? 'red' : 'black');
+                    el.innerHTML = `<div class="pc-corner"><span class="pc-v">${card.value}</span><span class="pc-s">${card.suit}</span></div><div class="pc-suit">${card.suit}</div><div class="pc-corner bottom"><span class="pc-v">${card.value}</span><span class="pc-s">${card.suit}</span></div>`;
+                }
+                return el;
+            },
+            updateHands() {
+                this.dealerCardsEl.innerHTML = '';
+                this.playerCardsEl.innerHTML = '';
+                this.dealerHand.forEach((card, i) => {
+                    this.dealerCardsEl.appendChild(this.createCardEl(card, card.hidden));
+                });
+                this.playerHand.forEach(card => this.playerCardsEl.appendChild(this.createCardEl(card, false)));
+
+                const dealerVisible = this.dealerHand.filter(c => !c.hidden);
+                this.dealerScoreEl.textContent = `Счёт: ${this.calcValue(dealerVisible)}`;
+                this.playerScoreEl.textContent = `Счёт: ${this.calcValue(this.playerHand)}`;
+            },
+            updateButtons() {
+                this.dealBtn.disabled = this.started || this.currentBet === 0;
+                this.hitBtn.disabled = !this.started || this.over;
+                this.standBtn.disabled = !this.started || this.over;
+                this.betChips.forEach(chip => {
+                    chip.style.pointerEvents = this.started ? 'none' : 'auto';
+                    chip.style.opacity = this.started ? '0.5' : '1';
+                });
+                this.quickControls.style.display = this.started ? 'none' : 'flex';
+            },
+            init() {
+                this.createDeck();
+                this.updateUI();
+                this.updateButtons();
+                this.dealBtn.addEventListener('click', () => this.startGame());
+                this.hitBtn.addEventListener('click', () => this.playerHit());
+                this.standBtn.addEventListener('click', () => this.playerStand());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+
+                this.betChips.forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        if (this.started) return;
+                        this.placeBet(parseInt(chip.dataset.bet, 10));
+                        this.betChips.forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                    });
+                });
+
+                this.quickBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (this.started) return;
+                        const mult = btn.dataset.multiplier;
+                        // Refund current bet first (through the same accounting path placeBet uses)
+                        balance += this.currentBet;
+                        const prevBet = this.currentBet;
+                        this.currentBet = 0;
+
+                        let newBet = 0;
+                        if (mult === '0.5') newBet = Math.max(10, Math.floor(prevBet * 0.5));
+                        else if (mult === '2') newBet = Math.min(balance, prevBet * 2 || 20);
+                        else if (mult === 'max') newBet = balance;
+
+                        if (newBet > 0) this.placeBet(newBet);
+                        else { updateBalanceDisplay(); this.updateUI(); }
+
+                        this.betChips.forEach(c => {
+                            c.classList.remove('active');
+                            if (parseInt(c.dataset.bet, 10) === newBet) c.classList.add('active');
+                        });
+                    });
+                });
+            }
+        };
+        bj.init();
+
+        // ============ SLOTS ============
+        // Real endless ring, one per reel: a fixed 8-symbol sequence repeats forever via
+        // ring[index % 8] for any index. Each reel keeps its own render window size (never a
+        // shared/global value — that was the bug that made reels overwrite each other's DOM
+        // length mid-spin). The strip only ever scrolls forward through its own ring; the
+        // landing offset is always an exact integer multiple of the measured cell size, so the
+        // visible payline is always exactly the symbol actually being checked — no mismatch.
+        // Shared: several per-game UI bits (segmented-control pill indicators, the Plinko
+        // board) need real layout measurements (getBoundingClientRect) to position
+        // correctly. Their section is display:none until first navigated to, and even right
+        // after that it's still mid-way through its own scale-in transition (transform
+        // 0.92 -> 1 over 0.5s) — measuring during either window gives a squashed/zeroed
+        // result that then sticks until something else forces a recalculation (e.g. the
+        // user taps the control once, which is why these looked "broken only at the very
+        // start, fixed after you click away and back"). This waits for the section to
+        // actually become visible AND finish that transition before running the callback
+        // (with a timeout fallback in case the transition doesn't fire, e.g. reduced-motion).
+        function whenSectionReady(sectionEl, callback) {
+            if (!sectionEl) return;
+            const observer = new MutationObserver(() => {
+                if (!sectionEl.classList.contains('active')) return;
+                let done = false;
+                const finish = () => { if (done) return; done = true; callback(); };
+                sectionEl.addEventListener('transitionend', finish, { once: true });
+                setTimeout(finish, 550);
+            });
+            observer.observe(sectionEl, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        const sl = {
+            balanceEl: document.getElementById('sl-balance'),
+            betDisplayEl: document.getElementById('sl-bet-display'),
+            resultEl: document.getElementById('sl-result'),
+            spinBtn: document.getElementById('sl-spin-btn'),
+            resetBtn: document.getElementById('sl-reset-btn'),
+            betDownBtn: document.getElementById('sl-bet-down'),
+            betUpBtn: document.getElementById('sl-bet-up'),
+            betInput: document.getElementById('sl-bet-amount'),
+            reelsEl: document.getElementById('sl-reels'),
+
+            betAmount: 10,
+            isSpinning: false,
+            emojis: ['🍒', '🍋', '🍇', '💎', '🔔', '🍀', '⭐', '💫'],
+            payouts3: { '🍒': 3, '🍋': 3, '🍇': 4, '💎': 8, '🔔': 6, '🍀': 10, '⭐': 15, '💫': 25 },
+            payout2: 1.5,
+
+            cellSize: 82,
+            windowH: 246,
+            ringLength: 8,
+
+            reels: [], // { el, ring: [8 symbols fixed for the whole game], pos, renderFrom, renderCopies }
+
+            measureGeometry() {
+                const wrap = this.reelsEl.querySelector('.reel-wrap');
+                const strip = this.reelsEl.querySelector('.reel-strip');
+                if (!wrap || !strip) return;
+                const cells = strip.querySelectorAll('.reel-cell');
+                if (cells.length < 2) return;
+
+                const wrapRect = wrap.getBoundingClientRect();
+                const r0 = cells[0].getBoundingClientRect();
+                const r1 = cells[1].getBoundingClientRect();
+                const step = r1.top - r0.top;
+
+                // Round to whole pixels: sub-pixel transform offsets are what make a stopped
+                // reel look like it's sitting slightly "between" cells on some displays/zoom
+                // levels — landing on an exact integer pixel value is crisp every time.
+                if (step > 10) this.cellSize = Math.round(step);
+                if (wrapRect.height > 10) this.windowH = Math.round(wrapRect.height);
+
+                // Sync the payline highlight's height to the real measured cell size, so the
+                // dashed frame always matches exactly what the reel actually lands on — at any
+                // screen size / responsive breakpoint, not just the desktop default.
+                this.reelsEl.style.setProperty('--cell-size', this.cellSize + 'px');
+            },
+
+            offsetForIndex(pos) {
+                const paylineCenter = this.windowH / 2;
+                const cellCenter = pos * this.cellSize + this.cellSize / 2;
+                return Math.round(-(cellCenter - paylineCenter));
+            },
+
+            shuffledRing() {
+                const ring = [...this.emojis];
+                for (let i = ring.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [ring[i], ring[j]] = [ring[j], ring[i]];
+                }
+                return ring;
+            },
+
+            symbolAt(reel, index) {
+                return reel.ring[((index % this.ringLength) + this.ringLength) % this.ringLength];
+            },
+
+            // Renders exactly reel.renderCopies loops of reel.ring, starting at reel.renderFrom.
+            // Uses only the reel's own properties — never a shared/global size — so reels can
+            // never clobber each other's render length.
+            renderReel(reel) {
+                reel.el.innerHTML = '';
+                const frag = document.createDocumentFragment();
+                const totalCells = this.ringLength * reel.renderCopies;
+                for (let k = 0; k < totalCells; k++) {
+                    const index = reel.renderFrom + k;
+                    const cell = document.createElement('div');
+                    cell.className = 'reel-cell';
+                    cell.textContent = this.symbolAt(reel, index);
+                    cell.dataset.idx = index;
+                    frag.appendChild(cell);
+                }
+                reel.el.appendChild(frag);
+            },
+
+            createReels() {
+                this.reelsEl.innerHTML = '';
+                this.reels = [];
+                for (let i = 0; i < 3; i++) {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'reel-wrap';
+                    const stripEl = document.createElement('div');
+                    stripEl.className = 'reel-strip';
+
+                    const restIndex = this.ringLength * 3;
+                    const reel = {
+                        el: stripEl,
+                        ring: this.shuffledRing(),
+                        pos: restIndex,
+                        renderFrom: restIndex - this.ringLength * 2,
+                        renderCopies: 8
+                    };
+                    this.renderReel(reel);
+
+                    const payline = document.createElement('div');
+                    payline.className = 'payline';
+                    const overlay = document.createElement('div');
+                    overlay.className = 'reel-overlay';
+
+                    wrap.appendChild(stripEl);
+                    wrap.appendChild(payline);
+                    wrap.appendChild(overlay);
+                    this.reelsEl.appendChild(wrap);
+                    this.reels.push(reel);
+                }
+
+                requestAnimationFrame(() => {
+                    this.measureGeometry();
+                    this.reels.forEach(reel => {
+                        reel.el.style.transition = 'none';
+                        reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                    });
+                });
+            },
+
+            changeBet(amount) {
+                if (this.isSpinning) return;
+                this.setBet(this.betAmount + amount);
+            },
+            setBet(value) {
+                let nb = Math.round(value);
+                if (isNaN(nb)) nb = 10;
+                nb = Math.max(5, Math.min(500, nb));
+                if (nb > balance) nb = Math.max(5, balance);
+                this.betAmount = nb;
+                this.updateUI();
+            },
+
+            spin() {
+                if (this.isSpinning || balance < this.betAmount) return;
+                // Belt-and-suspenders: re-measure right before every spin too, in case the
+                // section-became-visible remeasure (below, in init()) hasn't resolved yet —
+                // e.g. the section's own enter transition is still finishing when a fast
+                // tap fires the spin. A spin should never compute against stale geometry.
+                this.measureGeometry();
+                this.reels.forEach(reel => {
+                    reel.el.style.transition = 'none';
+                    reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                });
+                void this.reelsEl.offsetHeight;
+                this.isSpinning = true;
+                this.spinBtn.disabled = true;
+                this.spinBtn.classList.add('spinning');
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Крутим...';
+                document.querySelectorAll('.reel-cell.hit').forEach(c => c.classList.remove('hit'));
+                this.reelsEl.classList.add('reels-active');
+
+                balance -= this.betAmount;
+                updateBalanceDisplay();
+                saveData();
+
+                // Decide the outcome FIRST, entirely independent of rendering — this is what
+                // guarantees the visible payline and the checked result can never disagree:
+                // there is only one source of truth, and the animation exists purely to display it.
+                const results = this.rollOutcome();
+
+                this.reels.forEach((reel, i) => {
+                    const extraLoops = 5 + i; // cascading stop: reel 1 first, reel 3 last
+                    let landingIndex = reel.pos + 1;
+                    while (this.symbolAt(reel, landingIndex) !== results[i]) landingIndex++;
+                    landingIndex += this.ringLength * extraLoops;
+
+                    // Every property touched here belongs to THIS reel only.
+                    reel.renderFrom = reel.pos - this.ringLength;
+                    const span = (landingIndex - reel.renderFrom) + this.ringLength * 2;
+                    reel.renderCopies = Math.ceil(span / this.ringLength);
+                    this.renderReel(reel);
+
+                    reel.el.style.transition = 'none';
+                    reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                    void reel.el.offsetHeight;
+
+                    reel.pos = landingIndex;
+                    const spinDuration = 1.9 + i * 0.55;
+                    requestAnimationFrame(() => {
+                        reel.el.style.transition = `transform ${spinDuration}s cubic-bezier(0.15, 0.85, 0.2, 1)`;
+                        reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                    });
+                });
+
+                const maxDuration = 1.9 + 2 * 0.55;
+                setTimeout(() => this.checkResult(results), maxDuration * 1000 + 200);
+            },
+
+            rollOutcome() {
+                const results = [];
+                const willWin = Math.random() < 0.38;
+                if (willWin) {
+                    const threeOfKind = Math.random() < 0.55;
+                    const symbol = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+                    if (threeOfKind) {
+                        results.push(symbol, symbol, symbol);
+                    } else {
+                        const rest = this.emojis.filter(e => e !== symbol);
+                        const third = rest[Math.floor(Math.random() * rest.length)];
+                        results.push(symbol, symbol, third);
+                    }
+                } else {
+                    const pool = [...this.emojis];
+                    for (let i = 0; i < 3; i++) {
+                        const idx = Math.floor(Math.random() * pool.length);
+                        results.push(pool[idx]);
+                        pool.splice(idx, 1);
+                    }
+                }
+                return results;
+            },
+
+            checkResult(results) {
+                let winMultiplier = 0;
+                if (results[0] === results[1] && results[1] === results[2]) {
+                    winMultiplier = this.payouts3[results[0]] || 0;
+                } else if (results[0] === results[1]) {
+                    winMultiplier = this.payout2;
+                }
+
+                const winAmount = Math.floor(this.betAmount * winMultiplier);
+                this.reelsEl.classList.remove('reels-active');
+                this.spinBtn.classList.remove('spinning');
+
+                // Sanity read-back: verify what's actually painted on the payline for each reel
+                // matches the decided result before paying out. If a reel's cell isn't found
+                // (should never happen, but defensively), fall back to what was actually decided
+                // rather than silently trusting stale DOM.
+                this.reels.forEach((reel, i) => {
+                    const cell = reel.el.querySelector(`[data-idx="${reel.pos}"]`);
+                    if (cell && cell.textContent !== results[i]) {
+                        // Geometry drifted from the decided outcome — trust the DOM the player
+                        // actually sees, so the payout always matches what's on screen.
+                        results[i] = cell.textContent;
+                    }
+                });
+
+                if (winAmount > 0) {
+                    this.reels.forEach(reel => {
+                        const cell = reel.el.querySelector(`[data-idx="${reel.pos}"]`);
+                        if (cell) cell.classList.add('hit');
+                    });
+                    balance += winAmount;
+                    this.resultEl.textContent = `Поздравляем! Вы выиграли ${violaText(winAmount)} (x${winMultiplier})!`;
+                    this.resultEl.className = 'result-message win win-shake';
+                    createConfetti();
+                    updateStats('win', winAmount);
+                    this.spinBtn.classList.add('success-state');
+                    setTimeout(() => this.spinBtn.classList.remove('success-state'), 700);
+                } else {
+                    this.resultEl.textContent = 'Повезёт в следующий раз!';
+                    this.resultEl.className = 'result-message lose lose-shake';
+                    updateStats('loss', this.betAmount);
+                    this.spinBtn.classList.add('fail-state');
+                    setTimeout(() => this.spinBtn.classList.remove('fail-state'), 700);
+                }
+
+                saveData();
+                updateBalanceDisplay();
+                this.isSpinning = false;
+                this.updateUI();
+
+                if (balance <= 0) {
+                    setTimeout(() => {
+                        this.resetGame();
+                        this.resultEl.textContent = 'Баланс закончился. Игра сброшена!';
+                    }, 1800);
+                }
+            },
+
+            resetGame() {
+                this.isSpinning = false;
+                this.betAmount = 10;
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Сделайте ставку и крутите барабан!';
+                saveData();
+                updateBalanceDisplay();
+                this.updateUI();
+                this.createReels();
+            },
+
+            updateUI() {
+                this.balanceEl.textContent = balance;
+                this.betDisplayEl.textContent = this.betAmount;
+                this.betInput.value = this.betAmount;
+                const bet2 = document.getElementById('sl-bet-2');
+                if (bet2) bet2.textContent = this.betAmount;
+                this.spinBtn.disabled = this.isSpinning || balance < this.betAmount;
+                this.betDownBtn.style.opacity = this.betAmount <= 5 ? 0.5 : 1;
+                this.betUpBtn.style.opacity = (this.betAmount >= 500 || this.betAmount >= balance) ? 0.5 : 1;
+            },
+
+            init() {
+                this.createReels();
+                this.updateUI();
+                this.spinBtn.addEventListener('click', () => this.spin());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                setupHoldButton(this.betDownBtn, () => this.changeBet(-5));
+                setupHoldButton(this.betUpBtn, () => this.changeBet(5));
+                setupEditableBet(this.betInput, v => this.setBet(v));
+
+                // Paytable accordion toggle
+                const ptAcc = document.getElementById('slPaytableAcc');
+                const ptBtn = document.getElementById('slPaytableBtn');
+                if (ptAcc && ptBtn) {
+                    ptBtn.addEventListener('click', () => {
+                        const open = ptAcc.getAttribute('data-open') === 'true';
+                        ptAcc.setAttribute('data-open', String(!open));
+                        ptBtn.setAttribute('aria-expanded', String(!open));
+                    });
+                }
+
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        if (this.isSpinning) return;
+                        this.measureGeometry();
+                        this.reels.forEach(reel => {
+                            reel.el.style.transition = 'none';
+                            reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                        });
+                    }, 200);
+                });
+
+                // The Slots section is display:none on first load (still on the lobby), so
+                // .reel-wrap/.reel-cell read a 0×0 rect at construction time and cellSize/
+                // windowH are left at their hardcoded desktop-sized defaults (82/246) forever
+                // — the reels then keep spinning/stopping against those wrong numbers even
+                // though the actual rendered cells are smaller (mobile breakpoints shrink
+                // them to e.g. 68/198). That's what made the reels visually stop off-center
+                // from the payline and show a different symbol than the one actually paid
+                // out. Re-measure for real the first time the section becomes visible, and
+                // snap the still-idle reels to the corrected offsets.
+                const slotsSection = document.getElementById('section-slots');
+                if (slotsSection) {
+                    const remeasureAndSnap = () => {
+                        if (this.isSpinning) return;
+                        this.measureGeometry();
+                        this.reels.forEach(reel => {
+                            reel.el.style.transition = 'none';
+                            reel.el.style.transform = `translateY(${this.offsetForIndex(reel.pos - reel.renderFrom)}px)`;
+                        });
+                    };
+                    const observer = new MutationObserver(() => {
+                        if (!slotsSection.classList.contains('active')) return;
+                        // The section itself is still mid-way through its own scale-in
+                        // transition (transform 0.92 -> 1 over 0.5s) right when the 'active'
+                        // class lands, so measuring on the very next frame would capture the
+                        // reel cells at whatever squashed intermediate scale the section is
+                        // at that instant — not their true rest size. Wait for that
+                        // transition to actually finish (with a timeout fallback in case it
+                        // doesn't fire, e.g. reduced-motion) before measuring for real.
+                        let done = false;
+                        const finish = () => { if (done) return; done = true; remeasureAndSnap(); };
+                        slotsSection.addEventListener('transitionend', finish, { once: true });
+                        setTimeout(finish, 550);
+                    });
+                    observer.observe(slotsSection, { attributes: true, attributeFilter: ['class'] });
+                }
+            }
+        };
+        sl.init();
+
+        // ============ DICE ============
+        const dc = {
+            balanceEl: document.getElementById('dc-balance'),
+            betDisplayEl: document.getElementById('dc-bet-display'),
+            resultEl: document.getElementById('dc-result'),
+            rollBtn: document.getElementById('dc-roll-btn'),
+            resetBtn: document.getElementById('dc-reset-btn'),
+            betDownBtn: document.getElementById('dc-bet-down'),
+            betUpBtn: document.getElementById('dc-bet-up'),
+            betAmountEl: document.getElementById('dc-bet-amount'),
+            slider: document.getElementById('dc-slider'),
+            targetEl: document.getElementById('dc-target'),
+            chanceEl: document.getElementById('dc-chance'),
+            multEl: document.getElementById('dc-multiplier'),
+            cubeEl: document.getElementById('dc-cube'),
+            modeBtns: document.querySelectorAll('.dice-mode-btn'),
+            modeIndicator: document.getElementById('dc-mode-indicator'),
+            modeRow: document.getElementById('dc-mode-row'),
+
+            betAmount: 10,
+            target: 50,
+            mode: 'under',
+            isRolling: false,
+            houseEdge: 0.98,
+
+            getChance() {
+                return this.mode === 'under' ? this.target : (99 - this.target);
+            },
+            getMultiplier() {
+                const chance = this.getChance();
+                if (chance <= 0) return 0;
+                return (100 / chance) * this.houseEdge;
+            },
+            updateInfo() {
+                this.targetEl.textContent = this.target;
+                const chance = this.getChance();
+                this.chanceEl.textContent = chance + '%';
+                this.multEl.textContent = this.getMultiplier().toFixed(2) + 'x';
+                if (!this.isRolling) this.cubeEl.textContent = this.target;
+            },
+            moveModeIndicator(tab) {
+                if (!this.modeIndicator || !this.modeRow || !tab) return;
+                const containerRect = this.modeRow.getBoundingClientRect();
+                const tabRect = tab.getBoundingClientRect();
+                this.modeIndicator.style.width = tabRect.width + 'px';
+                this.modeIndicator.style.transform = `translateX(${tabRect.left - containerRect.left - 4}px)`;
+            },
+            setBet(value) {
+                let nb = Math.round(value);
+                if (isNaN(nb)) nb = 10;
+                nb = Math.max(5, Math.min(500, nb));
+                if (nb > balance) nb = Math.max(5, balance);
+                this.betAmount = nb;
+                this.updateUI();
+            },
+            changeBet(amount) {
+                if (this.isRolling) return;
+                this.setBet(this.betAmount + amount);
+            },
+            roll() {
+                if (this.isRolling || balance < this.betAmount) return;
+                this.isRolling = true;
+                this.rollBtn.disabled = true;
+                this.rollBtn.classList.add('rolling-state');
+                this.cubeEl.classList.add('rolling');
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Бросаем...';
+
+                balance -= this.betAmount;
+                updateBalanceDisplay();
+                saveData();
+
+                setTimeout(() => {
+                    const roll = Math.floor(Math.random() * 100);
+                    this.cubeEl.classList.remove('rolling');
+                    this.cubeEl.textContent = roll;
+                    this.cubeEl.classList.add('landed');
+                    setTimeout(() => this.cubeEl.classList.remove('landed'), 450);
+
+                    const win = this.mode === 'under' ? roll < this.target : roll > this.target;
+                    const multiplier = this.getMultiplier();
+
+                    this.rollBtn.classList.remove('rolling-state');
+                    this.rollBtn.classList.add(win ? 'success-state' : 'fail-state');
+                    setTimeout(() => this.rollBtn.classList.remove('success-state', 'fail-state'), 700);
+
+                    if (win) {
+                        const winAmount = Math.floor(this.betAmount * multiplier);
+                        balance += winAmount;
+                        this.resultEl.textContent = `Выпало ${roll}! Вы выиграли ${violaText(winAmount)} (x${multiplier.toFixed(2)})!`;
+                        this.resultEl.className = 'result-message win win-shake';
+                        createConfetti();
+                        updateStats('win', winAmount);
+                    } else {
+                        this.resultEl.textContent = `Выпало ${roll}. Повезёт в следующий раз!`;
+                        this.resultEl.className = 'result-message lose lose-shake';
+                        updateStats('loss', this.betAmount);
+                    }
+
+                    saveData();
+                    updateBalanceDisplay();
+                    this.isRolling = false;
+                    this.rollBtn.disabled = false;
+                    this.updateUI();
+
+                    setTimeout(() => { this.cubeEl.textContent = this.target; }, 2200);
+
+                    if (balance <= 0) {
+                        setTimeout(() => {
+                            this.resetGame();
+                            this.resultEl.textContent = 'Баланс закончился. Игра сброшена!';
+                        }, 2200);
+                    }
+                }, 900);
+            },
+            resetGame() {
+                this.isRolling = false;
+                this.betAmount = 10;
+                this.target = 50;
+                this.mode = 'under';
+                this.slider.value = 50;
+                this.modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === 'under'));
+                const underTab = document.querySelector('.dice-mode-btn[data-mode="under"]');
+                this.moveModeIndicator(underTab);
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Выберите порог и бросайте кости!';
+                saveData();
+                updateBalanceDisplay();
+                this.updateUI();
+                this.updateInfo();
+            },
+            updateUI() {
+                this.balanceEl.textContent = balance;
+                this.betDisplayEl.textContent = this.betAmount;
+                this.betAmountEl.value = this.betAmount;
+                const bet2 = document.getElementById('dc-bet-2');
+                if (bet2) bet2.textContent = this.betAmount;
+                const mult2 = document.getElementById('dc-mult-2');
+                if (mult2) mult2.textContent = this.getMultiplier().toFixed(2) + 'x';
+                this.rollBtn.disabled = this.isRolling || balance < this.betAmount;
+                this.betDownBtn.style.opacity = this.betAmount <= 5 ? 0.5 : 1;
+                this.betUpBtn.style.opacity = (this.betAmount >= 500 || this.betAmount >= balance) ? 0.5 : 1;
+            },
+            init() {
+                this.updateUI();
+                this.updateInfo();
+                this.rollBtn.addEventListener('click', () => this.roll());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                setupHoldButton(this.betDownBtn, () => this.changeBet(-5));
+                setupHoldButton(this.betUpBtn, () => this.changeBet(5));
+                setupEditableBet(this.betAmountEl, v => this.setBet(v));
+
+                this.slider.addEventListener('input', () => {
+                    if (this.isRolling) return;
+                    this.target = parseInt(this.slider.value, 10);
+                    this.updateInfo();
+                    this.updateUI();
+                });
+
+                this.modeBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (this.isRolling) return;
+                        this.mode = btn.dataset.mode;
+                        this.modeBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.moveModeIndicator(btn);
+                        this.updateInfo();
+                        this.updateUI();
+                    });
+                });
+
+                requestAnimationFrame(() => {
+                    const activeTab = document.querySelector('.dice-mode-btn.active') || this.modeBtns[0];
+                    this.moveModeIndicator(activeTab);
+                });
+
+                // The Dice section is display:none on first load (still on the lobby), so
+                // the very first indicator placement above runs against a 0-width row and
+                // ends up collapsed/invisible until something else (like clicking a tab)
+                // recalculates it. Redo it for real once the section is actually visible.
+                whenSectionReady(document.getElementById('section-dice'), () => {
+                    const activeTab = document.querySelector('.dice-mode-btn.active') || this.modeBtns[0];
+                    this.moveModeIndicator(activeTab);
+                });
+                window.addEventListener('resize', () => {
+                    const activeTab = document.querySelector('.dice-mode-btn.active') || this.modeBtns[0];
+                    this.moveModeIndicator(activeTab);
+                });
+            }
+        };
+        dc.init();
+
+        // ============ PLINKO ============
+        // Real physical simulation: the ball starts exactly at the top-center, and gravity
+        // accelerates its fall — each row takes slightly longer to cross than the last, so the
+        // ball visibly speeds up exactly like something actually falling, not a fixed-speed
+        // teleport. The board itself widens by exactly one peg per row (a true symmetric
+        // triangular funnel), and at every peg the ball nudges left/right by a fixed half-peg-gap
+        // step, so it always stays centered on the peg grid instead of drifting off it.
+        const pl = {
+            balanceEl: document.getElementById('pl-balance'),
+            betDisplayEl: document.getElementById('pl-bet-display'),
+            resultEl: document.getElementById('pl-result'),
+            dropBtn: document.getElementById('pl-drop-btn'),
+            resetBtn: document.getElementById('pl-reset-btn'),
+            betDownBtn: document.getElementById('pl-bet-down'),
+            betUpBtn: document.getElementById('pl-bet-up'),
+            betAmountEl: document.getElementById('pl-bet-amount'),
+            boardEl: document.getElementById('pl-board'),
+            slotsEl: document.getElementById('pl-slots'),
+            riskBtns: document.querySelectorAll('#pl-risk-row .dice-mode-btn'),
+            riskIndicator: document.getElementById('pl-risk-indicator'),
+            riskRow: document.getElementById('pl-risk-row'),
+
+            betAmount: 10,
+            rows: 8,
+            risk: 'low',
+            isDropping: false,
+            ball: null,
+            pegLayout: [], // computed once per build: pegLayout[row] = [{x,y}, ...] in px, board-relative
+
+            multiplierTables: {
+                low:    [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
+                medium: [13,  3,   1.3, 0.5, 0.3, 0.5, 1.3, 3,   13],
+                high:   [29,  4,   1.5, 0.3, 0.2, 0.3, 1.5, 4,   29]
+            },
+
+            // Compute exact pixel positions for every peg up front, as a clean symmetric
+            // triangle: row 0 has 3 pegs, each following row has one more, each one row-step
+            // taller and centered under the row above — this IS a proper Galton board shape,
+            // not an approximation from flex gaps.
+            //
+            // Fully responsive: column spacing is derived from whatever width the board
+            // actually rendered at (clamped so pegs never crowd together on a narrow phone
+            // or spread out unnaturally far on a wide/tablet screen), row spacing follows
+            // that same scale instead of being locked to a fixed CSS height, and peg/ball
+            // size are derived from the column spacing too — so the ball-to-gap ratio (how
+            // much real room the ball has to thread between pegs) stays visually consistent
+            // on every screen instead of a fixed-size ball sitting on a board that resized
+            // around it.
+            computeLayout(boardWidth) {
+                const topPad = 14, bottomPad = 14;
+                const pegGapX = Math.max(20, Math.min(42, (boardWidth - 40) / (this.rows + 2)));
+                const rowGap = pegGapX * 0.9;
+                const boardHeight = topPad + bottomPad + (this.rows - 1) * rowGap;
+                const centerX = boardWidth / 2;
+                const pegSize = Math.max(8, Math.min(14, pegGapX * 0.34));
+                const ballSize = Math.max(13, Math.min(20, pegGapX * 0.5));
+
+                const layout = [];
+                for (let r = 0; r < this.rows; r++) {
+                    const pegCount = r + 3;
+                    const rowWidth = (pegCount - 1) * pegGapX;
+                    const startX = centerX - rowWidth / 2;
+                    const y = topPad + r * rowGap;
+                    const row = [];
+                    for (let p = 0; p < pegCount; p++) {
+                        row.push({ x: startX + p * pegGapX, y });
+                    }
+                    layout.push(row);
+                }
+                return { layout, rowGap, pegGapX, centerX, topPad, boardHeight, pegSize, ballSize };
+            },
+
+            buildBoard() {
+                this.boardEl.innerHTML = '';
+                const boardRect = this.boardEl.getBoundingClientRect();
+                const { layout, rowGap, pegGapX, centerX, topPad, boardHeight, pegSize, ballSize } = this.computeLayout(boardRect.width);
+                this.pegLayout = layout;
+                this.rowGap = rowGap;
+                this.pegGapX = pegGapX;
+                this.centerX = centerX;
+                this.topPad = topPad;
+                this.pegSize = pegSize;
+                this.ballSize = ballSize;
+
+                this.boardEl.style.height = boardHeight + 'px';
+                this.boardEl.style.setProperty('--peg-size', pegSize + 'px');
+                this.boardEl.style.setProperty('--ball-size', ballSize + 'px');
+
+                layout.forEach(row => {
+                    row.forEach(peg => {
+                        // Round to whole pixels: sub-pixel left/top values make circular pegs
+                        // render slightly blurred/uneven across rows on non-retina screens.
+                        peg.x = Math.round(peg.x);
+                        peg.y = Math.round(peg.y);
+                        const el = document.createElement('div');
+                        el.className = 'plinko-peg';
+                        el.style.left = peg.x + 'px';
+                        el.style.top = peg.y + 'px';
+                        this.boardEl.appendChild(el);
+                    });
+                });
+
+                this.ball = document.createElement('div');
+                this.ball.className = 'plinko-ball';
+                this.boardEl.appendChild(this.ball);
+            },
+
+            // Positioned to line up exactly with the bottom row of pegs — each slot spans
+            // the real gap between two adjacent pegs (peg[i] to peg[i+1]) instead of an
+            // independent flexbox split, so the last bounce lands visually inside its slot
+            // instead of "teleporting" a few pixels off to the side of it.
+            buildSlots() {
+                this.slotsEl.innerHTML = '';
+                const table = this.multiplierTables[this.risk];
+                const lastRow = this.pegLayout[this.pegLayout.length - 1];
+                if (!lastRow || lastRow.length < table.length + 1) return; // board not built yet
+                const seam = 3; // small visual gap between adjacent slots
+                table.forEach((mult, i) => {
+                    const leftPeg = lastRow[i], rightPeg = lastRow[i + 1];
+                    const slot = document.createElement('div');
+                    slot.className = 'plinko-slot ' + (mult >= 5 ? 'high' : mult >= 1.2 ? 'mid' : 'low');
+                    slot.textContent = mult + 'x';
+                    slot.style.left = (leftPeg.x + seam / 2) + 'px';
+                    slot.style.width = (rightPeg.x - leftPeg.x - seam) + 'px';
+                    this.slotsEl.appendChild(slot);
+                });
+            },
+
+            changeBet(amount) {
+                if (this.isDropping) return;
+                this.setBet(this.betAmount + amount);
+            },
+            setBet(value) {
+                let nb = Math.round(value);
+                if (isNaN(nb)) nb = 10;
+                nb = Math.max(5, Math.min(500, nb));
+                if (nb > balance) nb = Math.max(5, balance);
+                this.betAmount = nb;
+                this.updateUI();
+            },
+            moveRiskIndicator(tab) {
+                if (!this.riskIndicator || !this.riskRow || !tab) return;
+                const containerRect = this.riskRow.getBoundingClientRect();
+                const tabRect = tab.getBoundingClientRect();
+                this.riskIndicator.style.width = tabRect.width + 'px';
+                this.riskIndicator.style.transform = `translateX(${tabRect.left - containerRect.left - 4}px)`;
+            },
+
+            drop() {
+                if (this.isDropping || balance < this.betAmount) return;
+                this.isDropping = true;
+                this.dropBtn.disabled = true;
+                this.dropBtn.classList.add('rolling-state');
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Шарик летит...';
+                document.querySelectorAll('.plinko-slot.landed').forEach(s => s.classList.remove('landed'));
+
+                balance -= this.betAmount;
+                updateBalanceDisplay();
+                saveData();
+
+                // Binomial path decided up front: at each row the ball bounces left(0) or
+                // right(1) with equal probability. Summing gives a binomial distribution —
+                // center slots common, edges rare — exactly how a real Galton board funnels
+                // balls from many independent 50/50 events. The animation below only displays
+                // this pre-decided outcome; it never influences it.
+                let rightBounces = 0;
+                const path = [];
+                for (let i = 0; i < this.rows; i++) {
+                    const bounceRight = Math.random() < 0.5 ? 0 : 1;
+                    rightBounces += bounceRight;
+                    path.push(bounceRight);
+                }
+                const finalSlot = rightBounces;
+
+                this.animateBall(path, finalSlot);
+            },
+
+            animateBall(path, finalSlot) {
+                if (!this.pegLayout.length) return;
+
+                const pegR = this.pegSize / 2;
+                const ballR = this.ballSize / 2;
+                // How far above a peg's center the ball rests when it's touching the peg's
+                // top edge (not overlapping through its middle), and how far to the side —
+                // toward whichever way it's about to bounce next — it sits while there.
+                // Real balls don't balance dead-center on a pin; they catch an edge and lean.
+                const restLift = pegR + ballR * 0.55;
+                const restSide = pegR * 0.95;
+
+                // Ball path: start exactly centered above row 0. At each row, walk to the peg
+                // directly below-left or below-right of the previous position (a real zigzag
+                // through the actual peg coordinates — never a straight-line teleport). Each
+                // stop is offset up and to the side of the peg's true center so the ball reads
+                // as catching the peg's edge, not passing through its middle.
+                let col = 0;
+                const stops = [{ x: this.centerX, y: -ballR, isPeg: false }];
+
+                path.forEach((bounceRight, i) => {
+                    const row = this.pegLayout[i];
+                    const peg = row[Math.min(col + (bounceRight === 1 ? 1 : 0), row.length - 1)];
+                    if (bounceRight === 1) col++;
+                    const dir = bounceRight === 1 ? 1 : -1;
+                    stops.push({
+                        x: peg.x + dir * restSide, y: peg.y - restLift,
+                        pegX: peg.x, pegY: peg.y, isPeg: true
+                    });
+                });
+
+                // Final resting point: straight down into the chosen slot from the last peg.
+                const lastRow = this.pegLayout[this.pegLayout.length - 1];
+                const lastPeg = lastRow[Math.min(finalSlot, lastRow.length - 1)];
+                const boardRect = this.boardEl.getBoundingClientRect();
+                stops.push({ x: lastPeg.x, y: boardRect.height - (ballR + 4), isPeg: false });
+
+                this.ball.style.transition = 'none';
+                this.ball.classList.remove('impact');
+                this.ball.style.left = stops[0].x + 'px';
+                this.ball.style.top = stops[0].y + 'px';
+                this.ball.classList.add('active');
+                void this.ball.offsetHeight;
+
+                // Gravity: each fall takes slightly less time than the last (accelerating
+                // overall as the ball gains momentum toward the bottom), and every individual
+                // fall itself uses an ease-in curve so it visibly speeds up as it drops rather
+                // than moving at one constant scripted speed — then, on hitting a peg, a brief
+                // two-step "wobble" rocks the ball toward the peg's true center and back before
+                // it releases toward the next one, reading as it catching and settling for a
+                // beat instead of instantly snapping to the next spot.
+                const baseFall = 230, minFall = 130, fallDecel = 13;
+                const wobbleStep = 65;
+                let t = 0;
+
+                for (let i = 1; i < stops.length; i++) {
+                    const stop = stops[i];
+                    const fallDuration = Math.max(minFall, baseFall - (i - 1) * fallDecel);
+
+                    t += fallDuration;
+                    const fallDelay = t - fallDuration;
+                    setTimeout(() => {
+                        this.ball.style.transition = `left ${fallDuration}ms cubic-bezier(0.55, 0, 0.85, 0.25), top ${fallDuration}ms cubic-bezier(0.55, 0, 0.85, 0.25)`;
+                        this.ball.style.left = stop.x + 'px';
+                        this.ball.style.top = stop.y + 'px';
+                    }, fallDelay);
+
+                    if (stop.isPeg) {
+                        // Rock toward the peg's center...
+                        const leanX = stop.pegX - (stop.x - stop.pegX) * 0.3;
+                        const leanY = stop.pegY - restLift * 0.6;
+                        t += wobbleStep;
+                        const leanDelay = t - wobbleStep;
+                        setTimeout(() => {
+                            this.ball.style.transition = `left ${wobbleStep}ms ease-out, top ${wobbleStep}ms ease-out`;
+                            this.ball.style.left = leanX + 'px';
+                            this.ball.style.top = leanY + 'px';
+                        }, leanDelay);
+                        // ...then settle back to the resting/release point, ready for the next fall.
+                        t += wobbleStep;
+                        const settleDelay = t - wobbleStep;
+                        setTimeout(() => {
+                            this.ball.style.transition = `left ${wobbleStep}ms ease-in, top ${wobbleStep}ms ease-in`;
+                            this.ball.style.left = stop.x + 'px';
+                            this.ball.style.top = stop.y + 'px';
+                        }, settleDelay);
+                    } else if (i === stops.length - 1) {
+                        // Landed in the slot: a quick squash for impact feedback. Set the
+                        // transition explicitly to transform here — the inline transition
+                        // left over from the last left/top hop would otherwise silently
+                        // block this from animating (an inline `transition` replaces the
+                        // whole property, it doesn't merge with the stylesheet's).
+                        setTimeout(() => {
+                            this.ball.style.transition = 'transform 0.12s ease-out';
+                            this.ball.classList.add('impact');
+                            setTimeout(() => {
+                                this.ball.style.transition = 'transform 0.15s ease-out';
+                                this.ball.classList.remove('impact');
+                            }, 130);
+                        }, t);
+                    }
+                }
+
+                setTimeout(() => this.checkResult(finalSlot), t + 260);
+            },
+
+            checkResult(finalSlot) {
+                const table = this.multiplierTables[this.risk];
+                const multiplier = table[finalSlot];
+                const winAmount = Math.floor(this.betAmount * multiplier);
+
+                const slotEl = this.slotsEl.children[finalSlot];
+                if (slotEl) slotEl.classList.add('landed');
+                this.ball.classList.remove('active');
+
+                this.dropBtn.classList.remove('rolling-state');
+
+                if (multiplier > 1) {
+                    balance += winAmount;
+                    this.resultEl.textContent = `Шарик упал в x${multiplier}! Выигрыш: ${violaText(winAmount)}!`;
+                    this.resultEl.className = 'result-message win win-shake';
+                    if (multiplier >= 3) createConfetti();
+                    updateStats('win', winAmount - this.betAmount);
+                    this.dropBtn.classList.add('success-state');
+                } else if (multiplier === 1) {
+                    balance += winAmount;
+                    this.resultEl.textContent = `Шарик упал в x1 — ставка возвращена.`;
+                    this.resultEl.className = 'result-message tie';
+                    updateStats('tie', 0);
+                } else {
+                    balance += winAmount;
+                    this.resultEl.textContent = `Шарик упал в x${multiplier}. Возврат: ${violaText(winAmount)}.`;
+                    this.resultEl.className = 'result-message lose lose-shake';
+                    updateStats('loss', this.betAmount - winAmount);
+                    this.dropBtn.classList.add('fail-state');
+                }
+                setTimeout(() => this.dropBtn.classList.remove('success-state', 'fail-state'), 700);
+
+                saveData();
+                updateBalanceDisplay();
+                this.isDropping = false;
+                this.dropBtn.disabled = false;
+                this.updateUI();
+
+                if (balance <= 0) {
+                    setTimeout(() => {
+                        this.resetGame();
+                        this.resultEl.textContent = 'Баланс закончился. Игра сброшена!';
+                    }, 1800);
+                }
+            },
+
+            resetGame() {
+                this.isDropping = false;
+                this.betAmount = 10;
+                if (this.ball) this.ball.classList.remove('active');
+                document.querySelectorAll('.plinko-slot.landed').forEach(s => s.classList.remove('landed'));
+                this.resultEl.className = 'result-message';
+                this.resultEl.textContent = 'Сделайте ставку и бросьте шарик!';
+                saveData();
+                updateBalanceDisplay();
+                this.updateUI();
+            },
+
+            updateUI() {
+                this.balanceEl.textContent = balance;
+                this.betDisplayEl.textContent = this.betAmount;
+                this.betAmountEl.value = this.betAmount;
+                const bet2 = document.getElementById('pl-bet-2');
+                if (bet2) bet2.textContent = this.betAmount;
+                const risk2 = document.getElementById('pl-risk-2');
+                if (risk2) {
+                    const riskLabels = { low: 'Низкий', medium: 'Средний', high: 'Высокий' };
+                    risk2.textContent = riskLabels[this.risk] || 'Низкий';
+                }
+                this.dropBtn.disabled = this.isDropping || balance < this.betAmount;
+                this.betDownBtn.style.opacity = this.betAmount <= 5 ? 0.5 : 1;
+                this.betUpBtn.style.opacity = (this.betAmount >= 500 || this.betAmount >= balance) ? 0.5 : 1;
+            },
+
+            init() {
+                this.buildBoard();
+                this.buildSlots();
+                this.updateUI();
+                this.dropBtn.addEventListener('click', () => this.drop());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                setupHoldButton(this.betDownBtn, () => this.changeBet(-5));
+                setupHoldButton(this.betUpBtn, () => this.changeBet(5));
+                setupEditableBet(this.betAmountEl, v => this.setBet(v));
+
+                this.riskBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (this.isDropping) return;
+                        this.risk = btn.dataset.risk;
+                        this.riskBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.moveRiskIndicator(btn);
+                        this.buildSlots();
+                        this.updateUI();
+                    });
+                });
+
+                requestAnimationFrame(() => {
+                    const activeTab = document.querySelector('#pl-risk-row .dice-mode-btn.active') || this.riskBtns[0];
+                    this.moveRiskIndicator(activeTab);
+                });
+
+                // The board section may be display:none on first load (still on the lobby), so
+                // its width/height read as 0 at construction time — same for the risk-tab pill
+                // indicator above. Rebuild the peg layout and re-place the pill for real the
+                // first time the Plinko section actually becomes visible (waiting for its own
+                // scale-in transition to finish, not just the next animation frame — measuring
+                // mid-transition would just capture a squashed intermediate size), and again on
+                // resize.
+                whenSectionReady(document.getElementById('section-plinko'), () => {
+                    this.buildBoard();
+                    this.buildSlots();
+                    const activeTab = document.querySelector('#pl-risk-row .dice-mode-btn.active') || this.riskBtns[0];
+                    this.moveRiskIndicator(activeTab);
+                });
+
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        if (this.isDropping) return;
+                        this.buildBoard();
+                        this.buildSlots();
+                        const activeTab = document.querySelector('#pl-risk-row .dice-mode-btn.active') || this.riskBtns[0];
+                        this.moveRiskIndicator(activeTab);
+                    }, 200);
+                });
+            }
+        };
+        pl.init();
+
+        // ============ Shared utility: hold-to-repeat button ============
+        function setupHoldButton(button, changeFn) {
+            let intervalId, timeoutId, holding = false;
+            let lastTouchTime = 0;
+            const start = (e) => {
+                // Mobile browsers fire a synthetic 'mousedown' shortly after 'touchstart' on the
+                // same tap, which would otherwise double-trigger changeFn(). Ignore mousedown if
+                // a touchstart just handled this same interaction.
+                if (e && e.type === 'mousedown' && Date.now() - lastTouchTime < 700) return;
+                if (e && e.type === 'touchstart') lastTouchTime = Date.now();
+
+                holding = true;
+                button.classList.add('holding');
+                changeFn();
+                timeoutId = setTimeout(() => {
+                    intervalId = setInterval(() => { if (holding) changeFn(); }, 100);
+                }, 500);
+            };
+            const stop = () => {
+                holding = false;
+                button.classList.remove('holding');
+                clearTimeout(timeoutId);
+                clearInterval(intervalId);
+            };
+            button.addEventListener('mousedown', start);
+            button.addEventListener('touchstart', start, { passive: true });
+            button.addEventListener('mouseup', stop);
+            button.addEventListener('touchend', stop);
+            button.addEventListener('mouseleave', stop);
+            button.addEventListener('touchcancel', stop);
+        }
+
+        // ============ Shared utility: editable bet input ============
+        function setupEditableBet(inputEl, applyFn) {
+            inputEl.addEventListener('change', () => applyFn(parseInt(inputEl.value, 10)));
+            inputEl.addEventListener('blur', () => applyFn(parseInt(inputEl.value, 10)));
+            inputEl.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { inputEl.blur(); }
+            });
+        }
+
+        // ============ Boot ============
+        loadData();
+        loadSettingsUI();
+        updateBalanceDisplay();
+        updateStatsDisplay();
+        showSection('lobby');
+
+        // Snap the blob into place instantly on load, then re-enable its transition
+        // so the very first render isn't an unwanted slide-in from the top-left corner.
+        if (activeBlob) {
+            activeBlob.style.transition = 'none';
+            moveBlobTo('lobby');
+            setTimeout(() => { activeBlob.style.transition = ''; }, 60);
+        }
+
+        setTimeout(() => {
+            document.getElementById('preloader').classList.add('hidden');
+            document.getElementById('dockWrapper').classList.add('loaded');
+        }, 1400);
+
+    })();
+    </script>
+</body>
+</html>
