@@ -1,3 +1,5 @@
+import { finishBoot } from '../shared/boot-screen.js';
+import { initializeTextMotion } from '../shared/text-motion.js';
 import { initializeMotionPicker } from '../shared/motion-picker.js';
 import { ExpandingIsland } from '../shared/island.js';
 import { initializeSwitches } from '../shared/controls.js';
@@ -203,6 +205,7 @@ const dialogs = new PortalDialogs({
   onSession: setSession,
   finishVisuals,
   onNavigate: navigate,
+  onServerLogin: openServerLogin,
 });
 
 function updateFavorites() {
@@ -229,7 +232,10 @@ function renderChrome() {
     : preferences.lang === 'en'
       ? 'Your game account'
       : 'Твой игровой счёт';
-  $('#island-subtitle').textContent = t('practice');
+  $('#island-subtitle').textContent = t(api.isPractice ? 'localPractice' : 'practice');
+  document.documentElement.dataset.playMode = api.mode;
+  $('#server-login-action').hidden = !api.isPractice;
+  $('#practice-mode-badge').hidden = !api.isPractice;
   $('#island-rounds').textContent = state.stats.rounds;
   $('#island-wins').textContent = state.stats.wins;
   $('#island-net').textContent = signedMoney(state.stats.netMinor);
@@ -298,7 +304,11 @@ function renderControls() {
   $('#plinko-max').textContent = money(
     Math.floor(state.betMinor * plinkoTable(state.plinko.rows, state.plinko.risk)[0]),
   );
-  $('#play-label').textContent = state.networkBusy ? t('waitingServer') : t(games[game].play);
+  $('#play-label').textContent = state.networkBusy
+    ? t(api.isPractice ? 'calculating' : 'waitingServer')
+    : !state.user
+      ? t('startPractice')
+      : t(games[game].play);
   $('#play-button').dataset.busy = String(state.networkBusy);
   $('.play-button-icon use').setAttribute('href', '#i-' + (state.networkBusy ? 'replay' : games[game].icon));
   $('#play-button').hidden = game === 'blackjack' && Boolean(state.activeBlackjack);
@@ -464,7 +474,13 @@ function navigate(game, source = null, push = true, animate = true) {
     if (link.dataset.go === game) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
-  if (push && location.hash !== '#' + game) history.pushState(null, '', '#' + game);
+  if (push && location.hash !== '#' + game) {
+    try {
+      history.pushState(null, '', '#' + game);
+    } catch {
+      /* Sandboxed file viewers still navigate locally. */
+    }
+  }
   scrollTo({ top: 0, behavior: 'instant' });
   requestAnimationFrame(() => {
     plinko.resize();
@@ -524,7 +540,8 @@ async function play() {
   const game = state.game;
   if (!games[game] || state.networkBusy || state.uncertain) return;
   if (!state.user) {
-    dialogs.open('auth-dialog', $('#play-button'));
+    await startPractice(null);
+    if (state.user) return play();
     return;
   }
   if (game === 'plinko' ? state.busy.plinko >= 8 : state.busy[game]) return;
@@ -542,7 +559,7 @@ async function play() {
   actionEpoch++;
   sound.unlock();
   renderControls();
-  $('#result-title').textContent = t('waitingServer');
+  $('#result-title').textContent = t(api.isPractice ? 'calculating' : 'waitingServer');
   $('#result-detail').textContent = '';
   $('#result-proof').hidden = true;
   const parameters = game === 'plinko' ? { ...state.plinko } : game === 'dice' ? { ...state.dice } : {};
@@ -608,9 +625,14 @@ async function synchronize(recover = true) {
   if (state.networkBusy) return;
   const epoch = actionEpoch;
   const generation = api.generation;
-  const [config, session] = await Promise.all([api.call('/api/config'), api.call('/api/session')]);
-  state.config = config;
+  const [config, session] = await Promise.all([api.call('/api/config'), api.call('/api/session')]).catch(
+    (error) => {
+      if (generation !== api.generation) return [null, null];
+      throw error;
+    },
+  );
   if (generation !== api.generation || epoch !== actionEpoch) return;
+  state.config = config;
   setSession(session);
   if (recover && session.user && api.pending()) {
     state.uncertain = true;
@@ -641,8 +663,41 @@ async function synchronize(recover = true) {
 function setAuthBusy(busy) {
   state.authBusy = busy;
   for (const id of ['guest-login', 'telegram-login']) $('#' + id).disabled = busy;
+  $('#practice-login').disabled = state.networkBusy || state.uncertain;
   $('#guest-login').dataset.busy = String(busy);
   $('#auth-dialog').setAttribute('aria-busy', String(busy));
+}
+async function startPractice(target = 'plinko') {
+  if ((state.authBusy && api.isPractice) || state.networkBusy || state.uncertain) return;
+  setAuthBusy(true);
+  finishVisuals();
+  try {
+    api.usePractice();
+    state.config = await api.call('/api/config');
+    setSession(await api.call('/api/auth/guest', {}));
+    state.connected = true;
+    state.uncertain = false;
+    $('#connection-banner').hidden = true;
+    $('#auth-error').textContent = '';
+    await morph.close($('#auth-dialog'));
+    if (target && state.game === 'lobby') navigate(target);
+    renderAll();
+  } catch (error) {
+    onError(error);
+  } finally {
+    setAuthBusy(false);
+  }
+}
+async function openServerLogin() {
+  if (state.networkBusy || state.uncertain) return;
+  finishVisuals();
+  await morph.close($('#account-dialog'));
+  api.useServer();
+  setSession({ user: null });
+  dialogs.open('auth-dialog', $('#account-button'));
+  synchronize(false).catch((error) => {
+    $('#auth-error').textContent = errorMessage(error);
+  });
 }
 async function guestLogin() {
   if (state.authBusy) return;
@@ -659,20 +714,23 @@ async function guestLogin() {
     notify(t('guestGreeting'));
     $('#connection-banner').hidden = true;
   } catch (error) {
+    if (generation !== api.generation) return;
     $('#auth-error').textContent = errorMessage(error);
     onError(error);
   } finally {
-    setAuthBusy(false);
+    if (generation === api.generation) setAuthBusy(false);
   }
 }
 async function telegramLogin() {
   if (state.authBusy) return;
-  api.beginAuthentication();
+  const generation = api.beginAuthentication();
   setAuthBusy(true);
   $('#auth-error').textContent = '';
   try {
     if (initData) {
-      setSession(await api.call('/api/auth/telegram/miniapp', { initData }));
+      const session = await api.call('/api/auth/telegram/miniapp', { initData });
+      if (generation !== api.generation) return;
+      setSession(session);
       morph.close($('#auth-dialog'));
       history.replaceState(null, '', location.pathname + '#lobby');
       notify(t('guestGreeting'));
@@ -680,6 +738,7 @@ async function telegramLogin() {
     }
     const data = await api.call('/api/auth/telegram/start', {}),
       container = $('#telegram-widget');
+    if (generation !== api.generation) return;
     container.replaceChildren();
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
@@ -694,9 +753,10 @@ async function telegramLogin() {
     });
     container.append(script);
   } catch (error) {
+    if (generation !== api.generation) return;
     $('#auth-error').textContent = errorMessage(error);
   } finally {
-    setAuthBusy(false);
+    if (generation === api.generation) setAuthBusy(false);
   }
 }
 
@@ -733,6 +793,9 @@ $('#account-button').addEventListener('click', (event) =>
   dialogs.open(state.user ? 'account-dialog' : 'auth-dialog', event.currentTarget),
 );
 $('#guest-login').addEventListener('click', guestLogin);
+$('#practice-login').addEventListener('click', () => startPractice(null));
+$('#practice-launch').addEventListener('click', () => startPractice());
+$('#practice-retry').addEventListener('click', () => startPractice(state.game === 'lobby' ? 'plinko' : null));
 $('#telegram-login').addEventListener('click', telegramLogin);
 
 document.addEventListener('click', (event) => {
@@ -828,6 +891,7 @@ $$('[data-bj-action]').forEach((button) =>
 $('#retry-connection').addEventListener('click', () => synchronize(true).catch(onError));
 window.addEventListener('online', () => synchronize(true).catch(onError));
 window.addEventListener('offline', () => {
+  if (api.isPractice) return;
   state.connected = false;
   $('#connection-banner').hidden = false;
   $('#connection-message').textContent = t('connectionLost');
@@ -874,3 +938,6 @@ synchronize(false)
     }
   })
   .catch(onError);
+
+initializeTextMotion();
+finishBoot();

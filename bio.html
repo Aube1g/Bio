@@ -10492,7 +10492,7 @@
       .setting-row :is(.switch-track, .toggle-track) {
         position: absolute;
         display: block;
-        inset: 7px 4px;
+        inset: 11px 4px;
         width: auto;
         height: auto;
         min-width: 0;
@@ -10549,13 +10549,13 @@
         z-index: 3;
         pointer-events: none;
         left: 2px;
-        top: 5px;
-        width: 38px;
-        height: 36px;
+        top: 10px;
+        width: 46px;
+        height: 26px;
         border: 1px solid #ffffffe0;
         border-bottom-color: #ffffff62;
         border-right-color: #ffffff78;
-        border-radius: 52% 48% 48% 52% / 48% 49% 51% 52%;
+        border-radius: 999px;
         background: linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
         box-shadow:
           inset 1px 1.5px 2px #ffffffb8,
@@ -10564,7 +10564,7 @@
           0 0 1px 1px #24173326;
         -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
         backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
-        transform: translateX(calc(var(--switch-position) * 30px)) scaleX(var(--lens-stretch))
+        transform: translateX(calc(var(--switch-position) * 22px)) scaleX(var(--lens-stretch))
           scaleY(var(--lens-squash));
         transform-origin: 50% 50%;
         transition:
@@ -10584,9 +10584,9 @@
       .glass-switch-lens::after {
         content: "";
         position: absolute;
-        top: 5px;
-        left: 7px;
-        width: 19px;
+        top: 3px;
+        left: 9px;
+        width: 24px;
         height: 5px;
         border-top: 1.5px solid #ffffffa6;
         border-radius: 50%;
@@ -10598,8 +10598,8 @@
         }
       }
       .glass-switch[data-touching="true"] .glass-switch-lens {
-        scale: 1.14 1.07;
-        border-radius: 47% 53% 50% 50% / 50% 44% 56% 50%;
+        scale: 1.12 0.96;
+        border-radius: 20px 24px 22px 20px;
         box-shadow:
           inset 1.5px 2px 2px #ffffffe0,
           inset -2px -1px 4px #ede0ff8a,
@@ -11881,10 +11881,478 @@
       [data-theme="light"] .game-island .viola-icon {
         filter: none;
       }
+
+      /* The liquid clock returns from the original index.html. No API request blocks it. */
+      .app-preloader {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: var(--bg, #050510);
+        color: var(--ink, #e8e8ff);
+      }
+      html[data-booting="true"] .app-preloader {
+        display: flex;
+        animation: boot-failsafe 4.5s step-end forwards;
+      }
+      .loader-clock {
+        width: 140px;
+        height: 140px;
+        display: grid;
+        place-items: center;
+        position: relative;
+        animation: clock-appear 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .loader-clock-blob {
+        position: absolute;
+        inset: 0;
+        border: 1px solid #ffffff25;
+        background: linear-gradient(135deg, #ffffff0d, #ffffff03);
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        box-shadow:
+          0 0 40px #7000ff35,
+          inset 0 1px #ffffff1a;
+        overflow: hidden;
+        animation: loader-liquid 8s infinite ease-in-out;
+      }
+      .loader-shimmer {
+        position: absolute;
+        inset: -30%;
+        background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
+        animation: loader-shimmer 2.2s ease-in-out infinite;
+      }
+      .loader-clock-ticks {
+        position: absolute;
+        inset: 16px;
+        border-radius: 50%;
+        border: 1px dashed color-mix(in srgb, var(--primary-text) 35%, transparent);
+      }
+      .loader-clock-center {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--primary-text);
+        z-index: 2;
+      }
+      .loader-clock-hand {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        border-radius: 4px;
+        transform-origin: 50% 100%;
+      }
+      .loader-clock-hand.hour {
+        height: 35px;
+        width: 4px;
+        margin-left: -2px;
+        background: var(--ink);
+      }
+      .loader-clock-hand.minute {
+        height: 50px;
+        width: 2px;
+        margin-left: -1px;
+        background: #4cdbea;
+      }
+      .loader-clock-hand.second {
+        height: 60px;
+        width: 1px;
+        background: #fc5474;
+      }
+      .loader-label {
+        margin-top: 24px;
+        letter-spacing: 0.2em;
+        font-size: 12px;
+        font-weight: 900;
+        color: var(--primary-text);
+      }
+      [data-theme="light"] .loader-clock-blob {
+        background: linear-gradient(135deg, #8a4fff15, #00c2d60c);
+        border-color: #8a4fff30;
+      }
+      @keyframes loader-liquid {
+        0%,
+        100% {
+          border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+        33% {
+          border-radius: 65% 35% 35% 65% / 60% 35% 65% 40%;
+        }
+        66% {
+          border-radius: 35% 65% 55% 45% / 35% 65% 35% 65%;
+        }
+      }
+      @keyframes loader-shimmer {
+        from {
+          transform: translateX(-80%);
+        }
+        to {
+          transform: translateX(80%);
+        }
+      }
+      @keyframes clock-appear {
+        from {
+          opacity: 0;
+          transform: scale(0.76) rotate(-12deg);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes boot-failsafe {
+        to {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
+      }
+
+      /* A visible mid-frame and a scrubber make each contour identifiable. */
+      .motion-preview-stage {
+        height: 211px;
+        background: radial-gradient(
+          ellipse at 50% 50%,
+          color-mix(in srgb, var(--primary) 17%, transparent),
+          transparent 70%
+        );
+      }
+      .motion-preview-window {
+        left: calc(50% - 140px);
+        top: 28px;
+        width: 280px;
+        height: 155px;
+        border-radius: 22px;
+      }
+      .motion-preview-outline {
+        position: absolute;
+        left: calc(50% - 140px);
+        top: 28px;
+        width: 280px;
+        height: 155px;
+        pointer-events: none;
+        overflow: visible;
+        transform-origin: 50% 40%;
+      }
+      .motion-preview-outline path {
+        stroke: var(--primary-text);
+        stroke-width: 1.25;
+        fill: none;
+        vector-effect: non-scaling-stroke;
+        opacity: 0.8;
+      }
+      .motion-window-bar {
+        padding: 13px;
+      }
+      .motion-window-mark {
+        left: 25px;
+        top: 66px;
+      }
+      .motion-window-mark .brand-mark {
+        width: 36px;
+        height: 36px;
+      }
+      .motion-window-lines {
+        left: 83px;
+        top: 72px;
+        gap: 12px;
+      }
+      .motion-window-lines i {
+        width: 135px;
+        height: 7px;
+      }
+      .motion-window-lines i:last-child {
+        width: 91px;
+      }
+      .motion-preview-neighbor {
+        left: calc(50% - 153px);
+        top: 43px;
+        width: 241px;
+        height: 141px;
+      }
+      .motion-preview-source {
+        left: calc(50% + 155px);
+        top: 144px;
+      }
+      .motion-preview-directions {
+        width: fit-content;
+        display: flex;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin: 0 auto 12px;
+        background: var(--panel);
+      }
+      .motion-preview-directions button {
+        position: relative;
+        min-height: 32px;
+        padding: 6px 13px;
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--muted);
+      }
+      .motion-preview-directions button[aria-pressed="true"] {
+        color: var(--ink);
+        background: color-mix(in srgb, var(--primary) 18%, var(--panel));
+      }
+      .motion-timeline {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 0 16px 16px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .motion-timeline .range-control {
+        flex: 1;
+        min-width: 30px;
+        width: auto;
+        accent-color: var(--primary);
+        margin: 0;
+      }
+      .motion-timeline output {
+        width: 30px;
+        text-align: right;
+        font:
+          10px ui-monospace,
+          monospace;
+      }
+      .motion-timeline button {
+        min-height: 32px;
+        padding: 5px 9px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel);
+        color: var(--primary-text);
+        font-size: 10px;
+      }
+      .motion-picker-footer {
+        position: sticky;
+        bottom: -1px;
+        z-index: 5;
+        background: var(--card-bg, var(--surface));
+        padding: 15px 0 0;
+        border-top: 1px solid var(--line);
+        margin-top: 17px;
+      }
+
+      /* Small, HTML-safe Markdown accents for actual information, not decorative filler. */
+      .inline-pill {
+        display: inline;
+        padding: 0.07em 0.42em;
+        margin: 0 0.08em;
+        border: 1px solid color-mix(in srgb, var(--primary-text) 20%, transparent);
+        border-radius: 0.48em;
+        background: color-mix(in srgb, var(--primary) 10%, transparent);
+        color: var(--primary-text);
+        font-size: 0.91em;
+        font-weight: 800;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      .inline-code {
+        display: inline;
+        padding: 0.1em 0.4em;
+        border: 1px solid var(--line);
+        border-radius: 0.4em;
+        background: var(--panel);
+        color: var(--primary-text);
+        font:
+          0.91em/1.6 ui-monospace,
+          monospace;
+        overflow-wrap: anywhere;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      .rich-emphasis {
+        font-weight: 900;
+        color: var(--ink);
+        text-decoration: underline;
+        text-decoration-color: color-mix(in srgb, var(--primary-text) 55%, transparent);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 3px;
+      }
+      .info-card p,
+      .info-callout p,
+      .detail-features.info-grid li {
+        line-height: 1.95;
+      }
+      .proof-field > span {
+        text-transform: uppercase;
+        letter-spacing: 0.055em;
+        font-size: 9px;
+        font-weight: 900;
+      }
+      .proof-field > code {
+        display: block;
+        padding: 10px 12px;
+        margin-top: 8px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: var(--panel);
+      }
+
+      /* Practice mode is available from the downloaded HTML, not only the development server. */
+      .practice-launch {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 20px 0 0 14px;
+        min-height: 40px;
+        padding: 9px 13px;
+        border-radius: 13px;
+        border: 1px solid #d4ef8e35;
+        background: #d4ef8e0a;
+        color: var(--lime);
+        font-size: 11px;
+      }
+      .practice-launch .icon {
+        width: 13px;
+        height: 13px;
+      }
+      .practice-login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 13px;
+        min-height: 52px;
+        border: 1px solid #d4ef8e45;
+        background: #d4ef8e14;
+        color: var(--lime);
+        border-radius: 17px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .practice-login .icon {
+        width: 19px;
+        height: 19px;
+      }
+      .practice-mode-badge {
+        border: 1px solid var(--line);
+        border-radius: 99px;
+        padding: 5px 10px;
+        font-size: 9px;
+        color: var(--primary-text);
+      }
+      .lobby-topline {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      #practice-retry {
+        color: var(--lime-ink);
+        background: var(--lime);
+        padding: 7px 11px;
+        border-radius: 10px;
+      }
+      [data-play-mode="local"] #connection-dot {
+        background: var(--primary-text);
+      }
+      [data-theme="light"] .practice-login,
+      [data-theme="light"] .practice-launch {
+        color: #425b20;
+        border-color: #698c334a;
+        background: #b9d38e24;
+      }
+      [data-motion="off"] .loader-clock,
+      [data-motion="off"] .loader-clock * {
+        animation: none !important;
+      }
+      @media (max-width: 700px) {
+        .motion-preview-stage {
+          height: 176px;
+        }
+        .motion-preview-window,
+        .motion-preview-outline {
+          left: calc(50% - 107px);
+          top: 24px;
+          width: 214px;
+          height: 128px;
+        }
+        .motion-preview-neighbor {
+          left: calc(50% - 119px);
+          top: 37px;
+          width: 186px;
+          height: 110px;
+        }
+        .motion-preview-source {
+          display: none;
+        }
+        .motion-window-mark {
+          left: 16px;
+          top: 55px;
+        }
+        .motion-window-mark .brand-mark {
+          width: 28px;
+          height: 28px;
+        }
+        .motion-window-lines {
+          left: 62px;
+          top: 59px;
+          gap: 8px;
+        }
+        .motion-window-lines i {
+          width: 112px;
+          height: 6px;
+        }
+        .motion-window-lines i:last-child {
+          width: 78px;
+        }
+        .motion-timeline {
+          gap: 8px;
+          padding-inline: 11px;
+        }
+        .motion-timeline label {
+          display: none;
+        }
+        .motion-timeline button {
+          font-size: 9px;
+        }
+        .practice-launch {
+          margin-left: 0;
+          font-size: 10px;
+        }
+        .connection-banner {
+          flex-wrap: wrap;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .loader-clock,
+        .loader-clock * {
+          animation: none !important;
+        }
+      }
+      .practice-launch {
+        pointer-events: auto;
+      }
+      .hero-grid {
+        pointer-events: none;
+      }
+
+      .motion-picker-footer {
+        padding-bottom: 12px;
+        bottom: 0;
+      }
+      .motion-preview-directions button[aria-pressed="true"] {
+        color: #fff;
+        background: var(--button-primary, var(--primary));
+      }
     </style>
     <script>
       (() => {
         const root = document.documentElement;
+        root.dataset.booting = 'true';
+        setTimeout(() => {
+          if (root.dataset.booting) {
+            delete root.dataset.booting;
+            window.dispatchEvent(new Event('apprevealed'));
+          }
+        }, 4500);
         try {
           const parsed = JSON.parse(localStorage.getItem('aubeig.preferences') || '{}');
           const saved = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
@@ -11909,6 +12377,18 @@
     </script>
   </head>
   <body>
+    <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
+      <div class="loader-clock" aria-hidden="true">
+        <div class="loader-clock-blob"><div class="loader-shimmer"></div></div>
+        <div class="loader-clock-ticks"></div>
+        <span class="loader-clock-hand hour" id="loader-hour"></span>
+        <span class="loader-clock-hand minute" id="loader-minute"></span>
+        <span class="loader-clock-hand second" id="loader-second"></span>
+        <span class="loader-clock-center"></span>
+      </div>
+      <span class="loader-label" id="loader-label">ЗАГРУЗКА…</span>
+    </div>
+
     <div class="atmosphere" aria-hidden="true">
       <div class="atmosphere-glow"></div>
       <canvas id="atmosphere-canvas"></canvas>
@@ -13680,13 +14160,15 @@
           >
           <div class="motion-setting-controls">
             <select id="transition-select" hidden aria-hidden="true" tabindex="-1">
-              <option value="mix">Микс · каждый раз по-разному</option>
-              <option value="hyprland">Hyprland · Slide</option>
-              <option value="caelestia">Caelestia · Pop</option>
-              <option value="liquid">Liquid · упругая поверхность</option>
-              <option value="iris">Iris · раскрытие диафрагмы</option>
-              <option value="shutters">Shutters · жидкие шторки</option>
-              <option value="cascade">Cascade · каскад плиток</option></select
+              <option value="star">Star</option>
+              <option value="bloom">Bloom</option>
+              <option value="orbit">Orbit</option>
+              <option value="ribbon">Ribbon</option>
+              <option value="hyprland">Hyprland</option>
+              <option value="caelestia">Caelestia</option>
+              <option value="liquid">Liquid</option>
+              <option value="iris">Iris</option>
+              <option value="mix">Mix</option></select
             ><button
               class="motion-picker-trigger"
               type="button"
@@ -13728,7 +14210,7 @@
         />
         <p class="eyebrow">Начнём с простого «привет»</p>
         <h2 id="contact-title">Есть идея?<br />Давай создадим.</h2>
-        <p class="dialog-intro">
+        <p class="dialog-intro" data-rich>
           Сайт, бот, полезный инструмент или что-то совсем новое. Расскажи, что задумал — обсудим детали.
         </p>
         <div class="contact-links">
@@ -13895,7 +14377,7 @@
             ><span>Открыт к идеям</span></span
           >
         </div>
-        <p class="bio-profile-summary">
+        <p class="bio-profile-summary" data-rich>
           Соединяю чистый код и эстетичный дизайн. От небольших скриптов до целых экосистем — создаю то, чем
           хочется пользоваться.
         </p>
@@ -13905,14 +14387,14 @@
               <svg class="icon" aria-hidden="true"><use href="#i-code" /></svg>
               <h3>Разработка</h3>
             </div>
-            <p>Веб-сайты, Telegram-боты, парсеры и инструменты под конкретную задачу.</p>
+            <p data-rich>Веб-сайты, Telegram-боты, парсеры и инструменты под конкретную задачу.</p>
           </section>
           <section class="info-card">
             <div class="info-card-heading">
               <svg class="icon" aria-hidden="true"><use href="#i-nodes" /></svg>
               <h3>Экосистемы</h3>
             </div>
-            <p>XLI, XGO, Hydra и Anon — интерфейсы, агенты и автоматизация.</p>
+            <p data-rich>XLI, XGO, Hydra и Anon — интерфейсы, агенты и автоматизация.</p>
           </section>
         </div>
         <div class="bio-profile-stack" aria-label="Технологии">
@@ -13970,14 +14452,89 @@
               </div>
               <div class="motion-window-lines"><i></i><i></i></div>
             </div>
+            <svg class="motion-preview-outline" aria-hidden="true"><path fill="none" /></svg>
             <div class="motion-preview-source">
               <svg class="icon"><use href="#i-window" /></svg>
             </div>
           </div>
           <p id="motion-preview-description"></p>
+          <div class="motion-preview-directions segmented spring-group" role="group" aria-label="Направление">
+            <button type="button" data-preview-direction="open" aria-pressed="true" data-motion-text="open">
+              Открытие
+            </button>
+            <button
+              type="button"
+              data-preview-direction="close"
+              aria-pressed="false"
+              data-motion-text="close"
+            >
+              Закрытие
+            </button>
+          </div>
+          <div class="motion-timeline">
+            <label for="motion-preview-progress" data-motion-text="frame">Кадр</label
+            ><input
+              class="range-control"
+              type="range"
+              id="motion-preview-progress"
+              min="0"
+              max="100"
+              step="1"
+              value="45"
+            /><output id="motion-preview-percent">45%</output
+            ><button type="button" id="motion-preview-mid" data-motion-text="mid">Середина</button>
+          </div>
         </div>
         <div class="motion-choice-grid" role="radiogroup" aria-label="Анимация окон" id="motion-choices">
           <button
+            type="button"
+            class="motion-choice"
+            role="radio"
+            aria-checked="false"
+            data-motion-style="star"
+            tabindex="-1"
+          >
+            <span class="motion-choice-icon"
+              ><svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></span
+            ><span><strong>Star</strong><small>Четыре луча → мягкое окно</small></span
+            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
+          ><button
+            type="button"
+            class="motion-choice"
+            role="radio"
+            aria-checked="false"
+            data-motion-style="bloom"
+            tabindex="-1"
+          >
+            <span class="motion-choice-icon"
+              ><svg class="icon" aria-hidden="true"><use href="#i-clover" /></svg></span
+            ><span><strong>Bloom</strong><small>Шесть лепестков → панель</small></span
+            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
+          ><button
+            type="button"
+            class="motion-choice"
+            role="radio"
+            aria-checked="false"
+            data-motion-style="orbit"
+            tabindex="-1"
+          >
+            <span class="motion-choice-icon"
+              ><svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg></span
+            ><span><strong>Orbit</strong><small>Кольцо раскрывает середину</small></span
+            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
+          ><button
+            type="button"
+            class="motion-choice"
+            role="radio"
+            aria-checked="false"
+            data-motion-style="ribbon"
+            tabindex="-1"
+          >
+            <span class="motion-choice-icon"
+              ><svg class="icon" aria-hidden="true"><use href="#i-file" /></svg></span
+            ><span><strong>Ribbon</strong><small>Диагональный разворот листа</small></span
+            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
+          ><button
             type="button"
             class="motion-choice"
             role="radio"
@@ -13987,7 +14544,7 @@
           >
             <span class="motion-choice-icon"
               ><svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg></span
-            ><span><strong>Hyprland</strong><small>Сдвиг и упругая остановка</small></span
+            ><span><strong>Hyprland</strong><small>Боковой сдвиг и отскок</small></span
             ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
           ><button
             type="button"
@@ -13999,7 +14556,7 @@
           >
             <span class="motion-choice-icon"
               ><svg class="icon" aria-hidden="true"><use href="#i-window" /></svg></span
-            ><span><strong>Caelestia</strong><small>Мягкое раскрытие панели</small></span
+            ><span><strong>Caelestia</strong><small>Всплытие и мягкая остановка</small></span
             ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
           ><button
             type="button"
@@ -14011,7 +14568,7 @@
           >
             <span class="motion-choice-icon"
               ><svg class="icon" aria-hidden="true"><use href="#i-wave" /></svg></span
-            ><span><strong>Liquid</strong><small>Текучая геометрия</small></span
+            ><span><strong>Liquid</strong><small>Капля растягивается в окно</small></span
             ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
           ><button
             type="button"
@@ -14023,31 +14580,7 @@
           >
             <span class="motion-choice-icon"
               ><svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg></span
-            ><span><strong>Iris</strong><small>Раскрытие диафрагмы</small></span
-            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
-          ><button
-            type="button"
-            class="motion-choice"
-            role="radio"
-            aria-checked="false"
-            data-motion-style="shutters"
-            tabindex="-1"
-          >
-            <span class="motion-choice-icon"
-              ><svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg></span
-            ><span><strong>Shutters</strong><small>Пять раскрывающихся полос</small></span
-            ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
-          ><button
-            type="button"
-            class="motion-choice"
-            role="radio"
-            aria-checked="false"
-            data-motion-style="cascade"
-            tabindex="-1"
-          >
-            <span class="motion-choice-icon"
-              ><svg class="icon" aria-hidden="true"><use href="#i-grid" /></svg></span
-            ><span><strong>Cascade</strong><small>Каскад мягких панелей</small></span
+            ><span><strong>Iris</strong><small>Круг от центра к краям</small></span
             ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg></button
           ><button
             type="button"
@@ -14058,7 +14591,7 @@
             tabindex="-1"
           >
             <span class="motion-choice-icon"
-              ><svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg></span
+              ><svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg></span
             ><span><strong>Mix</strong><small>Чередовать все стили</small></span
             ><svg class="icon motion-choice-check" aria-hidden="true"><use href="#i-check" /></svg>
           </button>
@@ -14076,209 +14609,401 @@
       </div>
     </dialog>
     <script>
+      requestAnimationFrame(() => requestAnimationFrame(() => {
       (() => {
+        // assets/shared/boot-screen.js
+        function finishBoot() {
+          const root = document.documentElement, loader = document.getElementById("app-preloader");
+          if (!loader) return;
+          if (!root.dataset.booting) {
+            loader.hidden = true;
+            return;
+          }
+          const started = performance.now();
+          const enabled = () => root.dataset.motion !== "off";
+          const english = root.lang === "en";
+          loader.setAttribute("aria-label", english ? "Loading" : "Загрузка");
+          document.getElementById("loader-label").textContent = english ? "LOADING…" : "ЗАГРУЗКА…";
+          let timer = 0, finished = false;
+          const tick = () => {
+            const date = /* @__PURE__ */ new Date(), seconds = date.getSeconds() + date.getMilliseconds() / 1e3, minutes = date.getMinutes() + seconds / 60;
+            document.getElementById("loader-hour").style.transform = `rotate(${date.getHours() % 12 * 30 + minutes / 2}deg)`;
+            document.getElementById("loader-minute").style.transform = `rotate(${minutes * 6}deg)`;
+            document.getElementById("loader-second").style.transform = `rotate(${seconds * 6}deg)`;
+          };
+          tick();
+          if (enabled()) timer = setInterval(tick, 80);
+          const finish = () => {
+            if (finished) return;
+            finished = true;
+            clearInterval(timer);
+            clearTimeout(deadline);
+            const complete = () => {
+              const announce = Boolean(root.dataset.booting);
+              loader.hidden = true;
+              delete root.dataset.booting;
+              if (announce) window.dispatchEvent(new Event("apprevealed"));
+            };
+            if (!enabled() || document.hidden) {
+              complete();
+              return;
+            }
+            const animation = loader.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-out" });
+            animation.finished.then(complete).catch(complete);
+          };
+          const deadline = setTimeout(finish, 2200);
+          Promise.race([
+            document.fonts?.ready || Promise.resolve(),
+            new Promise((resolve) => setTimeout(resolve, 1600))
+          ]).then(() => {
+            setTimeout(finish, enabled() ? Math.max(0, 620 - (performance.now() - started)) : 0);
+          });
+        }
+
+        // assets/shared/text-motion.js
+        var animations = /* @__PURE__ */ new Set();
+        var active = /* @__PURE__ */ new WeakMap();
+        var canMove = () => document.documentElement.dataset.motion !== "off";
+        function initializeTextMotion() {
+          const targets = "h1,h2,.hero-tagline,.lobby-hero-copy>p,.game-heading-copy>p,.dialog-intro,.dialog-lead,.bio-profile-summary";
+          function reveal(scope) {
+            if (!canMove() || document.documentElement.dataset.booting || !scope?.isConnected) return;
+            const nodes = [...scope.querySelectorAll(targets)].filter(
+              (node) => node.getClientRects().length && !node.closest("[hidden],.window-snapshot,.surface-snapshot,.morph-card-copy,.motion-preview-stage")
+            );
+            nodes.slice(0, 12).forEach((node, index) => {
+              active.get(node)?.cancel();
+              const title = /^H[12]$/.test(node.tagName);
+              const animation = node.animate(
+                [
+                  {
+                    opacity: 0,
+                    transform: `translateY(${title ? 15 : 9}px)`,
+                    filter: "blur(4px)",
+                    clipPath: "inset(0 0 100% 0)"
+                  },
+                  { opacity: 1, transform: "none", filter: "blur(0px)", clipPath: "inset(0 0 0% 0)" }
+                ],
+                { duration: title ? 640 : 520, delay: Math.min(index, 5) * 45, easing: "cubic-bezier(.16,1,.3,1)" }
+              );
+              node.dataset.textMotion = "revealing";
+              animations.add(animation);
+              active.set(node, animation);
+              animation.finished.catch(() => {
+              }).then(() => {
+                animations.delete(animation);
+                if (active.get(node) === animation) {
+                  active.delete(node);
+                  delete node.dataset.textMotion;
+                }
+              });
+            });
+          }
+          const roots = [...document.querySelectorAll(".view,.portal-view,dialog")];
+          const states = /* @__PURE__ */ new WeakMap();
+          for (const scope of roots) {
+            const inspect = () => {
+              const visible = scope.tagName === "DIALOG" ? scope.open : !scope.hidden;
+              const busy = scope.classList.contains("morphing") || scope.classList.contains("is-morphing") || scope.classList.contains("is-window-entering") || scope.classList.contains("surface-incoming");
+              if (!visible || busy) {
+                states.set(scope, false);
+                return;
+              }
+              if (!states.get(scope)) {
+                states.set(scope, true);
+                requestAnimationFrame(() => reveal(scope));
+              }
+            };
+            new MutationObserver(inspect).observe(scope, {
+              attributes: true,
+              attributeFilter: ["hidden", "open", "class"]
+            });
+          }
+          const initial = () => {
+            reveal(document.body);
+            roots.forEach((scope) => states.set(scope, scope.tagName === "DIALOG" ? scope.open : !scope.hidden));
+          };
+          window.addEventListener("apprevealed", initial, { once: true });
+          window.addEventListener("preferenceschange", () => {
+            if (!canMove()) for (const animation of animations) animation.cancel();
+          });
+          new MutationObserver(() => {
+            if (!canMove()) for (const animation of animations) animation.cancel();
+          }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-motion"] });
+          if (!document.documentElement.dataset.booting) requestAnimationFrame(initial);
+        }
+
         // assets/shared/desktop-motion.js
-        var TRANSITION_STYLES = ["hyprland", "caelestia", "liquid", "iris", "shutters", "cascade"];
+        var TRANSITION_STYLES = [
+          "hyprland",
+          "caelestia",
+          "liquid",
+          "iris",
+          "star",
+          "bloom",
+          "orbit",
+          "ribbon"
+        ];
         var isDesktopMotion = (name) => name === "hyprland" || name === "caelestia";
         var clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-        var emphasized = (t) => 1 - (1 - clamp(t, 0, 1)) ** 5;
         function workspaceProgress(t) {
           t = clamp(t, 0, 1);
-          return t === 1 ? 1 : 1 - Math.exp(-8 * t) * (Math.cos(10 * t) + 0.8 * Math.sin(10 * t));
+          const p = t * t * (3 - 2 * t);
+          return p + 0.12 * Math.sin(Math.PI * t) * p;
         }
         function rounded(x, y, w, h, radius) {
           const r = Math.max(0, Math.min(radius, w / 2, h / 2));
           return `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
         }
         function desktopMask(effect, width, height, t, direction = 1) {
-          const w = Math.max(1, width), h = Math.max(1, height), p = emphasized(t);
+          const w = Math.max(1, width), h = Math.max(1, height), p = clamp(workspaceProgress(t), 0, 1);
           if (effect === "hyprland") {
             const cut = (1 - p) * w * 0.22;
             return rounded(direction > 0 ? cut : 0, 0, w - cut, h, 24 + (1 - p) * 30);
           }
-          const insetX = (1 - p) * w * 0.035;
-          const insetY = (1 - p) * Math.min(130, h * 0.2);
+          const insetX = (1 - p) * w * 0.18;
+          const insetY = (1 - p) * Math.min(180, h * 0.28);
           return rounded(insetX, insetY, w - insetX * 2, h - insetY * 2, 24 + Math.sin(Math.PI * t) * 34);
         }
         function desktopTransform(effect, width, t, direction = 1) {
           if (effect === "hyprland") {
-            const x = (1 - workspaceProgress(t)) * Math.min(115, width * 0.16) * direction;
+            const x = (1 - workspaceProgress(t)) * width * 0.72 * direction;
             return `translate3d(${x}px,0,0)`;
           }
           const remaining = 1 - workspaceProgress(t);
-          return `translate3d(0,${remaining * 26}px,0) scale(${1 - remaining * 0.035})`;
+          return `translate3d(0,${remaining * 54}px,0) scale(${1 - remaining * 0.2})`;
+        }
+        function normalizeTransition(value) {
+          if (value === "cascade" || value === "shutters") return "star";
+          return value === "mix" || TRANSITION_STYLES.includes(value) ? value : "star";
         }
 
-        // assets/shared/dom.js
-        var $ = (selector, scope = document) => scope.querySelector(selector);
-        var $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
-        var clamp2 = (value, min, max) => Math.max(min, Math.min(max, value));
-        var lerp = (a, b, t) => a + (b - a) * t;
-
-        // assets/shared/preferences.js
-        var defaults = {
-          theme: "dark",
-          lang: "ru",
-          motion: true,
-          ripple: true,
-          particles: true,
-          liquid: true,
-          glass: true,
-          background: "constellation",
-          table: "royal",
-          transition: "hyprland",
-          sound: false,
-          volume: 0.25
+        // assets/shared/motion-recipes.js
+        var clamp2 = (value) => Math.max(0, Math.min(1, value));
+        var smooth = (value) => {
+          const t = clamp2(value);
+          return t * t * (3 - 2 * t);
         };
-        var memory = /* @__PURE__ */ new Map();
-        var safeStorage = {
-          get(key) {
-            if (memory.has(key)) return memory.get(key);
-            try {
-              return localStorage.getItem(key);
-            } catch {
-              return null;
-            }
-          },
-          set(key, value) {
-            memory.set(key, value);
-            try {
-              localStorage.setItem(key, value);
-            } catch {
-            }
-          }
-        };
-        var legacy = { particles: "fx", liquid: "liq" };
-        function readPreferences() {
-          let stored = {};
-          try {
-            const parsed = JSON.parse(safeStorage.get("aubeig.preferences") || "{}");
-            stored = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
-          } catch {
-          }
-          const result = { ...defaults };
-          for (const key of Object.keys(defaults)) {
-            const value = stored[key] ?? safeStorage.get("bio." + key) ?? safeStorage.get("ab_" + (legacy[key] || key));
-            if (value == null) continue;
-            if (typeof defaults[key] === "boolean") result[key] = ![false, "false", "off"].includes(value);
-            else result[key] = value;
-          }
-          if (!["dark", "light"].includes(result.theme)) result.theme = "dark";
-          if (!["ru", "en"].includes(result.lang)) result.lang = "ru";
-          if (!["constellation", "aurora", "plain"].includes(result.background)) result.background = "constellation";
-          if (!["royal", "green", "crimson", "midnight", "gold"].includes(result.table)) result.table = "royal";
-          if (!["mix", ...TRANSITION_STYLES].includes(result.transition)) result.transition = "mix";
-          result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));
-          return result;
-        }
-        var preferences = readPreferences();
-        var reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-
-        // assets/shared/motion.js
-        var ease = (t) => 1 - (1 - t) ** 4;
-        var spring = (t) => t >= 1 ? 1 : 1 - Math.exp(-7.5 * t) * (Math.cos(11.5 * t) + 0.65 * Math.sin(11.5 * t));
-        function roundedPath(x, y, width, height, radius = 25) {
+        var mix = (a, b, t) => a + (b - a) * t;
+        var f = (value) => Number(value.toFixed(3));
+        function roundedRect(x, y, width, height, radius = 24) {
           const w = Math.max(0.01, width), h = Math.max(0.01, height), r = Math.max(0, Math.min(radius, w / 2, h / 2));
-          return `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
+          return `M${f(x + r)} ${f(y)}H${f(x + w - r)}Q${f(x + w)} ${f(y)} ${f(x + w)} ${f(y + r)}V${f(y + h - r)}Q${f(x + w)} ${f(y + h)} ${f(x + w - r)} ${f(y + h)}H${f(x + r)}Q${f(x)} ${f(y + h)} ${f(x)} ${f(y + h - r)}V${f(y + r)}Q${f(x)} ${f(y)} ${f(x + r)} ${f(y)}Z`;
         }
-        function mask(effect, w, h, t, origin = { x: w / 2, y: h / 2 }) {
+        function circle(cx, cy, radius, reverse = false) {
+          const r = Math.max(0.01, radius), sweep = reverse ? 0 : 1;
+          return `M${f(cx + r)} ${f(cy)}A${f(r)} ${f(r)} 0 1 ${sweep} ${f(cx - r)} ${f(cy)}A${f(r)} ${f(r)} 0 1 ${sweep} ${f(cx + r)} ${f(cy)}Z`;
+        }
+        function curve(points, tension = 0.13) {
+          let path = `M${points[0].map(f).join(" ")}`;
+          for (let i = 0; i < points.length; i++) {
+            const a = points[(i + points.length - 1) % points.length], b = points[i], c = points[(i + 1) % points.length], d = points[(i + 2) % points.length];
+            const values = [
+              b[0] + (c[0] - a[0]) * tension,
+              b[1] + (c[1] - a[1]) * tension,
+              c[0] - (d[0] - b[0]) * tension,
+              c[1] - (d[1] - b[1]) * tension,
+              ...c
+            ];
+            path += `C${values.map(f).join(" ")}`;
+          }
+          return path + "Z";
+        }
+        function polarWindow(effect, w, h, t) {
+          const growth = mix(0.025, 1, smooth(t));
+          const fill = smooth((t - 0.57) / 0.43);
+          const cx = w / 2, cy = h / 2;
+          const points = Array.from({ length: 48 }, (_, i) => {
+            const angle = -Math.PI / 2 + i * Math.PI * 2 / 48;
+            const cos = Math.cos(angle), sin = Math.sin(angle);
+            const boundary = Math.min(
+              w / 2 / Math.max(1e-5, Math.abs(cos)),
+              h / 2 / Math.max(1e-5, Math.abs(sin))
+            );
+            if (effect === "star") {
+              const sx = w / 2 * Math.sign(cos) * Math.abs(cos) ** 3;
+              const sy = h / 2 * Math.sign(sin) * Math.abs(sin) ** 3;
+              return [cx + mix(sx, cos * boundary, fill) * growth, cy + mix(sy, sin * boundary, fill) * growth];
+            }
+            const factor = 0.57 + 0.43 * ((Math.cos(6 * angle) + 1) / 2);
+            const radius = boundary * growth * mix(factor, 1, fill);
+            return [cx + cos * radius, cy + sin * radius];
+          });
+          return curve(points, effect === "star" ? 0.085 : 0.15);
+        }
+        function diagonalWindow(w, h, t) {
+          const threshold = 0.015 + 1.985 * smooth(t);
+          let polygon = [
+            [0, 0],
+            [w, 0],
+            [w, h],
+            [0, h]
+          ];
+          const result = [];
+          for (let i = 0; i < polygon.length; i++) {
+            const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+            const da = a[0] / w + a[1] / h - threshold, db = b[0] / w + b[1] / h - threshold;
+            if (da <= 0) result.push(a);
+            if (da <= 0 !== db <= 0) {
+              const p = da / (da - db);
+              result.push([mix(a[0], b[0], p), mix(a[1], b[1], p)]);
+            }
+          }
+          return `M${result.map((point) => point.map(f).join(" ")).join("L")}Z`;
+        }
+        function transitionPath(effect, width, height, progress, origin = {}) {
+          const w = Math.max(1, width), h = Math.max(1, height), t = clamp2(progress);
+          if (t >= 0.9999) return roundedRect(0, 0, w, h, 24);
+          if (origin.surfaceHeight && h > origin.surfaceHeight + 1) {
+            const visible = Math.max(120, origin.surfaceHeight);
+            return transitionPath(effect, w, visible, t, { ...origin, surfaceHeight: void 0 }) + roundedRect(0, visible - 1, w, h - visible + 1, 0);
+          }
           if (isDesktopMotion(effect)) return desktopMask(effect, w, h, t, origin.direction || 1);
-          if (effect === "shutters")
-            return Array.from({ length: 5 }, (_, i) => {
-              const p2 = ease(clamp2((t - i * 0.05) / 0.8, 0, 1)), size = w / 5 * p2 + 1;
-              return roundedPath(i * w / 5 + (w / 5 - size) / 2, 0, size, h, 28 * (1 - p2));
-            }).join(" ");
-          if (effect === "cascade")
-            return Array.from({ length: 4 }, (_, i) => {
-              const p2 = ease(clamp2((t - i * 0.055) / 0.8, 0, 1));
-              return roundedPath(0, i * h / 4, w, h / 4 * p2 + 1, 34 * Math.sin(Math.PI * p2));
-            }).join(" ");
-          const p = clamp2(effect === "liquid" ? spring(t) : ease(t), 0, 1);
-          const width = lerp(48, w, p), height = lerp(48, h, ease(t));
-          return roundedPath(
-            lerp(clamp2(origin.x - 24, 0, Math.max(0, w - 48)), 0, p),
-            lerp(clamp2(origin.y - 24, 0, Math.max(0, h - 48)), 0, p),
-            width,
-            height,
-            effect === "iris" ? lerp(Math.min(width, height) / 2, 24, t * t) : 24 + 40 * Math.sin(Math.PI * t)
+          if (effect === "star" || effect === "bloom") return polarWindow(effect, w, h, t);
+          if (effect === "ribbon") return diagonalWindow(w, h, t);
+          if (effect === "orbit") {
+            const r = Math.hypot(w, h) / 2 * mix(0.025, 1.025, smooth(t));
+            const hole = r * 0.71 * (1 - smooth((t - 0.5) / 0.36));
+            return circle(w / 2, h / 2, r) + (hole > 0.1 ? circle(w / 2, h / 2, hole, true) : "");
+          }
+          if (effect === "iris") return circle(w / 2, h / 2, Math.hypot(w, h) / 2 * mix(0.015, 1.025, smooth(t)));
+          const p = smooth(t), rw = mix(24, w, p), rh = mix(20, h, smooth((t - 0.03) / 0.97));
+          const x = (w - rw) / 2, y = mix(Math.max(0, h * 0.62 - 10), 0, p);
+          const warp = Math.sin(Math.PI * t) * 0.18;
+          return curve(
+            [
+              [x + rw * 0.2, y],
+              [x + rw * 0.5, y + rh * warp],
+              [x + rw * 0.83, y],
+              [x + rw, y + rh * 0.25],
+              [x + rw - rw * warp, y + rh * 0.55],
+              [x + rw, y + rh * 0.8],
+              [x + rw * 0.75, y + rh],
+              [x + rw * 0.46, y + rh - rh * warp],
+              [x + rw * 0.18, y + rh],
+              [x, y + rh * 0.75],
+              [x + rw * warp, y + rh * 0.45],
+              [x, y + rh * 0.2]
+            ],
+            0.15
           );
+        }
+        function transitionTransform(effect, width, progress, direction = 1) {
+          const t = clamp2(progress);
+          if (isDesktopMotion(effect)) return desktopTransform(effect, width, t, direction);
+          if (effect === "ribbon")
+            return `perspective(900px) rotateY(${(1 - smooth(t)) * -8}deg) rotateZ(${(1 - smooth(t)) * -2}deg)`;
+          if (effect === "bloom") return `rotate(${(1 - smooth(t)) * -8}deg)`;
+          return "none";
+        }
+        function motionFrame(effect, width, height, progress, origin = {}) {
+          const path = transitionPath(effect, width, height, progress, origin);
+          return {
+            path,
+            clipPath: `path("${path}")`,
+            transform: transitionTransform(effect, width, progress, origin.direction || 1)
+          };
         }
 
         // assets/shared/motion-presets.json
         var motion_presets_default = [
           {
+            id: "star",
+            title: "Star",
+            ru: "Четыре луча → мягкое окно",
+            en: "Four rays → a soft window",
+            icon: "star"
+          },
+          {
+            id: "bloom",
+            title: "Bloom",
+            ru: "Шесть лепестков → панель",
+            en: "Six petals → a panel",
+            icon: "clover"
+          },
+          {
+            id: "orbit",
+            title: "Orbit",
+            ru: "Кольцо раскрывает середину",
+            en: "A ring opens its center",
+            icon: "replay"
+          },
+          {
+            id: "ribbon",
+            title: "Ribbon",
+            ru: "Диагональный разворот листа",
+            en: "A diagonal page unfold",
+            icon: "file"
+          },
+          {
             id: "hyprland",
             title: "Hyprland",
-            ru: "Сдвиг и упругая остановка",
-            en: "Slide and spring landing",
+            ru: "Боковой сдвиг и отскок",
+            en: "Sideways slide and rebound",
             icon: "arrow-right"
           },
           {
             id: "caelestia",
             title: "Caelestia",
-            ru: "Мягкое раскрытие панели",
-            en: "Soft panel expansion",
+            ru: "Всплытие и мягкая остановка",
+            en: "Rise and a soft landing",
             icon: "window"
           },
           {
             id: "liquid",
             title: "Liquid",
-            ru: "Текучая геометрия",
-            en: "Flowing geometry",
+            ru: "Капля растягивается в окно",
+            en: "A droplet stretches into a window",
             icon: "wave"
           },
           {
             id: "iris",
             title: "Iris",
-            ru: "Раскрытие диафрагмы",
-            en: "Opening aperture",
+            ru: "Круг от центра к краям",
+            en: "A circle from center to edges",
             icon: "eye"
-          },
-          {
-            id: "shutters",
-            title: "Shutters",
-            ru: "Пять раскрывающихся полос",
-            en: "Five opening curtains",
-            icon: "sliders"
-          },
-          {
-            id: "cascade",
-            title: "Cascade",
-            ru: "Каскад мягких панелей",
-            en: "Cascading soft panels",
-            icon: "grid"
           },
           {
             id: "mix",
             title: "Mix",
             ru: "Чередовать все стили",
             en: "Cycle through every style",
-            icon: "replay"
+            icon: "sliders"
           }
         ];
 
         // assets/shared/motion-picker.js
         var MOTION_PRESETS = motion_presets_default;
-        var text = {
+        var copy = {
           ru: {
             eyebrow: "ДВИЖЕНИЕ ПРОСТРАНСТВА",
             title: "Свой характер.",
-            replay: "Повторить",
+            replay: "Проиграть",
+            pause: "Пауза",
             apply: "Применить",
             cancel: "Отмена",
-            reduced: "Движение уменьшено в настройках системы.",
+            reduced: "Движение уменьшено системой. Контур можно сравнить ползунком.",
             choose: "Выбрать анимацию окон",
-            group: "Анимация окон"
+            group: "Анимация окон",
+            frame: "Кадр",
+            open: "Открытие",
+            close: "Закрытие",
+            mid: "Середина"
           },
           en: {
             eyebrow: "SPACE IN MOTION",
             title: "Your own character.",
-            replay: "Replay",
+            replay: "Play",
+            pause: "Pause",
             apply: "Apply",
             cancel: "Cancel",
-            reduced: "Motion is reduced by your system settings.",
+            reduced: "Motion is reduced by your system. Compare the shapes with the slider.",
             choose: "Choose a window animation",
-            group: "Window animation"
+            group: "Window animation",
+            frame: "Frame",
+            open: "Opening",
+            close: "Closing",
+            mid: "Midpoint"
           }
         };
         function initializeMotionPicker(select) {
@@ -14287,24 +15012,50 @@
           const cards = [...dialog.querySelectorAll("[data-motion-style]")];
           const preview = dialog.querySelector(".motion-preview-window");
           const stage = dialog.querySelector(".motion-preview-stage");
+          const outline = dialog.querySelector(".motion-preview-outline");
+          const outlinePath = outline.querySelector("path");
           const replay = document.getElementById("motion-preview-replay");
-          let pending = select.value, frame = 0, version = 0, sequence = 0;
+          const slider = document.getElementById("motion-preview-progress");
+          let pending = select.value, progress = 0.45, direction = "open", frame = 0, version = 0, playing = false, mixIndex = 0;
           const lang = () => document.documentElement.lang === "en" ? "en" : "ru";
           const enabled = () => document.documentElement.dataset.motion !== "off";
+          const effect = () => pending === "mix" ? TRANSITION_STYLES[mixIndex % TRANSITION_STYLES.length] : pending;
+          function draw(value = progress) {
+            progress = Math.max(0, Math.min(1, value));
+            const width = preview.offsetWidth, height = preview.offsetHeight;
+            if (!width || !height) return;
+            const p = direction === "open" ? progress : 1 - progress;
+            const sample = motionFrame(effect(), width, height, p);
+            preview.style.clipPath = sample.clipPath;
+            preview.style.transform = sample.transform;
+            outline.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            outlinePath.setAttribute("d", sample.path);
+            outline.style.transform = sample.transform;
+            slider.value = String(Math.round(progress * 100));
+            slider.style.setProperty("--fill", `${progress * 100}%`);
+            document.getElementById("motion-preview-percent").textContent = `${Math.round(progress * 100)}%`;
+            stage.dataset.sample = effect();
+            stage.dataset.progress = progress.toFixed(3);
+          }
           function stop() {
             cancelAnimationFrame(frame);
+            frame = 0;
             version++;
-            preview.style.cssText = "";
+            playing = false;
             delete stage.dataset.playing;
+            replay.setAttribute("aria-pressed", "false");
+            replay.querySelector("span").textContent = copy[lang()].replay;
           }
           function render() {
             const language = lang();
             for (const node of dialog.querySelectorAll("[data-motion-text]"))
-              node.textContent = text[language][node.dataset.motionText];
-            document.getElementById("motion-choices").setAttribute("aria-label", text[language].group);
-            const preset = MOTION_PRESETS.find((item) => item.id === pending) || MOTION_PRESETS[0];
-            document.getElementById("motion-preview-name").textContent = preset.title;
-            document.getElementById("motion-preview-description").textContent = preset[language];
+              node.textContent = copy[language][node.dataset.motionText];
+            document.getElementById("motion-choices").setAttribute("aria-label", copy[language].group);
+            slider.setAttribute("aria-label", language === "en" ? "Animation frame" : "Кадр анимации");
+            dialog.querySelector(".motion-preview-directions").setAttribute("aria-label", language === "en" ? "Preview direction" : "Направление предпросмотра");
+            const selected = MOTION_PRESETS.find((item) => item.id === pending) || MOTION_PRESETS[0];
+            document.getElementById("motion-preview-name").textContent = selected.title + (pending === "mix" ? ` / ${effect()}` : "");
+            document.getElementById("motion-preview-description").textContent = selected[language];
             cards.forEach((card) => {
               const item = MOTION_PRESETS.find((item2) => item2.id === card.dataset.motionStyle);
               card.querySelector("small").textContent = item[language];
@@ -14315,52 +15066,51 @@
             for (const trigger2 of document.querySelectorAll("[data-motion-picker]")) {
               trigger2.querySelector("[data-motion-current]").textContent = current.title;
               trigger2.querySelector("[data-motion-hint]").textContent = current[language];
-              trigger2.setAttribute("aria-label", `${text[language].choose}: ${current.title}`);
+              trigger2.setAttribute("aria-label", `${copy[language].choose}: ${current.title}`);
               trigger2.dataset.motionMode = current.id;
             }
+            for (const button of dialog.querySelectorAll("[data-preview-direction]"))
+              button.setAttribute("aria-pressed", String(button.dataset.previewDirection === direction));
             replay.disabled = !enabled();
+            replay.querySelector("span").textContent = playing ? copy[language].pause : copy[language].replay;
             document.getElementById("motion-reduced-note").hidden = enabled();
           }
           function play() {
-            stop();
+            if (playing) {
+              stop();
+              return;
+            }
             if (!enabled() || !dialog.open) return;
+            stop();
+            if (pending === "mix") mixIndex++;
             const run = version;
-            const effect = pending === "mix" ? TRANSITION_STYLES[sequence++ % TRANSITION_STYLES.length] : pending;
-            const box = preview.getBoundingClientRect(), parent = stage.getBoundingClientRect();
-            const origin = dialog.querySelector(".motion-preview-source").getBoundingClientRect();
-            const target = { x: box.left - parent.left, y: box.top - parent.top, w: box.width, h: box.height };
-            const source = {
-              x: origin.left - parent.left,
-              y: origin.top - parent.top,
-              w: origin.width,
-              h: origin.height
-            };
             let elapsed = 0, last = performance.now();
+            playing = true;
             stage.dataset.playing = "true";
+            replay.setAttribute("aria-pressed", "true");
+            render();
+            draw(0);
             const tick = (now) => {
               if (run !== version) return;
-              elapsed += Math.min(70, Math.max(0, now - last));
+              if (!enabled() || !dialog.open) {
+                stop();
+                return;
+              }
+              elapsed += Math.min(90, Math.max(0, now - last));
               last = now;
-              const t = enabled() ? Math.min(1, elapsed / (isDesktopMotion(effect) ? 540 : 700)) : 1;
-              const p = emphasized(t), w = source.w + (target.w - source.w) * p, h = source.h + (target.h - source.h) * p;
-              Object.assign(preview.style, {
-                left: `${source.x + (target.x - source.x) * p}px`,
-                top: `${source.y + (target.y - source.y) * p}px`,
-                width: `${w}px`,
-                height: `${h}px`,
-                transform: isDesktopMotion(effect) ? desktopTransform(effect, w, t) : "none",
-                clipPath: `path("${mask(effect, w, h, 0.15 + 0.85 * t)}")`
-              });
-              if (t < 1) frame = requestAnimationFrame(tick);
+              draw(Math.min(1, elapsed / 1700));
+              if (elapsed < 1700) frame = requestAnimationFrame(tick);
               else stop();
             };
-            tick(last);
+            frame = requestAnimationFrame(tick);
           }
           function choose(id, focus = false) {
+            stop();
             pending = id;
+            progress = 0.45;
             render();
+            draw();
             if (focus) cards.find((card) => card.dataset.motionStyle === id)?.focus();
-            play();
           }
           for (const card of cards) {
             card.addEventListener("click", () => choose(card.dataset.motionStyle));
@@ -14376,17 +15126,17 @@
             "click",
             (event) => {
               if (!event.target.closest("[data-motion-picker]")) return;
+              stop();
               pending = select.value;
+              progress = 0.45;
               render();
-              const whenReady = () => {
+              const ready = () => {
                 if (!dialog.open) return;
-                if (dialog.classList.contains("morphing") || dialog.classList.contains("is-morphing")) {
-                  requestAnimationFrame(whenReady);
-                  return;
-                }
-                play();
+                draw();
+                if (dialog.classList.contains("morphing") || dialog.classList.contains("is-morphing"))
+                  requestAnimationFrame(ready);
               };
-              requestAnimationFrame(whenReady);
+              requestAnimationFrame(ready);
             },
             true
           );
@@ -14397,18 +15147,95 @@
             dialog.querySelector("[data-close]").click();
           });
           replay.addEventListener("click", play);
+          slider.addEventListener("input", () => {
+            stop();
+            draw(Number(slider.value) / 100);
+          });
+          document.getElementById("motion-preview-mid").addEventListener("click", () => {
+            stop();
+            draw(0.5);
+          });
+          for (const button of dialog.querySelectorAll("[data-preview-direction]"))
+            button.addEventListener("click", () => {
+              stop();
+              direction = button.dataset.previewDirection;
+              render();
+              draw();
+            });
           dialog.addEventListener("close", stop);
           select.addEventListener("change", render);
-          window.addEventListener("resize", stop);
+          window.addEventListener("resize", () => {
+            stop();
+            draw();
+          });
           window.addEventListener("preferenceschange", () => {
             render();
             if (!enabled()) stop();
+            draw();
           });
           new MutationObserver(() => {
             render();
             if (!enabled()) stop();
+            draw();
           }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang", "data-motion"] });
           render();
+        }
+
+        // assets/shared/rich-text.js
+        var escape = (value) => String(value).replace(
+          /[&<>"']/g,
+          (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]
+        );
+        var words = [
+          "AES-GCM",
+          "WebRTC",
+          "DataChannel",
+          "Telegram",
+          "GitHub",
+          "JavaScript",
+          "TypeScript",
+          "Python",
+          "SafeShell",
+          "HeadlessUI",
+          "Neovim",
+          "XGO Agent",
+          "XLI CLI",
+          "XPI",
+          "SQLite",
+          "SHA-256",
+          "HMAC",
+          "Blackjack",
+          "Plinko",
+          "Dice",
+          "Slots",
+          "3:2",
+          "S17",
+          "Go"
+        ];
+        var pattern = new RegExp(
+          `(?<![\\p{L}\\p{N}_])(${words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?![\\p{L}\\p{N}_])`,
+          "gu"
+        );
+        function richText(value) {
+          let chips = 0;
+          const plain = (text) => {
+            let output2 = "", offset2 = 0;
+            for (const match of text.matchAll(pattern)) {
+              output2 += escape(text.slice(offset2, match.index));
+              output2 += chips++ < 5 ? `<span class="inline-pill">${escape(match[0])}</span>` : escape(match[0]);
+              offset2 = match.index + match[0].length;
+            }
+            return output2 + escape(text.slice(offset2));
+          };
+          const input = String(value), tokens = /(`[^`\n]+`|\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g;
+          let output = "", offset = 0;
+          for (const match of input.matchAll(tokens)) {
+            output += plain(input.slice(offset, match.index));
+            const token = match[0];
+            output += token.startsWith("`") ? `<code class="inline-code">${escape(token.slice(1, -1))}</code>` : token.startsWith("**") ? `<strong class="rich-emphasis">${escape(token.slice(2, -2))}</strong>` : `<em>${escape(token.slice(1, -1))}</em>`;
+            offset = match.index + token.length;
+          }
+          return output + plain(input.slice(offset));
         }
 
         // assets/bio/bio-image-2.webp
@@ -17249,6 +18076,9 @@
           const $2 = (selector, root2 = document) => root2.querySelector(selector);
           const $$2 = (selector, root2 = document) => [...root2.querySelectorAll(selector)];
           const root = document.documentElement;
+          const richSources = new Map(
+            $$2("[data-rich]").map((node) => [node, node.textContent.replace(/\s+/g, " ").trim()])
+          );
           const reduced = matchMedia("(prefers-reduced-motion: reduce)");
           const sessionPreferences = /* @__PURE__ */ new Map();
           const storage = {
@@ -17273,13 +18103,13 @@
           const preferences2 = {
             lang: storage.get("lang", "ru") === "en" ? "en" : "ru",
             background: ["constellation", "aurora", "plain"].includes(storage.get("background")) ? storage.get("background") : "constellation",
-            transition: ["mix", ...TRANSITION_STYLES].includes(storage.get("transition")) ? storage.get("transition") : "hyprland"
+            transition: normalizeTransition(storage.get("transition", "star"))
           };
           for (const key of ["ripple", "particles", "liquid", "glass"])
             preferences2[key] = !["off", "false", false].includes(storage.get(key, "on"));
           let renderer = null;
           const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
-          const escapeHTML = (text2) => String(text2).replace(
+          const escapeHTML = (text) => String(text).replace(
             /[&<>"']/g,
             (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]
           );
@@ -17454,8 +18284,8 @@
           };
           const icons = (name) => '<svg class="icon" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
           const clamp4 = (n, min, max) => Math.max(min, Math.min(max, n));
-          const lerp2 = (a, b, t) => a + (b - a) * t;
-          const smooth = (t) => t * t * (3 - 2 * t);
+          const lerp = (a, b, t) => a + (b - a) * t;
+          const smooth2 = (t) => t * t * (3 - 2 * t);
           const easeOut = (t) => 1 - Math.pow(1 - t, 4);
           function materialPath(x, y, w, h, r = 28, warp = 0) {
             r = Math.min(r, w * 0.46, h * 0.46);
@@ -17779,17 +18609,17 @@
                 }, delay);
                 return line;
               };
-              const type = (prefix, text2, cls = "t-cmd", delay = 180) => {
+              const type = (prefix, text, cls = "t-cmd", delay = 180) => {
                 const line = append(prefix + '<span class="' + cls + ' t-caret"></span>', "", delay);
-                for (let i = 2; i < text2.length + 2; i += 2) {
-                  const part = text2.slice(0, i);
+                for (let i = 2; i < text.length + 2; i += 2) {
+                  const part = text.slice(0, i);
                   job(() => {
                     line.innerHTML = prefix + '<span class="' + cls + ' t-caret">' + escapeHTML(part) + "</span>";
                     follow();
                   }, 18);
                 }
                 job(() => {
-                  line.innerHTML = prefix + '<span class="' + cls + '">' + escapeHTML(text2) + "</span>";
+                  line.innerHTML = prefix + '<span class="' + cls + '">' + escapeHTML(text) + "</span>";
                   follow();
                 }, 90);
               };
@@ -17847,9 +18677,9 @@
                   } else if (step.type === "raw") {
                     const template = document.createElement("template");
                     template.innerHTML = step.html;
-                    const text2 = template.content.textContent, first = template.content.querySelector("span");
+                    const text = template.content.textContent, first = template.content.querySelector("span");
                     const cls = first?.className?.split(" ").filter((c) => /^t-[a-z-]+$/.test(c)).join(" ") || "t-comment";
-                    append(escapeHTML(text2), cls, 140);
+                    append(escapeHTML(text), cls, 140);
                   } else if (step.type === "question" || step.type === "nvimq") {
                     append("? " + escapeHTML(step.q), "t-agent", 260);
                     step.options.forEach(
@@ -18178,7 +19008,7 @@
             chats.forEach(mountChat);
           }
           function descriptionMarkup(data) {
-            return '<span class="file-chip">' + escapeHTML(data.tag) + "</span><h3>" + escapeHTML(data.title) + "</h3><p>" + escapeHTML(data.description || data.desc) + '</p><ul class="demo-bullets">' + data.features.map((text2) => "<li>" + escapeHTML(text2) + "</li>").join("") + "</ul>";
+            return '<span class="file-chip">' + escapeHTML(data.tag) + "</span><h3>" + escapeHTML(data.title) + "</h3><p>" + escapeHTML(data.description || data.desc) + '</p><ul class="demo-bullets">' + data.features.map((text) => "<li>" + escapeHTML(text) + "</li>").join("") + "</ul>";
           }
           function changeInterface(mode) {
             if (!UI_MODES[mode]) return;
@@ -18212,9 +19042,9 @@
             const previous = currentAgent;
             currentAgent = agent;
             $$2("[data-agent]").forEach((button) => {
-              const active = button.dataset.agent === agent;
-              button.setAttribute("aria-selected", String(active));
-              button.tabIndex = active ? 0 : -1;
+              const active2 = button.dataset.agent === agent;
+              button.setAttribute("aria-selected", String(active2));
+              button.tabIndex = active2 ? 0 : -1;
             });
             $2("#agent-panel-xli").hidden = agent !== "xli";
             $2("#agent-panel-xgo").hidden = agent !== "xgo";
@@ -18264,7 +19094,7 @@
               const count = $2("#memory-count"), from = Number(count.dataset.value || 3400), to = compressed ? 180 : 3400, start = performance.now();
               function tick(now) {
                 const t = state.motion ? clamp4((now - start) / 620, 0, 1) : 1;
-                const value = Math.round(lerp2(from, to, easeOut(t)));
+                const value = Math.round(lerp(from, to, easeOut(t)));
                 count.dataset.value = String(value);
                 count.textContent = "~" + new Intl.NumberFormat("ru-RU").format(value);
                 if (t < 1) counterFrame = requestAnimationFrame(tick);
@@ -18294,9 +19124,9 @@
           const normalizeText = (value) => String(value).replace(/\s+/g, " ").trim();
           const enByRu = new Map(Object.entries(I18N_PAIRS).map(([ru, en]) => [normalizeText(ru), en]));
           const ruByEn = new Map([...enByRu].map(([ru, en]) => [normalizeText(en), ru]));
-          function tr(text2) {
-            const normalized = normalizeText(text2), source = ruByEn.get(normalized) || normalized;
-            if (preferences2.lang !== "en") return ruByEn.has(normalized) ? source : text2;
+          function tr(text) {
+            const normalized = normalizeText(text), source = ruByEn.get(normalized) || normalized;
+            if (preferences2.lang !== "en") return ruByEn.has(normalized) ? source : text;
             if (enByRu.has(source)) return enByRu.get(source);
             if (/^Интерфейс \/ графика /.test(normalized))
               return normalized.replace("Интерфейс / графика ", "Interface / artwork ");
@@ -18304,7 +19134,7 @@
               return "Projects shown: " + normalized.match(/\d+/)[0] + ".";
             if (/^Скорость демонстрации/.test(normalized))
               return normalized.replace("Скорость демонстрации", "Demo speed").replace("Изменить", "Change");
-            return text2;
+            return text;
           }
           const originalText = /* @__PURE__ */ new WeakMap(), originalAttributes = /* @__PURE__ */ new WeakMap();
           function translateScope(scope) {
@@ -18356,6 +19186,11 @@
               }
             }
           }
+          function renderRichPanels() {
+            richSources.forEach((source, node) => {
+              node.innerHTML = richText(tr(source));
+            });
+          }
           function setLanguage(lang, replay = true) {
             preferences2.lang = lang === "en" ? "en" : "ru";
             storage.set("lang", preferences2.lang);
@@ -18370,13 +19205,14 @@
                 if (player.root._changeLanguage) player.root._changeLanguage();
                 else player.replay();
               });
-              const active = $2('[data-system][aria-pressed="true"]');
-              if (active) {
-                const data = ORIGINAL_DEMOS.SUBSYSTEMS.find((item) => item.id === active.dataset.system);
+              const active2 = $2('[data-system][aria-pressed="true"]');
+              if (active2) {
+                const data = ORIGINAL_DEMOS.SUBSYSTEMS.find((item) => item.id === active2.dataset.system);
                 if (data) $2("#system-description").innerHTML = descriptionMarkup(data);
               }
             }
             translateScope(document.body);
+            renderRichPanels();
             syncPills(replay && state.motion);
             moveNav(false);
           }
@@ -18411,55 +19247,13 @@
             const r = Math.min(w, h) * 0.43, k = 0.55228475, fmt = (n) => n.toFixed(2), p = (...v) => v.map(fmt).join(" ");
             return "M " + p(x + r, y) + " H " + fmt(x + w - r) + " C " + p(x + w - r + k * r, y, x + w, y + r - k * r, x + w, y + r) + " V " + fmt(y + h - r) + " C " + p(x + w, y + h - r + k * r, x + w - r + k * r, y + h, x + w - r, y + h) + " H " + fmt(x + r) + " C " + p(x + r - k * r, y + h, x, y + h - r + k * r, x, y + h - r) + " V " + fmt(y + r) + " C " + p(x, y + r - k * r, x + r - k * r, y, x + r, y) + " Z";
           }
-          function spring2(t) {
+          function spring(t) {
             if (t <= 0) return 0;
             if (t >= 1) return 1;
             return 1 - Math.exp(-7.5 * t) * (Math.cos(11.5 * t) + 7.5 / 11.5 * Math.sin(11.5 * t));
           }
-          function surfaceMask(effect, w, h, t, origin = { x: w / 2, y: h / 2 }) {
-            if (isDesktopMotion(effect)) return desktopMask(effect, w, h, t, origin.direction || 1);
-            t = clamp4(t, 0, 1);
-            const eased = clamp4(easeOut(t), 0, 1);
-            if (effect === "shutters") {
-              return Array.from({ length: 5 }, (_, i) => {
-                const p2 = easeOut(clamp4((t - i * 0.052) / 0.78, 0, 1)), slice = w / 5, sw = Math.max(0.01, slice * p2 + 1);
-                return materialPath(
-                  i * slice + (slice - sw) / 2,
-                  0,
-                  sw,
-                  h,
-                  Math.min(30, sw * 0.48),
-                  Math.sin(Math.PI * p2) * 0.22
-                );
-              }).join(" ");
-            }
-            if (effect === "cascade") {
-              const rows = Math.max(4, Math.ceil(h / Math.max(155, innerHeight * 0.24)));
-              return Array.from({ length: rows }, (_, i) => {
-                const p2 = clamp4(spring2(clamp4((t - i % 4 * 0.062) / 0.72, 0, 1)), 0, 1), band = h / rows, hh2 = Math.max(0.01, band * p2 + 1);
-                return materialPath(0, i * band, w, hh2, Math.min(27, hh2 * 0.4), Math.sin(Math.PI * p2) * 0.45);
-              }).join(" ");
-            }
-            if (effect === "iris") {
-              const grow = smooth(t), ww2 = lerp2(Math.min(46, w), w, grow), hh2 = lerp2(Math.min(46, h), h, grow);
-              return materialPath(
-                lerp2(clamp4(origin.x - 23, 0, w - 46), 0, eased),
-                lerp2(clamp4(origin.y - 23, 0, h - 46), 0, eased),
-                ww2,
-                hh2,
-                lerp2(Math.min(ww2, hh2) * 0.46, 28, Math.pow(t, 3)),
-                0
-              );
-            }
-            const p = clamp4(spring2(t), 0, 1), ww = lerp2(Math.min(64, w), w, p), hh = lerp2(Math.min(62, h), h, smooth(t));
-            return materialPath(
-              lerp2(clamp4(origin.x - 32, 0, Math.max(0, w - 64)), 0, p),
-              lerp2(clamp4(origin.y - 31, 0, Math.max(0, h - 62)), 0, p),
-              ww,
-              hh,
-              28 + Math.sin(Math.PI * t) * 56,
-              Math.sin(Math.PI * t) * 0.72
-            );
+          function surfaceMask(effect, w, h, t, origin = {}) {
+            return transitionPath(effect, w, h, t, origin);
           }
           const pillRecords = /* @__PURE__ */ new WeakMap(), pillObserver = new ResizeObserver((entries) => entries.forEach((entry) => syncPill(entry.target, false)));
           function syncPill(group, animate = state.motion) {
@@ -18660,14 +19454,14 @@
           let workflowTimers = [];
           function setWorkflow(step) {
             step = clamp4(Number(step), 0, 2);
-            const board = $2("#signal-board"), words = [
+            const board = $2("#signal-board"), words2 = [
               ["imagine", "possibility"],
               ["build", "product"],
               ["ship", "experience"]
             ];
             board.dataset.step = step;
-            $2("#signal-function").textContent = words[step][0];
-            $2("#signal-return").textContent = words[step][1];
+            $2("#signal-function").textContent = words2[step][0];
+            $2("#signal-return").textContent = words2[step][1];
             const captions = [
               "Начинаю с вопроса: а можно удобнее?",
               "Соединяю интерфейс, логику и инструменты.",
@@ -18949,7 +19743,7 @@
                 liquid: true,
                 glass: true,
                 background: "constellation",
-                transition: "mix"
+                transition: "star"
               });
               for (const [key, value] of Object.entries(preferences2))
                 storage.set(key, typeof value === "boolean" ? value ? "on" : "off" : value);
@@ -19021,12 +19815,12 @@
           function moveNav(animate = state.motion) {
             const rail = $2(".rail"), settings = $2("#settings-dialog"), inSettings = !!settings?.open;
             rail.classList.toggle("has-settings", inSettings);
-            const active = inSettings ? $2('.rail-action[data-dialog="settings-dialog"]') : $2('.rail-link[aria-current="page"]');
-            if (!active) return;
+            const active2 = inSettings ? $2('.rail-action[data-dialog="settings-dialog"]') : $2('.rail-link[aria-current="page"]');
+            if (!active2) return;
             $$2(".rail-action").forEach(
-              (button) => button.classList.toggle("is-dock-active", inSettings && button === active)
+              (button) => button.classList.toggle("is-dock-active", inSettings && button === active2)
             );
-            const a = active.getBoundingClientRect(), r = $2(".dock-fluid").getBoundingClientRect();
+            const a = active2.getBoundingClientRect(), r = $2(".dock-fluid").getBoundingClientRect();
             const target = { x: a.left - r.left, y: a.top - r.top, w: a.width, h: a.height };
             $2(".dock-fluid").setAttribute("viewBox", "0 0 " + r.width + " " + r.height);
             dockTarget = target;
@@ -19081,19 +19875,19 @@
           };
           let navigationVersion = 0, pendingView = "home", windowMotion = null;
           function snapshotView(view) {
-            const copy = view.cloneNode(true);
-            copy.classList.remove("view");
-            copy.classList.add("window-snapshot");
-            copy.setAttribute("aria-hidden", "true");
-            copy.inert = true;
-            [copy, ...copy.querySelectorAll("*")].forEach((element2) => {
+            const copy2 = view.cloneNode(true);
+            copy2.classList.remove("view");
+            copy2.classList.add("window-snapshot");
+            copy2.setAttribute("aria-hidden", "true");
+            copy2.inert = true;
+            [copy2, ...copy2.querySelectorAll("*")].forEach((element2) => {
               [...element2.attributes].forEach((attribute) => {
                 if (attribute.name === "id" || attribute.name.startsWith("data-") || attribute.name === "name")
                   element2.removeAttribute(attribute.name);
               });
             });
-            $$2(".ripple-clip", copy).forEach((element2) => element2.remove());
-            return copy;
+            $$2(".ripple-clip", copy2).forEach((element2) => element2.remove());
+            return copy2;
           }
           function switchView(view, { history = true, focus = false, animate = true, source = null } = {}) {
             if (!validViews.has(view) || view === pendingView) return;
@@ -19115,7 +19909,12 @@
             $2("#view-label").textContent = tr(label[1]);
             $2("#view-number").textContent = label[0] + " / PERSONAL SPACE";
             $2("#view-path-icon").setAttribute("href", "#i-" + label[2]);
-            if (history && location.hash !== "#" + view) window.history.pushState(null, "", "#" + view);
+            if (history && location.hash !== "#" + view) {
+              try {
+                window.history.pushState(null, "", "#" + view);
+              } catch {
+              }
+            }
             moveNav();
             sizeCardHitAreas();
             syncPills(false);
@@ -19148,7 +19947,7 @@
             stage.classList.add("is-window-morphing");
             stage.setAttribute("aria-busy", "true");
             incoming.classList.add("is-window-entering");
-            const start = performance.now(), duration = isDesktopMotion(effect) ? 460 : effect === "cascade" ? 790 : effect === "shutters" ? 740 : 700;
+            const start = performance.now(), duration = isDesktopMotion(effect) ? 460 : 700;
             let frame = 0, done = false, elapsed = 0, last = start;
             const record = {
               finish() {
@@ -19177,11 +19976,18 @@
               elapsed += Math.min(120, Math.max(0, now - last));
               last = now;
               const t = state.motion ? clamp4(elapsed / duration, 0, 1) : 1;
-              stage.style.height = lerp2(before.height, after.height, easeOut(t)) + "px";
+              stage.style.height = lerp(before.height, after.height, easeOut(t)) + "px";
               incoming.style.clipPath = cssPath(
-                surfaceMask(effect, after.width, after.height, t, { ...origin, direction })
+                surfaceMask(effect, after.width, after.height, t, {
+                  ...origin,
+                  direction,
+                  surfaceHeight: Math.min(
+                    after.height,
+                    Math.max(180, innerHeight - Math.max(0, after.top + scrollY) - 20)
+                  )
+                })
               );
-              incoming.style.transform = isDesktopMotion(effect) ? desktopTransform(effect, after.width, t, direction) : effect === "cascade" ? "translateY(" + 12 * (1 - easeOut(t)) + "px)" : effect === "liquid" ? "translateY(" + 7 * (1 - spring2(t)) + "px)" : "none";
+              incoming.style.transform = transitionTransform(effect, after.width, t, direction);
               if (t < 1) frame = requestAnimationFrame(tick);
               else record.finish();
             }
@@ -19337,14 +20143,14 @@
             ghost.className = "morph-card-copy";
             ghost.setAttribute("aria-hidden", "true");
             ghost.inert = true;
-            const copy = source.cloneNode(true);
-            [copy, ...copy.querySelectorAll("*")].forEach((element2) => {
+            const copy2 = source.cloneNode(true);
+            [copy2, ...copy2.querySelectorAll("*")].forEach((element2) => {
               [...element2.attributes].forEach((attribute) => {
                 if (attribute.name === "id" || attribute.name === "name" || attribute.name === "tabindex" || attribute.name.startsWith("data-"))
                   element2.removeAttribute(attribute.name);
               });
             });
-            Object.assign(copy.style, {
+            Object.assign(copy2.style, {
               width: box.w + "px",
               height: box.h + "px",
               minWidth: "0",
@@ -19356,7 +20162,7 @@
               margin: "0",
               flex: "none"
             });
-            ghost.append(copy);
+            ghost.append(copy2);
             return ghost;
           }
           function morphWindow(dialog, from, to, opening, source) {
@@ -19365,7 +20171,7 @@
             return new Promise((resolve) => {
               const oldStyle = dialog.dataset.restStyle ?? dialog.getAttribute("style") ?? "";
               dialog.dataset.restStyle = oldStyle;
-              const effect = opening ? chooseEffect(dialog.dataset.windowStyle === "sheet" ? "cascade" : void 0) : dialog.dataset.windowEffect || "liquid";
+              const effect = opening ? chooseEffect(dialog.dataset.windowStyle === "sheet" ? "caelestia" : void 0) : dialog.dataset.windowEffect || "liquid";
               dialog.dataset.windowEffect = effect;
               const sourceBox = boxOf(source), sourceRadius = parseFloat(getComputedStyle(source).borderTopLeftRadius) || 28;
               const startPhase = opening ? 0 : dialog._shapeProgress ?? 1, contentStart = opening ? 0 : Number(dialog.style.getPropertyValue("--content-visibility") || 1), ghostStart = opening ? 1 : Number(dialog.style.getPropertyValue("--ghost-visibility") || 0);
@@ -19376,7 +20182,7 @@
               dialog.dataset.morphPhase = opening ? "opening" : "closing";
               dialog.style.setProperty("--target-content-width", Math.max(1, (opening ? to.w : from.w) - 2) + "px");
               let frame = 0, settled = false, elapsed = 0, last = performance.now();
-              const duration = opening ? isDesktopMotion(effect) ? 470 : effect === "cascade" ? 780 : effect === "shutters" ? 740 : 690 : 340, start = performance.now();
+              const duration = opening ? isDesktopMotion(effect) ? 470 : 690 : 340, start = performance.now();
               const record = {
                 finish() {
                   if (!settled) {
@@ -19398,21 +20204,14 @@
                 elapsed += Math.min(120, Math.max(0, now - last));
                 last = now;
                 const t = force || !state.motion ? 1 : clamp4(elapsed / duration, 0, 1);
-                const position = opening ? easeOut(t) : smooth(t), phase = opening ? t : lerp2(startPhase, 0, smooth(t));
+                const position = opening ? easeOut(t) : smooth2(t), phase = opening ? t : lerp(startPhase, 0, smooth2(t));
                 dialog._shapeProgress = phase;
-                let wide = opening ? clamp4(spring2(t), 0, 1.022) : smooth(t), tall = opening ? smooth(t) : smooth(t);
+                let wide = opening ? clamp4(spring(t), 0, 1.022) : smooth2(t), tall = opening ? smooth2(t) : smooth2(t);
                 if (effect === "iris") {
-                  wide = opening ? smooth(t) : smooth(t);
+                  wide = opening ? smooth2(t) : smooth2(t);
                   tall = wide;
                 }
-                if (effect === "shutters") {
-                  wide = opening ? easeOut(t) : smooth(t);
-                  tall = opening ? clamp4(spring2(t), 0, 1.01) : smooth(t);
-                }
-                if (effect === "cascade") {
-                  tall = opening ? easeOut(smooth(t)) : smooth(t);
-                }
-                const x = lerp2(from.x, to.x, position), y = lerp2(from.y, to.y, position), w = lerp2(from.w, to.w, wide), h = lerp2(from.h, to.h, tall);
+                const x = lerp(from.x, to.x, position), y = lerp(from.y, to.y, position), w = lerp(from.w, to.w, wide), h = lerp(from.h, to.h, tall);
                 Object.assign(dialog.style, {
                   left: x + "px",
                   top: y + "px",
@@ -19421,24 +20220,9 @@
                   width: w + "px",
                   height: h + "px"
                 });
-                if (effect === "liquid")
-                  dialog.style.clipPath = cssPath(
-                    materialPath(
-                      0,
-                      0,
-                      w,
-                      h,
-                      lerp2(sourceRadius, 30, phase) + Math.sin(Math.PI * phase) * Math.min(54, Math.min(w, h) * 0.12),
-                      Math.sin(Math.PI * phase) * 0.7
-                    )
-                  );
-                else if (effect === "iris")
-                  dialog.style.clipPath = cssPath(
-                    materialPath(0, 0, w, h, lerp2(Math.min(w, h) * 0.46, 29, smooth(phase)), 0)
-                  );
-                else dialog.style.clipPath = cssPath(surfaceMask(effect, w, h, 0.18 + phase * 0.82));
-                const content = opening ? smooth(clamp4((t - 0.18) / 0.54, 0, 1)) : contentStart * (1 - smooth(clamp4(t / 0.52, 0, 1)));
-                const copied = opening ? 1 - smooth(clamp4(t / 0.39, 0, 1)) : lerp2(ghostStart, 1, smooth(clamp4((t - 0.35) / 0.65, 0, 1)));
+                dialog.style.clipPath = cssPath(surfaceMask(effect, w, h, phase));
+                const content = opening ? smooth2(clamp4((t - 0.18) / 0.54, 0, 1)) : contentStart * (1 - smooth2(clamp4(t / 0.52, 0, 1)));
+                const copied = opening ? 1 - smooth2(clamp4(t / 0.39, 0, 1)) : lerp(ghostStart, 1, smooth2(clamp4((t - 0.35) / 0.65, 0, 1)));
                 dialog.style.setProperty("--content-visibility", String(content));
                 dialog.style.setProperty("--ghost-visibility", String(copied));
                 ghost.style.transform = "scale(" + w / Math.max(1, sourceBox.w) + "," + h / Math.max(1, sourceBox.h) + ")";
@@ -19470,6 +20254,7 @@
             moveNav();
             syncPills(false);
             translateScope(dialog);
+            renderRichPanels();
             renderer?.refresh();
             syncDemos();
             const target = boxOf(dialog), origin = boxOf(source);
@@ -19559,11 +20344,11 @@
             $2("#detail-content").innerHTML = `
                 <p class="eyebrow">${escapeHTML(project.label)}</p>
                 <h2 id="detail-title">${escapeHTML(project.title)}</h2>
-                <p class="dialog-intro">${escapeHTML(project.intro)}</p>
+                <p class="dialog-intro">${richText(tr(project.intro))}</p>
                 <div class="dialog-tags">${project.tags.map((tag) => "<span>" + escapeHTML(tag) + "</span>").join("")}</div>
                 ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ""}
-                <ul class="detail-features info-grid">${project.features.map((feature, index) => "<li>" + icons(["code", "nodes", "shield", "file"][index % 4]) + "<span>" + escapeHTML(feature) + "</span></li>").join("")}</ul>
-                <div class="info-callout">${icons("info")}<p class="dialog-note">${escapeHTML(project.note)}</p></div>
+                <ul class="detail-features info-grid">${project.features.map((feature, index) => "<li>" + icons(["code", "nodes", "shield", "file"][index % 4]) + "<span>" + richText(tr(feature)) + "</span></li>").join("")}</ul>
+                <div class="info-callout">${icons("info")}<p class="dialog-note">${richText(tr(project.note))}</p></div>
                 ${id === "xli" ? terminalFrame("modal-cli", "bugfix") : id === "xgo" ? chatFrame("modal-chat") : ""}
                 ${projectExtra(id)}
                 <div class="dialog-actions">${id === "xli" || id === "xgo" ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === "xli" ? "Терминалы и 14 подсистем" : "Чат, инструменты и память") + arrow + "</a>" : ""}<a class="${id === "xli" || id === "xgo" ? "outline-button" : "solid-button"}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
@@ -19628,6 +20413,69 @@
           moveNav(false);
           sizeCardHitAreas();
         })();
+
+        // assets/shared/dom.js
+        var $ = (selector, scope = document) => scope.querySelector(selector);
+        var $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+
+        // assets/shared/preferences.js
+        var defaults = {
+          theme: "dark",
+          lang: "ru",
+          motion: true,
+          ripple: true,
+          particles: true,
+          liquid: true,
+          glass: true,
+          background: "constellation",
+          table: "royal",
+          transition: "star",
+          sound: false,
+          volume: 0.25
+        };
+        var memory = /* @__PURE__ */ new Map();
+        var safeStorage = {
+          get(key) {
+            if (memory.has(key)) return memory.get(key);
+            try {
+              return localStorage.getItem(key);
+            } catch {
+              return null;
+            }
+          },
+          set(key, value) {
+            memory.set(key, value);
+            try {
+              localStorage.setItem(key, value);
+            } catch {
+            }
+          }
+        };
+        var legacy = { particles: "fx", liquid: "liq" };
+        function readPreferences() {
+          let stored = {};
+          try {
+            const parsed = JSON.parse(safeStorage.get("aubeig.preferences") || "{}");
+            stored = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+          } catch {
+          }
+          const result = { ...defaults };
+          for (const key of Object.keys(defaults)) {
+            const value = stored[key] ?? safeStorage.get("bio." + key) ?? safeStorage.get("ab_" + (legacy[key] || key));
+            if (value == null) continue;
+            if (typeof defaults[key] === "boolean") result[key] = ![false, "false", "off"].includes(value);
+            else result[key] = value;
+          }
+          if (!["dark", "light"].includes(result.theme)) result.theme = "dark";
+          if (!["ru", "en"].includes(result.lang)) result.lang = "ru";
+          if (!["constellation", "aurora", "plain"].includes(result.background)) result.background = "constellation";
+          if (!["royal", "green", "crimson", "midnight", "gold"].includes(result.table)) result.table = "royal";
+          result.transition = normalizeTransition(result.transition);
+          result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));
+          return result;
+        }
+        var preferences = readPreferences();
+        var reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
         // assets/shared/island.js
         var ExpandingIsland = class {
@@ -19814,7 +20662,7 @@
             gesture.moved = true;
             cancelAnimationFrame(this.frame);
             this.frame = 0;
-            const distance = this.host.getBoundingClientRect().width - 42;
+            const distance = this.host.getBoundingClientRect().width - this.lens.offsetWidth - 4;
             this.position = clamp3(gesture.position + dx / Math.max(1, distance), 0, 1);
             this.velocity = 0;
             this.host.dataset.dragging = "true";
@@ -19918,11 +20766,11 @@
             input.remove();
             $("#island-copy-contact").focus({ preventScroll: true });
           }
-          const text2 = $("#island-copy-contact span");
-          text2.textContent = copied ? document.documentElement.lang === "en" ? "Copied" : "Скопировано" : "@Aubeig";
+          const text = $("#island-copy-contact span");
+          text.textContent = copied ? document.documentElement.lang === "en" ? "Copied" : "Скопировано" : "@Aubeig";
           clearTimeout(copyTimer);
           copyTimer = setTimeout(() => {
-            text2.textContent = "@Aubeig";
+            text.textContent = "@Aubeig";
           }, 1800);
         });
         function synchronizePreferences() {
@@ -19961,7 +20809,11 @@
             document.querySelector(`.rail-link[data-view="${button.dataset.profileView}"]`)?.click();
           })
         );
+        initializeTextMotion();
+        finishBoot();
       })();
+
+      }));
     </script>
   </body>
 </html>
@@ -20065,4 +20917,26 @@ DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 
+@noble/hashes — MIT license:
+The MIT License (MIT)
+
+Copyright (c) 2022 Paul Miller (https://paulmillr.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 -->

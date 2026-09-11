@@ -120,7 +120,7 @@ class GlassSwitch {
     gesture.moved = true;
     cancelAnimationFrame(this.frame);
     this.frame = 0;
-    const distance = this.host.getBoundingClientRect().width - 42;
+    const distance = this.host.getBoundingClientRect().width - this.lens.offsetWidth - 4;
     this.position = clamp(gesture.position + dx / Math.max(1, distance), 0, 1);
     this.velocity = 0;
     this.host.dataset.dragging = 'true';

@@ -33,11 +33,33 @@
           </div>
           <div class="motion-window-lines"><i></i><i></i></div>
         </div>
+        <svg class="motion-preview-outline" aria-hidden="true"><path fill="none" /></svg>
         <div class="motion-preview-source">
           <svg class="icon"><use href="#i-window" /></svg>
         </div>
       </div>
       <p id="motion-preview-description"></p>
+      <div class="motion-preview-directions segmented spring-group" role="group" aria-label="Направление">
+        <button type="button" data-preview-direction="open" aria-pressed="true" data-motion-text="open">
+          Открытие
+        </button>
+        <button type="button" data-preview-direction="close" aria-pressed="false" data-motion-text="close">
+          Закрытие
+        </button>
+      </div>
+      <div class="motion-timeline">
+        <label for="motion-preview-progress" data-motion-text="frame">Кадр</label
+        ><input
+          class="range-control"
+          type="range"
+          id="motion-preview-progress"
+          min="0"
+          max="100"
+          step="1"
+          value="45"
+        /><output id="motion-preview-percent">45%</output
+        ><button type="button" id="motion-preview-mid" data-motion-text="mid">Середина</button>
+      </div>
     </div>
     <div class="motion-choice-grid" role="radiogroup" aria-label="Анимация окон" id="motion-choices">
       {{motion-choices}}

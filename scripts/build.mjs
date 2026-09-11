@@ -56,7 +56,7 @@ const toggles = [
   )
   .join('\n');
 const gameSettings = (await read('templates/game-settings.html')).replace('{{game-toggles}}', toggles);
-const license = `<!--\nOriginal content © 2026 Aubeig / ClawBack Intelligence Division.\nInterface and game implementation adapted. Original portfolio content retains CPL v1.0 attribution.\nFont Awesome Free 6.4.0 icons © Fonticons, Inc. — CC BY 4.0, https://fontawesome.com/license/free\nNunito license:\n${await read('assets/fonts/OFL.txt')}\n-->`;
+const license = `<!--\nOriginal content © 2026 Aubeig / ClawBack Intelligence Division.\nInterface and game implementation adapted. Original portfolio content retains CPL v1.0 attribution.\nFont Awesome Free 6.4.0 icons © Fonticons, Inc. — CC BY 4.0, https://fontawesome.com/license/free\nNunito license:\n${await read('assets/fonts/OFL.txt')}\n@noble/hashes — MIT license:\n${await read('assets/licenses/noble-hashes.txt')}\n-->`;
 for (const page of ['bio', 'games']) {
   const entry = page === 'bio' ? 'assets/bio/entry.js' : 'assets/games/app.js';
   const result = await build({
@@ -74,7 +74,13 @@ for (const page of ['bio', 'games']) {
   if (page === 'bio') css += '\n' + (await read('assets/bio/island.css'));
   else css += '\n' + (await read('assets/games/arcade.css'));
   // Shared controls stay last so both pages use one consistent switch geometry.
-  css += '\n' + commonCSS + '\n' + (await read('assets/shared/modal-panels.css'));
+  css +=
+    '\n' +
+    commonCSS +
+    '\n' +
+    (await read('assets/shared/modal-panels.css')) +
+    '\n' +
+    (await read('assets/shared/experience.css'));
   const formattedCSS = await format(css, { parser: 'css', printWidth: 110 });
   let template = await read(`templates/${page}.html`);
   if (page === 'bio') {
@@ -89,14 +95,16 @@ for (const page of ['bio', 'games']) {
     .replace('{{game-profile}}', await read('templates/game-profile.html'))
     .replace('{{bio-profile}}', await read('templates/bio-profile.html'))
     .replace('{{motion-picker}}', motionPicker)
+    .replace('{{boot-screen}}', await read('templates/boot-screen.html'))
     .replace(`{{styles:${page}}}`, `<style>\n${formattedCSS}\n</style>`)
     .replace('{{bootstrap}}', bootstrap)
     .replace(
       `{{script:${page}}}`,
-      () => `<script>\n${result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')}\n</script>`,
+      () =>
+        `<script>\nrequestAnimationFrame(() => requestAnimationFrame(() => {\n${result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')}\n}));\n</script>`,
     );
   template = await embedAssets(template);
-  if (/\{\{(?:asset:|script:|styles:|icons|game-|bio-island|bio-profile|motion-)/.test(template))
+  if (/\{\{(?:asset:|script:|styles:|icons|game-|bio-island|bio-profile|motion-|boot-screen)/.test(template))
     throw new Error('Unresolved template token');
   const output = await format(template, {
     parser: 'html',

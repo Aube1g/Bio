@@ -1,3 +1,4 @@
+import { transitionPath, transitionTransform } from './motion-recipes.js';
 import { TRANSITION_STYLES, isDesktopMotion, desktopMask, desktopTransform } from './desktop-motion.js';
 import { $, $$, clamp, lerp } from './dom.js';
 import { motionEnabled, preferences } from './preferences.js';
@@ -12,29 +13,8 @@ export function roundedPath(x, y, width, height, radius = 25) {
     r = Math.max(0, Math.min(radius, w / 2, h / 2));
   return `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
 }
-function mask(effect, w, h, t, origin = { x: w / 2, y: h / 2 }) {
-  if (isDesktopMotion(effect)) return desktopMask(effect, w, h, t, origin.direction || 1);
-  if (effect === 'shutters')
-    return Array.from({ length: 5 }, (_, i) => {
-      const p = ease(clamp((t - i * 0.05) / 0.8, 0, 1)),
-        size = (w / 5) * p + 1;
-      return roundedPath((i * w) / 5 + (w / 5 - size) / 2, 0, size, h, 28 * (1 - p));
-    }).join(' ');
-  if (effect === 'cascade')
-    return Array.from({ length: 4 }, (_, i) => {
-      const p = ease(clamp((t - i * 0.055) / 0.8, 0, 1));
-      return roundedPath(0, (i * h) / 4, w, (h / 4) * p + 1, 34 * Math.sin(Math.PI * p));
-    }).join(' ');
-  const p = clamp(effect === 'liquid' ? spring(t) : ease(t), 0, 1);
-  const width = lerp(48, w, p),
-    height = lerp(48, h, ease(t));
-  return roundedPath(
-    lerp(clamp(origin.x - 24, 0, Math.max(0, w - 48)), 0, p),
-    lerp(clamp(origin.y - 24, 0, Math.max(0, h - 48)), 0, p),
-    width,
-    height,
-    effect === 'iris' ? lerp(Math.min(width, height) / 2, 24, t * t) : 24 + 40 * Math.sin(Math.PI * t),
-  );
+function mask(effect, w, h, t, origin = {}) {
+  return transitionPath(effect, w, h, t, origin);
 }
 const effectName = () =>
   preferences.transition && preferences.transition !== 'mix'
@@ -81,6 +61,10 @@ export function transitionSurface(stage, change, source) {
       x: rect ? rect.x - after.x + rect.width / 2 : after.width / 2,
       y: Math.min(after.height / 2, 240),
       direction: Number(stage.dataset.direction) || 1,
+      surfaceHeight: Math.min(
+        after.height,
+        Math.max(180, innerHeight - Math.max(0, after.top + scrollY) - 20),
+      ),
     };
   const effect = effectName();
   incoming.dataset.effect = effect;
@@ -110,9 +94,12 @@ export function transitionSurface(stage, change, source) {
     const t = motionEnabled() ? clamp(elapsed / (isDesktopMotion(effect) ? 440 : 580), 0, 1) : 1;
     stage.style.height = lerp(before.height, after.height, ease(t)) + verticalFrame + 'px';
     incoming.style.clipPath = `path("${mask(effect, after.width, after.height, t, origin)}")`;
-    incoming.style.transform = isDesktopMotion(effect)
-      ? desktopTransform(effect, after.width, t, Number(stage.dataset.direction) || 1)
-      : '';
+    incoming.style.transform = transitionTransform(
+      effect,
+      after.width,
+      t,
+      Number(stage.dataset.direction) || 1,
+    );
     incoming.style.transformOrigin = '50% 25%';
     if (t < 1) frame = requestAnimationFrame(tick);
     else record.finish();
@@ -226,7 +213,7 @@ export class MorphDialogs {
           width: w + 'px',
           height: h + 'px',
         });
-        dialog.style.clipPath = `path("${effect === 'shutters' || effect === 'cascade' || isDesktopMotion(effect) ? mask(effect, w, h, opening ? 0.25 + t * 0.75 : 1 - t * 0.75) : roundedPath(0, 0, w, h, 24 + Math.sin(Math.PI * t) * (effect === 'iris' ? Math.min(w, h) * 0.35 : 30))}")`;
+        dialog.style.clipPath = `path("${mask(effect, w, h, opening ? t : 1 - t)}")`;
         dialog.style.setProperty('--content-opacity', opening ? clamp((t - 0.2) / 0.5, 0, 1) : 1 - ease(t));
         if (t < 1) frame = requestAnimationFrame(tick);
         else finish(true);

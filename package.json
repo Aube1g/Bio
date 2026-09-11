@@ -12,12 +12,17 @@
     "format": "prettier --write 'assets/**/*.{js,css,json}' 'server/**/*.js' 'tests/*.mjs' 'scripts/*.mjs' 'templates/*.html'",
     "test:browser": "node tests/browser.mjs",
     "test:interactions": "node tests/interaction.browser.mjs",
-    "test:glass": "node tests/glass-ui.browser.mjs"
+    "test:glass": "node tests/glass-ui.browser.mjs",
+    "test:offline": "node tests/offline-play.browser.mjs",
+    "test:experience": "node tests/experience.browser.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "esbuild": "0.25.10",
     "playwright": "1.63.0",
     "prettier": "3.6.2"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.8.0"
   }
 }

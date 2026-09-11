@@ -1,4 +1,4 @@
-import { TRANSITION_STYLES } from './desktop-motion.js';
+import { TRANSITION_STYLES, normalizeTransition } from './desktop-motion.js';
 const defaults = {
   theme: 'dark',
   lang: 'ru',
@@ -9,7 +9,7 @@ const defaults = {
   glass: true,
   background: 'constellation',
   table: 'royal',
-  transition: 'hyprland',
+  transition: 'star',
   sound: false,
   volume: 0.25,
 };
@@ -53,7 +53,7 @@ export function readPreferences() {
   if (!['ru', 'en'].includes(result.lang)) result.lang = 'ru';
   if (!['constellation', 'aurora', 'plain'].includes(result.background)) result.background = 'constellation';
   if (!['royal', 'green', 'crimson', 'midnight', 'gold'].includes(result.table)) result.table = 'royal';
-  if (!['mix', ...TRANSITION_STYLES].includes(result.transition)) result.transition = 'mix';
+  result.transition = normalizeTransition(result.transition);
   result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));
   return result;
 }

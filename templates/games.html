@@ -16,6 +16,7 @@
     {{styles:games}} {{bootstrap}}
   </head>
   <body class="games-page">
+    {{boot-screen}}
     <a class="skip-link" href="#portal-stage" data-t="skip">Перейти к играм</a>
     {{icons}}
     <div class="ambient" aria-hidden="true">
@@ -80,7 +81,10 @@
           <div class="lobby-topline">
             <span class="eyebrow"
               ><i class="live-dot"></i><span data-t="yourSpace">Твоё игровое пространство</span></span
-            ><span class="tiny-code">04 GAMES · INFINITE MOODS</span>
+            ><span class="tiny-code">04 GAMES · INFINITE MOODS</span
+            ><span class="practice-mode-badge" id="practice-mode-badge" hidden data-t="localPractice"
+              >Тестовый режим · в браузере</span
+            >
           </div>
           <div class="lobby-bento">
             <article class="lobby-hero">
@@ -101,6 +105,10 @@
                   ><span class="round-icon"
                     ><svg class="icon" aria-hidden="true"><use href="#i-arrow-down" /></svg
                   ></span>
+                </button>
+                <button class="practice-launch text-button" id="practice-launch" type="button">
+                  <svg class="icon" aria-hidden="true"><use href="#i-play" /></svg
+                  ><span data-t="tryWithoutServer">Попробовать без входа</span>
                 </button>
               </div>
               <div class="hero-playground" aria-hidden="true">
@@ -558,7 +566,8 @@
     </nav>
     <div class="connection-banner" id="connection-banner" role="status" hidden>
       <svg class="icon" aria-hidden="true"><use href="#i-wifi" /></svg><span id="connection-message"></span
-      ><button type="button" id="retry-connection" data-t="retry">Повторить</button>
+      ><button type="button" id="retry-connection" data-t="retry">Повторить</button
+      ><button type="button" id="practice-retry" data-t="startPractice">Тестовая игра</button>
     </div>
     <dialog id="auth-dialog" class="portal-dialog auth-dialog" aria-labelledby="auth-title">
       <button class="dialog-close" type="button" data-close aria-label="Закрыть">
@@ -584,6 +593,10 @@
           ><svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg>
         </button>
         <p class="small-note" data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</p>
+        <button class="practice-login" id="practice-login" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg
+          ><span data-t="tryWithoutServer">Попробовать без входа</span>
+        </button>
         <p class="form-error" id="auth-error" role="alert"></p>
       </div>
     </dialog>

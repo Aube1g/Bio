@@ -1,3 +1,5 @@
+import { finishBoot } from '../shared/boot-screen.js';
+import { initializeTextMotion } from '../shared/text-motion.js';
 import { initializeMotionPicker } from '../shared/motion-picker.js';
 import './app.js';
 import { $, $$ } from '../shared/dom.js';
@@ -113,3 +115,6 @@ document.querySelectorAll('[data-profile-view]').forEach((button) =>
     document.querySelector(`.rail-link[data-view="${button.dataset.profileView}"]`)?.click();
   }),
 );
+
+initializeTextMotion();
+finishBoot();

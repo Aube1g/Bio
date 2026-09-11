@@ -139,9 +139,9 @@ try {
       };
     });
     assert(geometry.hitHeight >= 44);
-    assert.equal(geometry.trackHeight, 32);
-    assert.equal(geometry.thumbWidth, 38);
-    assert.equal(geometry.x, 30);
+    assert.equal(geometry.trackHeight, 24);
+    assert.equal(geometry.thumbWidth, 46);
+    assert.equal(geometry.x, 22);
     assert.notEqual(geometry.color, 'rgb(255, 255, 255)');
     await input.uncheck();
     assert.equal(

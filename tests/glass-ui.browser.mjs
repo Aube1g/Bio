@@ -85,8 +85,8 @@ try {
       targetHeight: host.clientHeight,
     };
   });
-  assert.equal(appearance.width, 38);
-  assert.equal(appearance.height, 36);
+  assert.equal(appearance.width, 46);
+  assert.equal(appearance.height, 26);
   assert(appearance.targetHeight >= 44);
   assert.notEqual(appearance.background, 'rgb(255, 255, 255)');
   assert.notEqual(appearance.filter, 'none');
@@ -148,8 +148,8 @@ try {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await picker('mix', false);
   assert(await page.locator('#motion-preview-replay').isDisabled());
-  assert.equal(await page.locator('[data-motion-style]').count(), 7);
-  assert.equal(await page.locator('[data-motion-style="star"]').count(), 0);
+  assert.equal(await page.locator('[data-motion-style]').count(), 9);
+  assert.equal(await page.locator('[data-motion-style="star"]').count(), 1);
   await audit('motion-gallery-dark');
   await close('motion-picker-dialog');
   await close('game-settings-dialog');

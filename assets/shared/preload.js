@@ -1,5 +1,12 @@
 (() => {
   const root = document.documentElement;
+  root.dataset.booting = 'true';
+  setTimeout(() => {
+    if (root.dataset.booting) {
+      delete root.dataset.booting;
+      window.dispatchEvent(new Event('apprevealed'));
+    }
+  }, 4500);
   try {
     const parsed = JSON.parse(localStorage.getItem('aubeig.preferences') || '{}');
     const saved = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};

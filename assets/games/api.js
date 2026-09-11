@@ -1,3 +1,4 @@
+import { PracticeStore } from './practice-store.js';
 import { safeStorage } from '../shared/preferences.js';
 import { sleep } from '../shared/dom.js';
 
@@ -10,6 +11,27 @@ export class RequestError extends Error {
 }
 
 const TOKEN_KEY = 'aubeig.preview.session';
+const MODE_KEY = 'aubeig.play-mode';
+function localMode() {
+  if (
+    typeof location !== 'undefined' &&
+    (['file:', 'blob:'].includes(location.protocol) || location.origin === 'null')
+  )
+    return true;
+  try {
+    return sessionStorage.getItem(MODE_KEY) === 'local';
+  } catch {
+    return false;
+  }
+}
+function saveMode(value) {
+  try {
+    sessionStorage.setItem(MODE_KEY, value);
+  } catch {
+    /* Page-local mode remains usable. */
+  }
+}
+
 function tabToken(value) {
   try {
     if (value === undefined) return sessionStorage.getItem(TOKEN_KEY) || '';
@@ -23,11 +45,30 @@ function tabToken(value) {
 
 export class GameApi {
   constructor() {
+    this.mode = localMode() ? 'local' : 'server';
+    this.practice = new PracticeStore();
     this.csrf = '';
     this.userId = null;
     this.generation = 0;
     const saved = tabToken();
     this.token = /^[a-f0-9]{64}$/.test(saved) ? saved : '';
+  }
+  get isPractice() {
+    return this.mode === 'local';
+  }
+  usePractice() {
+    this.beginAuthentication();
+    this.mode = 'local';
+    this.csrf = '';
+    this.userId = null;
+    saveMode('local');
+  }
+  useServer() {
+    this.beginAuthentication();
+    this.mode = 'server';
+    this.csrf = '';
+    this.userId = null;
+    saveMode('server');
   }
   beginAuthentication() {
     return ++this.generation;
@@ -35,6 +76,7 @@ export class GameApi {
   acceptSession(data) {
     this.csrf = data.csrf || '';
     this.userId = data.user?.id || null;
+    if (this.isPractice) return;
     if (data.sessionToken) {
       this.token = data.sessionToken;
       tabToken(this.token);
@@ -45,6 +87,11 @@ export class GameApi {
   }
   async call(path, body, retry = false) {
     const generation = this.generation;
+    if (this.isPractice) {
+      const data = await this.practice.call(path, body);
+      if (generation === this.generation && Object.hasOwn(data, 'user')) this.acceptSession(data);
+      return data;
+    }
     const options = {
       method: body === undefined ? 'GET' : 'POST',
       credentials: 'same-origin',
@@ -84,6 +131,7 @@ export class GameApi {
     return this.userId ? `games.pending.${this.userId}` : null;
   }
   async mutate(path, body) {
+    if (this.isPractice) return this.call(path, body);
     const key = this.pendingKey();
     if (!key) throw new RequestError('login_required', 'Sign in first', 401);
     const pending = { path, body, userId: this.userId };
@@ -98,6 +146,7 @@ export class GameApi {
     }
   }
   pending() {
+    if (this.isPractice) return null;
     try {
       const key = this.pendingKey();
       const pending = key ? JSON.parse(safeStorage.get(key) || 'null') : null;

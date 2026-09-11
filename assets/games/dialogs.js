@@ -1,3 +1,4 @@
+import { richText } from '../shared/rich-text.js';
 import { copyText } from '../shared/clipboard.js';
 import { $, $$, icon, escapeHTML, uuid } from '../shared/dom.js';
 import { preferences, safeStorage } from '../shared/preferences.js';
@@ -17,8 +18,30 @@ const title = (name) =>
   ({ blackjack: 'Blackjack', slots: 'Slots', dice: 'Dice', plinko: 'Plinko' })[name] || name;
 
 export class PortalDialogs {
-  constructor({ morph, api, state, notify, onError, onData, onSession, finishVisuals, onNavigate }) {
-    Object.assign(this, { morph, api, state, notify, onError, onData, onSession, finishVisuals, onNavigate });
+  constructor({
+    morph,
+    api,
+    state,
+    notify,
+    onError,
+    onData,
+    onSession,
+    finishVisuals,
+    onNavigate,
+    onServerLogin,
+  }) {
+    Object.assign(this, {
+      morph,
+      api,
+      state,
+      notify,
+      onError,
+      onData,
+      onSession,
+      finishVisuals,
+      onNavigate,
+      onServerLogin,
+    });
     this.rounds = new Map();
     this.proofRound = null;
     this.historyCursor = null;
@@ -34,6 +57,7 @@ export class PortalDialogs {
       const verify = event.target.closest('#verify-round');
       if (verify) this.verify(verify);
       if (event.target.closest('#save-client-seed')) this.saveSeed();
+      if (event.target.closest('#server-login-action')) this.onServerLogin();
       const launch = event.target.closest('[data-profile-game]');
       if (launch)
         this.morph.close($('#account-dialog')).then(() => this.onNavigate(launch.dataset.profileGame));
@@ -65,6 +89,9 @@ export class PortalDialogs {
     if (id === 'history-dialog') this.history();
     if (id === 'wallet-dialog') {
       $('#wallet-amount').textContent = money(this.state().wallet.balanceMinor);
+      $('#wallet-dialog [data-t="resetNote"]').textContent = t(
+        this.api.isPractice ? 'localResetNote' : 'resetNote',
+      );
       $('#practice-reset').disabled = Boolean(
         this.state().networkBusy || this.state().activeBlackjack || this.state().pendingCredits.size,
       );
@@ -85,6 +112,9 @@ export class PortalDialogs {
       icon(state.user.kind === 'guest' ? 'user' : 'telegram') +
       `<span>${t(state.user.kind === 'guest' ? 'guest' : 'telegramAccount')}</span>`;
     $('#profile-balance').textContent = money(state.wallet.balanceMinor);
+    $('#account-dialog [data-t="practice"]').textContent = t(
+      this.api.isPractice ? 'localPractice' : 'practice',
+    );
     $('#account-stats').innerHTML = [
       ['gamepad', 'rounds', state.stats.rounds],
       ['check', 'wins', state.stats.wins],
@@ -187,7 +217,7 @@ export class PortalDialogs {
                 [t('risk'), t(state.plinko.risk)],
                 [t('multiplier'), plinkoTable(state.plinko.rows, state.plinko.risk)[0] + '×'],
               ];
-    let html = `<section class="modal-section-card"><div class="info-card-heading">${icon(gameIcon[game])}<h3>${t('howToPlay')}</h3></div><p>${t('rules' + game[0].toUpperCase() + game.slice(1))}</p></section><div class="rule-facts">${facts.map(([label, value]) => `<div class="info-card"><span>${escapeHTML(label)}</span><strong>${escapeHTML(value)}</strong></div>`).join('')}</div>`;
+    let html = `<section class="modal-section-card"><div class="info-card-heading">${icon(gameIcon[game])}<h3>${t('howToPlay')}</h3></div><p>${richText(t('rules' + game[0].toUpperCase() + game.slice(1)))}</p></section><div class="rule-facts">${facts.map(([label, value]) => `<div class="info-card"><span>${escapeHTML(label)}</span><strong>${escapeHTML(value)}</strong></div>`).join('')}</div>`;
     if (game === 'slots')
       html += `<div class="table-card"><table class="payout-table"><thead><tr><th>${t('slotSymbols')}</th><th>${t('threeSame')}</th><th>${t('twoSame')}</th></tr></thead><tbody>${SLOT_SYMBOLS.map((name, i) => `<tr><td>${name === 'seven' ? '<strong>7</strong>' : icon(name)} ${name.toUpperCase()}</td><td>${SLOT_TRIPLES[i]}×</td><td>1.75×</td></tr>`).join('')}</tbody></table></div>`;
     if (game === 'plinko') {
@@ -219,14 +249,14 @@ export class PortalDialogs {
     }
     this.proofRound = null;
     $('#proof-content').innerHTML =
-      `<aside class="info-callout">${icon('shield')}<p>${t('seedIntro')}</p></aside>${this.field(t('nextHash'), state.fairness.nextHash)}${this.field('Nonce', state.fairness.nonce)}<label class="field-label" for="client-seed-input">${t('clientSeed')}</label><input id="client-seed-input" class="seed-input" maxlength="64" value="${escapeHTML(state.clientSeed)}"><button class="primary-button" type="button" id="save-client-seed">${icon('check')}<span>${t('saveSeed')}</span></button><aside class="info-callout" style="margin-top:14px">${icon('info')}<p>${t('fairLocal')}</p></aside>`;
+      `<aside class="info-callout">${icon('shield')}<p>${richText(t(this.api.isPractice ? 'localProof' : 'seedIntro'))}</p></aside>${this.field(t('nextHash'), state.fairness.nextHash)}${this.field('Nonce', state.fairness.nonce)}<label class="field-label" for="client-seed-input">${t('clientSeed')}</label><input id="client-seed-input" class="seed-input" maxlength="64" value="${escapeHTML(state.clientSeed)}"><button class="primary-button" type="button" id="save-client-seed">${icon('check')}<span>${t('saveSeed')}</span></button><aside class="info-callout" style="margin-top:14px">${icon('info')}<p>${richText(t(this.api.isPractice ? 'localProofNote' : 'fairLocal'))}</p></aside>`;
     this.morph.open($('#proof-dialog'), opener);
   }
   showProof(round, opener) {
     if (!round) return;
     this.proofRound = round;
     $('#proof-content').innerHTML =
-      `<p>${title(round.game)} · ${escapeHTML(round.id.slice(0, 8))}</p><div class="proof-results"><span>${t('bet')}<strong>${money(round.betMinor)}</strong></span><span>${t('paid')}<strong>${round.status === 'settled' ? money(round.payoutMinor) : '—'}</strong></span></div><aside class="info-callout">${icon('shield')}<p>${t('seedIntro')}</p></aside>${this.field('Server seed hash', round.proof.hash)}${this.field(t('clientSeed'), round.proof.clientSeed)}${this.field('Nonce', round.proof.nonce)}${round.proof.serverSeed ? this.field('Server seed', round.proof.serverSeed) : `<p>${t('proofWaiting')}</p>`}${round.proof.serverSeed ? `<button class="primary-button" type="button" id="verify-round">${icon('shield')}<span>${t('verify')}</span></button><p id="verify-status" class="verify-status" role="status"></p>` : ''}<aside class="info-callout" style="margin-top:14px">${icon('info')}<p>${t('fairLocal')}</p></aside>`;
+      `<p>${title(round.game)} · ${escapeHTML(round.id.slice(0, 8))}</p><div class="proof-results"><span>${t('bet')}<strong>${money(round.betMinor)}</strong></span><span>${t('paid')}<strong>${round.status === 'settled' ? money(round.payoutMinor) : '—'}</strong></span></div><aside class="info-callout">${icon('shield')}<p>${richText(t(this.api.isPractice ? 'localProof' : 'seedIntro'))}</p></aside>${this.field('Server seed hash', round.proof.hash)}${this.field(t('clientSeed'), round.proof.clientSeed)}${this.field('Nonce', round.proof.nonce)}${round.proof.serverSeed ? this.field('Server seed', round.proof.serverSeed) : `<p>${t('proofWaiting')}</p>`}${round.proof.serverSeed ? `<button class="primary-button" type="button" id="verify-round">${icon('shield')}<span>${t('verify')}</span></button><p id="verify-status" class="verify-status" role="status"></p>` : ''}<aside class="info-callout" style="margin-top:14px">${icon('info')}<p>${richText(t(this.api.isPractice ? 'localProofNote' : 'fairLocal'))}</p></aside>`;
     this.morph.open($('#proof-dialog'), opener);
   }
   async verify(button) {

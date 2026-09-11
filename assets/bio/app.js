@@ -1,5 +1,8 @@
+import { richText } from '../shared/rich-text.js';
+import { transitionPath, transitionTransform } from '../shared/motion-recipes.js';
 import {
   TRANSITION_STYLES,
+  normalizeTransition,
   isDesktopMotion,
   desktopMask,
   desktopTransform,
@@ -14,6 +17,9 @@ import demos from './demos.json';
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const root = document.documentElement;
+  const richSources = new Map(
+    $$('[data-rich]').map((node) => [node, node.textContent.replace(/\s+/g, ' ').trim()]),
+  );
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const sessionPreferences = new Map();
   const storage = {
@@ -41,9 +47,7 @@ import demos from './demos.json';
     background: ['constellation', 'aurora', 'plain'].includes(storage.get('background'))
       ? storage.get('background')
       : 'constellation',
-    transition: ['mix', ...TRANSITION_STYLES].includes(storage.get('transition'))
-      ? storage.get('transition')
-      : 'hyprland',
+    transition: normalizeTransition(storage.get('transition', 'star')),
   };
   for (const key of ['ripple', 'particles', 'liquid', 'glass'])
     preferences[key] = !['off', 'false', false].includes(storage.get(key, 'on'));
@@ -1362,6 +1366,11 @@ import demos from './demos.json';
       }
     }
   }
+  function renderRichPanels() {
+    richSources.forEach((source, node) => {
+      node.innerHTML = richText(tr(source));
+    });
+  }
   function setLanguage(lang, replay = true) {
     preferences.lang = lang === 'en' ? 'en' : 'ru';
     storage.set('lang', preferences.lang);
@@ -1383,6 +1392,7 @@ import demos from './demos.json';
       }
     }
     translateScope(document.body);
+    renderRichPanels();
     syncPills(replay && state.motion);
     moveNav(false);
   }
@@ -1452,58 +1462,8 @@ import demos from './demos.json';
     if (t >= 1) return 1;
     return 1 - Math.exp(-7.5 * t) * (Math.cos(11.5 * t) + (7.5 / 11.5) * Math.sin(11.5 * t));
   }
-  function surfaceMask(effect, w, h, t, origin = { x: w / 2, y: h / 2 }) {
-    if (isDesktopMotion(effect)) return desktopMask(effect, w, h, t, origin.direction || 1);
-    t = clamp(t, 0, 1);
-    const eased = clamp(easeOut(t), 0, 1);
-    if (effect === 'shutters') {
-      return Array.from({ length: 5 }, (_, i) => {
-        const p = easeOut(clamp((t - i * 0.052) / 0.78, 0, 1)),
-          slice = w / 5,
-          sw = Math.max(0.01, slice * p + 1);
-        return materialPath(
-          i * slice + (slice - sw) / 2,
-          0,
-          sw,
-          h,
-          Math.min(30, sw * 0.48),
-          Math.sin(Math.PI * p) * 0.22,
-        );
-      }).join(' ');
-    }
-    if (effect === 'cascade') {
-      const rows = Math.max(4, Math.ceil(h / Math.max(155, innerHeight * 0.24)));
-      return Array.from({ length: rows }, (_, i) => {
-        const p = clamp(spring(clamp((t - (i % 4) * 0.062) / 0.72, 0, 1)), 0, 1),
-          band = h / rows,
-          hh = Math.max(0.01, band * p + 1);
-        return materialPath(0, i * band, w, hh, Math.min(27, hh * 0.4), Math.sin(Math.PI * p) * 0.45);
-      }).join(' ');
-    }
-    if (effect === 'iris') {
-      const grow = smooth(t),
-        ww = lerp(Math.min(46, w), w, grow),
-        hh = lerp(Math.min(46, h), h, grow);
-      return materialPath(
-        lerp(clamp(origin.x - 23, 0, w - 46), 0, eased),
-        lerp(clamp(origin.y - 23, 0, h - 46), 0, eased),
-        ww,
-        hh,
-        lerp(Math.min(ww, hh) * 0.46, 28, Math.pow(t, 3)),
-        0,
-      );
-    }
-    const p = clamp(spring(t), 0, 1),
-      ww = lerp(Math.min(64, w), w, p),
-      hh = lerp(Math.min(62, h), h, smooth(t));
-    return materialPath(
-      lerp(clamp(origin.x - 32, 0, Math.max(0, w - 64)), 0, p),
-      lerp(clamp(origin.y - 31, 0, Math.max(0, h - 62)), 0, p),
-      ww,
-      hh,
-      28 + Math.sin(Math.PI * t) * 56,
-      Math.sin(Math.PI * t) * 0.72,
-    );
+  function surfaceMask(effect, w, h, t, origin = {}) {
+    return transitionPath(effect, w, h, t, origin);
   }
 
   // The thumb moves; the actual buttons never move their hit targets.
@@ -2026,7 +1986,7 @@ import demos from './demos.json';
         liquid: true,
         glass: true,
         background: 'constellation',
-        transition: 'mix',
+        transition: 'star',
       });
       for (const [key, value] of Object.entries(preferences))
         storage.set(key, typeof value === 'boolean' ? (value ? 'on' : 'off') : value);
@@ -2233,7 +2193,13 @@ import demos from './demos.json';
     $('#view-label').textContent = tr(label[1]);
     $('#view-number').textContent = label[0] + ' / PERSONAL SPACE';
     $('#view-path-icon').setAttribute('href', '#i-' + label[2]);
-    if (history && location.hash !== '#' + view) window.history.pushState(null, '', '#' + view);
+    if (history && location.hash !== '#' + view) {
+      try {
+        window.history.pushState(null, '', '#' + view);
+      } catch {
+        /* The embedded document can still switch views. */
+      }
+    }
     moveNav();
     sizeCardHitAreas();
     syncPills(false);
@@ -2273,13 +2239,7 @@ import demos from './demos.json';
     stage.setAttribute('aria-busy', 'true');
     incoming.classList.add('is-window-entering');
     const start = performance.now(),
-      duration = isDesktopMotion(effect)
-        ? 460
-        : effect === 'cascade'
-          ? 790
-          : effect === 'shutters'
-            ? 740
-            : 700;
+      duration = isDesktopMotion(effect) ? 460 : 700;
     let frame = 0,
       done = false,
       elapsed = 0,
@@ -2313,15 +2273,16 @@ import demos from './demos.json';
       const t = state.motion ? clamp(elapsed / duration, 0, 1) : 1;
       stage.style.height = lerp(before.height, after.height, easeOut(t)) + 'px';
       incoming.style.clipPath = cssPath(
-        surfaceMask(effect, after.width, after.height, t, { ...origin, direction }),
+        surfaceMask(effect, after.width, after.height, t, {
+          ...origin,
+          direction,
+          surfaceHeight: Math.min(
+            after.height,
+            Math.max(180, innerHeight - Math.max(0, after.top + scrollY) - 20),
+          ),
+        }),
       );
-      incoming.style.transform = isDesktopMotion(effect)
-        ? desktopTransform(effect, after.width, t, direction)
-        : effect === 'cascade'
-          ? 'translateY(' + 12 * (1 - easeOut(t)) + 'px)'
-          : effect === 'liquid'
-            ? 'translateY(' + 7 * (1 - spring(t)) + 'px)'
-            : 'none';
+      incoming.style.transform = transitionTransform(effect, after.width, t, direction);
       if (t < 1) frame = requestAnimationFrame(tick);
       else record.finish();
     }
@@ -2536,7 +2497,7 @@ import demos from './demos.json';
       const oldStyle = dialog.dataset.restStyle ?? dialog.getAttribute('style') ?? '';
       dialog.dataset.restStyle = oldStyle;
       const effect = opening
-        ? chooseEffect(dialog.dataset.windowStyle === 'sheet' ? 'cascade' : undefined)
+        ? chooseEffect(dialog.dataset.windowStyle === 'sheet' ? 'caelestia' : undefined)
         : dialog.dataset.windowEffect || 'liquid';
       dialog.dataset.windowEffect = effect;
       const sourceBox = boxOf(source),
@@ -2554,15 +2515,7 @@ import demos from './demos.json';
         settled = false,
         elapsed = 0,
         last = performance.now();
-      const duration = opening
-          ? isDesktopMotion(effect)
-            ? 470
-            : effect === 'cascade'
-              ? 780
-              : effect === 'shutters'
-                ? 740
-                : 690
-          : 340,
+      const duration = opening ? (isDesktopMotion(effect) ? 470 : 690) : 340,
         start = performance.now();
       const record = {
         finish() {
@@ -2594,13 +2547,6 @@ import demos from './demos.json';
           wide = opening ? smooth(t) : smooth(t);
           tall = wide;
         }
-        if (effect === 'shutters') {
-          wide = opening ? easeOut(t) : smooth(t);
-          tall = opening ? clamp(spring(t), 0, 1.01) : smooth(t);
-        }
-        if (effect === 'cascade') {
-          tall = opening ? easeOut(smooth(t)) : smooth(t);
-        }
         const x = lerp(from.x, to.x, position),
           y = lerp(from.y, to.y, position),
           w = lerp(from.w, to.w, wide),
@@ -2613,22 +2559,7 @@ import demos from './demos.json';
           width: w + 'px',
           height: h + 'px',
         });
-        if (effect === 'liquid')
-          dialog.style.clipPath = cssPath(
-            materialPath(
-              0,
-              0,
-              w,
-              h,
-              lerp(sourceRadius, 30, phase) + Math.sin(Math.PI * phase) * Math.min(54, Math.min(w, h) * 0.12),
-              Math.sin(Math.PI * phase) * 0.7,
-            ),
-          );
-        else if (effect === 'iris')
-          dialog.style.clipPath = cssPath(
-            materialPath(0, 0, w, h, lerp(Math.min(w, h) * 0.46, 29, smooth(phase)), 0),
-          );
-        else dialog.style.clipPath = cssPath(surfaceMask(effect, w, h, 0.18 + phase * 0.82));
+        dialog.style.clipPath = cssPath(surfaceMask(effect, w, h, phase));
         const content = opening
           ? smooth(clamp((t - 0.18) / 0.54, 0, 1))
           : contentStart * (1 - smooth(clamp(t / 0.52, 0, 1)));
@@ -2667,6 +2598,7 @@ import demos from './demos.json';
     moveNav();
     syncPills(false);
     translateScope(dialog);
+    renderRichPanels();
     renderer?.refresh();
     syncDemos();
     const target = boxOf(dialog),
@@ -2763,11 +2695,11 @@ import demos from './demos.json';
     $('#detail-content').innerHTML = `
           <p class="eyebrow">${escapeHTML(project.label)}</p>
           <h2 id="detail-title">${escapeHTML(project.title)}</h2>
-          <p class="dialog-intro">${escapeHTML(project.intro)}</p>
+          <p class="dialog-intro">${richText(tr(project.intro))}</p>
           <div class="dialog-tags">${project.tags.map((tag) => '<span>' + escapeHTML(tag) + '</span>').join('')}</div>
           ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ''}
-          <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + escapeHTML(feature) + '</span></li>').join('')}</ul>
-          <div class="info-callout">${icons('info')}<p class="dialog-note">${escapeHTML(project.note)}</p></div>
+          <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + richText(tr(feature)) + '</span></li>').join('')}</ul>
+          <div class="info-callout">${icons('info')}<p class="dialog-note">${richText(tr(project.note))}</p></div>
           ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? chatFrame('modal-chat') : ''}
           ${projectExtra(id)}
           <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Терминалы и 14 подсистем' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;

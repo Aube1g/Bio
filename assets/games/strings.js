@@ -1,5 +1,15 @@
 import { preferences } from '../shared/preferences.js';
 export const ru = {
+  localPractice: 'Тестовый режим · в браузере',
+  startPractice: 'Тестовая игра',
+  calculating: 'Твой ход…',
+  practicePlay: 'Играем без сервера',
+  tryWithoutServer: 'Попробовать без входа',
+  serverLogin: 'Серверный вход',
+  localProof:
+    'Локальная партия: seed и результат можно воспроизвести в этом браузере. Счёт не связан с сервером и кошельком Виол.',
+  localProofNote: 'Это тестовые фишки. Проверка подтверждает вычисление, а не работу внешнего сервера.',
+  localResetNote: 'Тестовый счёт можно обновить после завершения раздачи Blackjack.',
   gameAccount: 'Игровой счёт',
   openWallet: 'Открыть счёт',
   violas: 'Виолы',
@@ -209,13 +219,13 @@ export const ru = {
   rulesPractice:
     'Все игры используют отдельные тренировочные фишки. Покупок, депозитов и вывода средств нет.',
   rulesDice:
-    'Кубик выдаёт число от 1 до 6. «Меньше» и «Больше» — строгие сравнения: равенство порогу не выигрывает. Множитель равен 0,98 / вероятности выигрыша; возврат округляется вниз до 0,01 фишки.',
+    'Кубик выдаёт число **от 1 до 6**. **«Меньше»** и **«Больше»** — строгие сравнения: равенство порогу не выигрывает. Множитель равен 0,98 / вероятности выигрыша; возврат округляется вниз до 0,01 фишки.',
   rulesSlots:
-    'Три барабана выбирают символы независимо, каждый из восьми равновероятен. Выигрыш считается слева направо. Три совпадения имеют приоритет над двумя; за спин только одна выплата. Теоретический возврат — 96,484375%.',
+    '**Три барабана** выбирают символы независимо, каждый из восьми равновероятен. Выигрыш считается слева направо. Три совпадения имеют приоритет над двумя; за спин **только одна выплата**. Теоретический возврат — 96,484375%.',
   rulesBlackjack:
-    'Одна колода — 52 карты, новая для каждой раздачи. Туз считается как 1 или 11. Blackjack — 21 на первых двух картах и выплачивается 3:2. При обычной победе возврат 2×, при ничьей 1×. Дилер стоит на любых 17, включая мягкие. Удвоение: ещё одна равная ставка, одна карта, затем ход дилера. Сплита и страховки нет. Начатую раздачу нельзя отменить с возвратом; она сохраняется при перезагрузке.',
+    'Одна колода — **52 карты**, новая для каждой раздачи. Туз считается как **1 или 11**. Blackjack — 21 на первых двух картах и выплачивается `3:2`. При обычной победе возврат 2×, при ничьей 1×. Дилер стоит на любых 17, включая мягкие. Удвоение: ещё одна равная ставка, одна карта, затем ход дилера. Сплита и страховки нет. Начатую раздачу нельзя отменить с возвратом; она сохраняется при перезагрузке.',
   rulesPlinko:
-    'На каждом ряду выбирается левый или правый отскок с вероятностью ½. Для N рядов есть N + 1 ячейка. Риск меняет таблицу выплат, а не вероятности маршрутов. Результат и траектория зафиксированы одной партией; изменение размера окна их не меняет. Одновременно можно наблюдать до восьми шаров.',
+    'На каждом ряду выбирается левый или правый отскок с вероятностью ½. Для N рядов есть N + 1 ячейка. Риск меняет **таблицу выплат**, а не вероятности маршрутов. Результат и траектория зафиксированы одной партией; изменение размера окна их не меняет. Одновременно можно наблюдать **до восьми шаров**.',
   rowsRisk: '{rows} рядов · {risk} риск',
   lostAuth: 'Не удалось подтвердить вход через Telegram.',
   telegramUnavailable: 'Вход через Telegram пока недоступен. Можно продолжить гостем.',
@@ -226,6 +236,16 @@ export const ru = {
   close: 'Закрыть',
 };
 export const en = {
+  localPractice: 'Test mode · in this browser',
+  startPractice: 'Play a test game',
+  calculating: 'Your move…',
+  practicePlay: 'Playing without a server',
+  tryWithoutServer: 'Try without signing in',
+  serverLogin: 'Server sign-in',
+  localProof:
+    'Local round: the seed and result can be reproduced in this browser. This account is separate from the server and the Violas wallet.',
+  localProofNote: 'These are test chips. Verification checks the calculation, not an external server.',
+  localResetNote: 'Reset the test account after finishing the Blackjack hand.',
   gameAccount: 'Game account',
   openWallet: 'Open account',
   violas: 'Violas',
@@ -434,13 +454,13 @@ export const en = {
   twoSame: 'Two on the left',
   rulesPractice: 'All games use separate practice chips. No purchases, deposits or withdrawals.',
   rulesDice:
-    'The die produces a number from 1 to 6. Under and Over are strict comparisons: matching the threshold is not a win. The multiplier is 0.98 / winning probability; the return is rounded down to 0.01 chip.',
+    'The die produces a number **from 1 to 6**. **Under** and **Over** are strict comparisons: matching the threshold is not a win. The multiplier is 0.98 / winning probability; the return is rounded down to 0.01 chip.',
   rulesSlots:
-    'Three reels select symbols independently, each of the eight equally likely. Matches count from left to right. Three matching symbols take priority over two; there is one payout per spin. Theoretical return: 96.484375%.',
+    '**Three reels** select symbols independently, each of the eight equally likely. Matches count from left to right. Three matching symbols take priority over two; there is **one payout per spin**. Theoretical return: 96.484375%.',
   rulesBlackjack:
-    'One 52-card deck, freshly shuffled for each hand. Aces count as 1 or 11. Blackjack is 21 on the first two cards and pays 3:2. An ordinary win returns 2×; a push returns 1×. The dealer stands on all 17s, including soft 17. Double: add an equal stake, take one card, then the dealer plays. No split or insurance. A started hand cannot be canceled for a refund; it survives a reload.',
+    'One **52-card deck**, freshly shuffled for each hand. Aces count as **1 or 11**. Blackjack is 21 on the first two cards and pays `3:2`. An ordinary win returns 2×; a push returns 1×. The dealer stands on all 17s, including soft 17. Double: add an equal stake, take one card, then the dealer plays. No split or insurance. A started hand cannot be canceled for a refund; it survives a reload.',
   rulesPlinko:
-    'Each row chooses a left or right bounce with probability ½. N rows produce N + 1 bins. Risk changes payouts, not path probabilities. Outcome and trajectory belong to the same round; resizing does not change them. Up to eight balls can be displayed simultaneously.',
+    'Each row chooses a left or right bounce with probability ½. N rows produce N + 1 bins. Risk changes **payouts**, not path probabilities. Outcome and trajectory belong to the same round; resizing does not change them. **Up to eight balls** can be displayed simultaneously.',
   rowsRisk: '{rows} rows · {risk} risk',
   lostAuth: 'Could not verify Telegram sign-in.',
   telegramUnavailable: 'Telegram sign-in is currently unavailable. You can continue as a guest.',

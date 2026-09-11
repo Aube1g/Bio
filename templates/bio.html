@@ -22,6 +22,7 @@
     {{styles:bio}} {{bootstrap}}
   </head>
   <body>
+    {{boot-screen}}
     <div class="atmosphere" aria-hidden="true">
       <div class="atmosphere-glow"></div>
       <canvas id="atmosphere-canvas"></canvas>
@@ -1598,13 +1599,15 @@
           >
           <div class="motion-setting-controls">
             <select id="transition-select" hidden aria-hidden="true" tabindex="-1">
-              <option value="mix">Микс · каждый раз по-разному</option>
-              <option value="hyprland">Hyprland · Slide</option>
-              <option value="caelestia">Caelestia · Pop</option>
-              <option value="liquid">Liquid · упругая поверхность</option>
-              <option value="iris">Iris · раскрытие диафрагмы</option>
-              <option value="shutters">Shutters · жидкие шторки</option>
-              <option value="cascade">Cascade · каскад плиток</option></select
+              <option value="star">Star</option>
+              <option value="bloom">Bloom</option>
+              <option value="orbit">Orbit</option>
+              <option value="ribbon">Ribbon</option>
+              <option value="hyprland">Hyprland</option>
+              <option value="caelestia">Caelestia</option>
+              <option value="liquid">Liquid</option>
+              <option value="iris">Iris</option>
+              <option value="mix">Mix</option></select
             ><button
               class="motion-picker-trigger"
               type="button"
@@ -1646,7 +1649,7 @@
         />
         <p class="eyebrow">Начнём с простого «привет»</p>
         <h2 id="contact-title">Есть идея?<br />Давай создадим.</h2>
-        <p class="dialog-intro">
+        <p class="dialog-intro" data-rich>
           Сайт, бот, полезный инструмент или что-то совсем новое. Расскажи, что задумал — обсудим детали.
         </p>
         <div class="contact-links">

@@ -37,7 +37,7 @@
 .setting-row :is(.switch-track, .toggle-track) {
   position: absolute;
   display: block;
-  inset: 7px 4px;
+  inset: 11px 4px;
   width: auto;
   height: auto;
   min-width: 0;
@@ -94,13 +94,13 @@
   z-index: 3;
   pointer-events: none;
   left: 2px;
-  top: 5px;
-  width: 38px;
-  height: 36px;
+  top: 10px;
+  width: 46px;
+  height: 26px;
   border: 1px solid #ffffffe0;
   border-bottom-color: #ffffff62;
   border-right-color: #ffffff78;
-  border-radius: 52% 48% 48% 52% / 48% 49% 51% 52%;
+  border-radius: 999px;
   background: linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
   box-shadow:
     inset 1px 1.5px 2px #ffffffb8,
@@ -109,7 +109,7 @@
     0 0 1px 1px #24173326;
   -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
   backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
-  transform: translateX(calc(var(--switch-position) * 30px)) scaleX(var(--lens-stretch))
+  transform: translateX(calc(var(--switch-position) * 22px)) scaleX(var(--lens-stretch))
     scaleY(var(--lens-squash));
   transform-origin: 50% 50%;
   transition:
@@ -129,9 +129,9 @@
 .glass-switch-lens::after {
   content: '';
   position: absolute;
-  top: 5px;
-  left: 7px;
-  width: 19px;
+  top: 3px;
+  left: 9px;
+  width: 24px;
   height: 5px;
   border-top: 1.5px solid #ffffffa6;
   border-radius: 50%;
@@ -143,8 +143,8 @@
   }
 }
 .glass-switch[data-touching='true'] .glass-switch-lens {
-  scale: 1.14 1.07;
-  border-radius: 47% 53% 50% 50% / 50% 44% 56% 50%;
+  scale: 1.12 0.96;
+  border-radius: 20px 24px 22px 20px;
   box-shadow:
     inset 1.5px 2px 2px #ffffffe0,
     inset -2px -1px 4px #ede0ff8a,

@@ -7,42 +7,16 @@ import {
   handValue,
   payout,
 } from '../shared/game-rules.js';
-const text = new TextEncoder();
-const hex = (bytes) => [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, '0')).join('');
-async function randomFor(proof) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    text.encode(proof.serverSeed),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-  const message = `${proof.game}:${proof.nonce}:${proof.clientSeed}`;
-  const blocks = await Promise.all(
-    Array.from({ length: 32 }, (_, i) => crypto.subtle.sign('HMAC', key, text.encode(`${message}:${i}`))),
-  );
-  const values = blocks.flatMap((buffer) => {
-    const view = new DataView(buffer);
-    return Array.from({ length: 8 }, (_, i) => view.getUint32(i * 4));
-  });
-  let offset = 0;
-  return {
-    int(size) {
-      const limit = Math.floor(0x100000000 / size) * size;
-      let n;
-      do {
-        if (offset >= values.length) throw new Error('Random buffer exhausted');
-        n = values[offset++];
-      } while (n >= limit);
-      return n % size;
-    },
-  };
-}
+import { BrowserFairRandom, hashSeed } from './browser-random.js';
 export async function verifyRound(round) {
-  if (!crypto.subtle || !round.proof.serverSeed) throw new Error('Verification unavailable');
-  if (hex(await crypto.subtle.digest('SHA-256', text.encode(round.proof.serverSeed))) !== round.proof.hash)
-    return false;
-  const rng = await randomFor(round.proof),
+  if (!round.proof.serverSeed) throw new Error('Verification unavailable');
+  if (hashSeed(round.proof.serverSeed) !== round.proof.hash) return false;
+  const rng = new BrowserFairRandom(
+      round.proof.serverSeed,
+      round.proof.clientSeed,
+      round.proof.nonce,
+      round.proof.game,
+    ),
     parameters = round.parameters,
     actual = round.outcome;
   let expected;
