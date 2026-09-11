@@ -1,0 +1,321 @@
+/* A transparent optical lens travels over the track; the touch target never moves. */
+:root {
+  --switch-on: #9570ff;
+  --switch-off: #383542;
+  --control-spring: cubic-bezier(0.22, 1.28, 0.38, 1);
+}
+[data-theme='light'] {
+  --switch-off: #cbc7d6;
+  --switch-on: #8351f0;
+}
+.setting-row :is(.switch, .toggle-control) {
+  position: relative;
+  display: inline-block;
+  width: 72px;
+  height: 46px;
+  min-width: 72px;
+  flex: 0 0 72px;
+  align-self: center;
+  cursor: pointer;
+  touch-action: pan-y;
+  overflow: visible;
+  --switch-position: 0;
+  --lens-stretch: 1;
+  --lens-squash: 1;
+}
+:is(.switch, .toggle-control) input {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+  touch-action: pan-y;
+}
+.setting-row :is(.switch-track, .toggle-track) {
+  position: absolute;
+  display: block;
+  inset: 7px 4px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #ffffff20;
+  border-radius: 99px;
+  background: var(--switch-off);
+  pointer-events: none;
+  box-shadow:
+    inset 0 2px 4px #0004,
+    0 1px #ffffff0c;
+  isolation: isolate;
+  overflow: hidden;
+}
+.setting-row :is(.switch-track, .toggle-track)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: clamp(0, var(--switch-position), 1);
+  border-radius: inherit;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--switch-on) 72%, #fff),
+    var(--switch-on) 48%,
+    #5626ac
+  );
+  box-shadow:
+    inset 0 1px 2px #ffffff60,
+    inset 0 -1px 3px #22054540;
+}
+.setting-row :is(.switch-track, .toggle-track)::after {
+  content: '';
+  position: absolute;
+  inset: 4px 9px;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 99px;
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(0deg, #ffffff05, #ffffff12);
+  opacity: 0.8;
+}
+.setting-row :is(.switch, .toggle-control) input:checked + :is(.switch-track, .toggle-track) {
+  background: var(--switch-off);
+  border-color: #d9c9ff40;
+}
+.setting-row :is(.switch, .toggle-control) input:checked + :is(.switch-track, .toggle-track)::after {
+  background: linear-gradient(0deg, #ffffff05, #ffffff18);
+  transform: none;
+}
+.glass-switch-lens {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  left: 2px;
+  top: 5px;
+  width: 38px;
+  height: 36px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 52% 48% 48% 52% / 48% 49% 51% 52%;
+  background: linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b,
+    0 0 1px 1px #24173326;
+  -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  transform: translateX(calc(var(--switch-position) * 30px)) scaleX(var(--lens-stretch))
+    scaleY(var(--lens-squash));
+  transform-origin: 50% 50%;
+  transition:
+    border-radius 260ms var(--control-spring),
+    box-shadow 220ms ease;
+}
+.glass-switch-lens::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 23% 12%, #ffffffb0, #ffffff13 32%, transparent 50%),
+    linear-gradient(155deg, transparent 45%, #ffffff05 60%, #ffffff55 97%);
+  box-shadow: inset 0 -2px 2px #e9d7ff42;
+}
+.glass-switch-lens::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 7px;
+  width: 19px;
+  height: 5px;
+  border-top: 1.5px solid #ffffffa6;
+  border-radius: 50%;
+  transform: rotate(-22deg);
+}
+@supports (backdrop-filter: url('#switch-refraction')) {
+  .glass-switch-lens {
+    backdrop-filter: url('#switch-refraction') blur(0.7px) saturate(1.6) brightness(1.14);
+  }
+}
+.glass-switch[data-touching='true'] .glass-switch-lens {
+  scale: 1.14 1.07;
+  border-radius: 47% 53% 50% 50% / 50% 44% 56% 50%;
+  box-shadow:
+    inset 1.5px 2px 2px #ffffffe0,
+    inset -2px -1px 4px #ede0ff8a,
+    0 5px 13px #0005;
+}
+.glass-switch-lens {
+  transition:
+    scale 240ms var(--control-spring),
+    border-radius 260ms var(--control-spring),
+    box-shadow 220ms;
+}
+.setting-row :is(.switch, .toggle-control) input:focus-visible + :is(.switch-track, .toggle-track) {
+  outline: 3px solid var(--primary-text);
+  outline-offset: 6px;
+}
+.setting-row :is(.switch, .toggle-control):has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.toggle-glyph {
+  display: none;
+}
+[data-theme='light'] .glass-switch-lens {
+  border-color: #ffffff;
+  background: linear-gradient(140deg, #ffffff76, #ffffff15 50%, #c3a2f520);
+  box-shadow:
+    inset 1px 1.5px 3px #fff,
+    inset -1px -1px 3px #ffffffa8,
+    0 3px 8px #32204b33,
+    0 0 1px 1px #77648b66;
+}
+[data-glass='false'] .glass-switch-lens {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-motion='off'] .glass-switch-lens {
+  scale: 1 !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-switch-lens {
+    scale: 1 !important;
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .setting-row .glass-switch .glass-switch-lens {
+    background: ButtonText;
+    border: 1px solid Canvas;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .glass-switch-lens::before,
+  .glass-switch-lens::after {
+    display: none;
+  }
+  .setting-row .glass-switch input:checked + :is(.switch-track, .toggle-track) {
+    background: Highlight;
+  }
+}
+/* Settings read as quiet grouped rows, not a bank of miniature buttons. */
+.settings-dialog .settings-grid {
+  gap: 0 24px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--panel) 40%, transparent);
+}
+.settings-dialog .setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 88px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.settings-dialog .setting-row > div {
+  min-width: 0;
+}
+.settings-dialog .setting-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.settings-dialog .setting-title .icon {
+  width: 17px;
+  height: 17px;
+  color: var(--primary-text);
+}
+.settings-dialog .setting-description {
+  max-width: 250px;
+  margin: 5px 0 0 27px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.settings-dialog .setting-row:last-child {
+  border-bottom: 0;
+}
+.spring-group {
+  isolation: isolate;
+}
+.spring-indicator,
+.spring-thumb {
+  pointer-events: none;
+}
+.spring-group > :is(button, a) {
+  touch-action: manipulation;
+}
+.motion-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+.motion-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+}
+.motion-option .icon {
+  width: 19px;
+  height: 19px;
+}
+.motion-option[aria-pressed='true'] {
+  color: var(--primary-text);
+  border-color: var(--primary-text);
+}
+@media (min-width: 701px) {
+  .settings-dialog .setting-row:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
+  }
+}
+@media (max-width: 700px) {
+  .settings-dialog .settings-grid {
+    grid-template-columns: 1fr;
+    padding: 0 14px;
+  }
+  .settings-dialog .setting-row {
+    min-height: 85px;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .settings-dialog .setting-title {
+    font-size: 14px;
+  }
+  .settings-dialog .setting-description {
+    font-size: 11px;
+  }
+}
+[data-motion='off'] .setting-row *,
+[data-motion='off'] .setting-row *::after {
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .setting-row *,
+  .setting-row *::after {
+    transition: none !important;
+  }
+}

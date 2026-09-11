@@ -1,0 +1,321 @@
+.page-header {
+  position: relative;
+  z-index: 35;
+}
+.bio-island-wrap {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 0;
+  z-index: 36;
+}
+.bio-island {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-50%);
+  width: 250px;
+  border: 1px solid #ffffff15;
+  border-radius: 25px;
+  background: #111018;
+  color: #f2edff;
+  box-shadow:
+    0 8px 25px #0003,
+    inset 0 1px #ffffff08;
+  overflow: hidden;
+  isolation: isolate;
+}
+.bio-island-trigger {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 42px;
+  padding: 0 16px;
+  text-align: left;
+  color: inherit;
+  font-size: 11px;
+}
+.bio-island-trigger strong {
+  flex: 1;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.bio-island-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #7be1b4;
+  box-shadow: 0 0 12px #47e8b122;
+}
+.island-expand-icon {
+  width: 12px;
+  height: 12px;
+  color: #a59bb9;
+  transition: transform 350ms var(--spring);
+}
+.bio-island[data-open='true'] .island-expand-icon {
+  transform: rotate(45deg);
+}
+.bio-island[data-open='true'] {
+  width: 358px;
+  border-radius: 28px;
+  border-color: #b394eb40;
+  box-shadow: 0 20px 60px #0007;
+}
+.bio-island-panel {
+  padding: 0 16px 16px;
+}
+.bio-island-identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 17px 0;
+}
+.bio-island-identity img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+.bio-island-identity > div {
+  display: grid;
+  gap: 2px;
+}
+.bio-island-identity strong {
+  font-size: 19px;
+  line-height: 1.2;
+}
+.bio-island-identity span {
+  font-size: 10px;
+  color: #b9aecb;
+}
+.bio-island-time {
+  margin-left: auto;
+  font:
+    11px ui-monospace,
+    monospace;
+  color: #c4b9d7;
+}
+.bio-island-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid #ffffff14;
+  font-size: 11px;
+  color: #b9aecb;
+}
+.bio-island-context strong {
+  color: #eee7ff;
+  font-weight: 700;
+}
+.island-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.island-quick-grid a {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 17px;
+  padding: 15px;
+  background: #292237;
+  color: #f0e6ff;
+  border: 1px solid #ffffff09;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.island-quick-grid a:last-child {
+  background: #313723;
+  color: #e0efbc;
+}
+.island-quick-grid .icon {
+  width: 22px;
+  height: 22px;
+}
+.island-quick-grid a:hover {
+  background: #433058;
+}
+.island-quick-grid a:last-child:hover {
+  background: #424e2b;
+}
+.island-bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+.island-bottom-actions button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #bcb0cd;
+  padding: 10px 8px;
+  min-height: 40px;
+  font-size: 11px;
+  border-radius: 12px;
+}
+.island-bottom-actions button:hover {
+  background: #ffffff0b;
+  color: white;
+}
+.island-bottom-actions .icon {
+  width: 14px;
+  height: 14px;
+}
+.bio-island :focus-visible {
+  outline: 2px solid #c6acff;
+  outline-offset: -3px;
+}
+.bio-island-trigger .ripple-clip {
+  display: none;
+}
+.island-mini-bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+.island-mini-bars i {
+  width: 2px;
+  height: 5px;
+  background: #b7a0e0;
+  border-radius: 2px;
+  transition: height 240ms;
+}
+.island-mini-bars i:nth-child(2) {
+  height: 10px;
+}
+.island-mini-bars i:nth-child(3) {
+  height: 14px;
+}
+.bio-island[data-activity='transition'] .island-mini-bars i {
+  animation: island-meter 550ms ease-in-out infinite alternate;
+}
+.bio-island[data-activity='transition'] .island-mini-bars i:nth-child(2n) {
+  animation-delay: -250ms;
+}
+@keyframes island-meter {
+  to {
+    height: 3px;
+  }
+}
+[data-theme='light'] .bio-island {
+  background: #23202d;
+  box-shadow: 0 8px 20px #26203025;
+}
+@media (max-width: 1000px) {
+  .header-clock .mono {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .page-header {
+    min-height: 71px;
+    align-items: flex-start;
+  }
+  .page-header .header-clock {
+    display: none;
+  }
+  .bio-island-wrap {
+    left: auto;
+    right: 0;
+    width: 178px;
+    top: -3px;
+  }
+  .bio-island {
+    left: auto;
+    right: 0;
+    transform: none;
+    width: 178px;
+    border-radius: 24px;
+  }
+  .bio-island-trigger {
+    height: 39px;
+    gap: 8px;
+    padding: 0 12px;
+    font-size: 10px;
+  }
+  .bio-island[data-open='true'] {
+    width: min(352px, calc(100vw - 36px));
+    border-radius: 26px;
+  }
+  .island-mini-bars {
+    display: none;
+  }
+  .bio-island-panel {
+    padding: 0 14px 14px;
+  }
+  .hero-top-label {
+    display: flex;
+  }
+}
+[data-motion='off'] .bio-island * {
+  animation: none !important;
+  transition: none !important;
+}
+.bio-island-wrap {
+  position: fixed;
+  top: 24px;
+}
+.bio-island {
+  max-height: calc(100dvh - 48px);
+}
+.bio-island[data-open='true']:not([data-resizing]) {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+@media (max-width: 700px) {
+  .bio-island-wrap {
+    top: max(13px, env(safe-area-inset-top));
+    right: 18px;
+  }
+  .bio-island {
+    max-height: calc(100dvh - 30px);
+  }
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+  }
+  .profile-identity {
+    margin-top: 22px;
+    gap: 12px;
+    align-items: center;
+  }
+  .profile-identity .avatar-frame img {
+    width: 48px;
+    height: 48px;
+  }
+  .profile-name {
+    font-size: 23px;
+    line-height: 1.25;
+  }
+  .profile-role {
+    font-size: 10px;
+  }
+  .profile-description {
+    margin-top: 18px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .skill-tags {
+    margin-top: 16px;
+    max-width: none;
+  }
+  .profile-divider {
+    margin: 20px 0 14px;
+  }
+  .profile-foot {
+    width: 100%;
+  }
+}

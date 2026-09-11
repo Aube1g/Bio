@@ -1,0 +1,51 @@
+[
+  {
+    "id": "hyprland",
+    "title": "Hyprland",
+    "ru": "Сдвиг и упругая остановка",
+    "en": "Slide and spring landing",
+    "icon": "arrow-right"
+  },
+  {
+    "id": "caelestia",
+    "title": "Caelestia",
+    "ru": "Мягкое раскрытие панели",
+    "en": "Soft panel expansion",
+    "icon": "window"
+  },
+  {
+    "id": "liquid",
+    "title": "Liquid",
+    "ru": "Текучая геометрия",
+    "en": "Flowing geometry",
+    "icon": "wave"
+  },
+  {
+    "id": "iris",
+    "title": "Iris",
+    "ru": "Раскрытие диафрагмы",
+    "en": "Opening aperture",
+    "icon": "eye"
+  },
+  {
+    "id": "shutters",
+    "title": "Shutters",
+    "ru": "Пять раскрывающихся полос",
+    "en": "Five opening curtains",
+    "icon": "sliders"
+  },
+  {
+    "id": "cascade",
+    "title": "Cascade",
+    "ru": "Каскад мягких панелей",
+    "en": "Cascading soft panels",
+    "icon": "grid"
+  },
+  {
+    "id": "mix",
+    "title": "Mix",
+    "ru": "Чередовать все стили",
+    "en": "Cycle through every style",
+    "icon": "replay"
+  }
+]

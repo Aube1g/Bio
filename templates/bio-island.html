@@ -1,0 +1,42 @@
+<div class="bio-island-wrap">
+  <div class="bio-island" id="bio-island" data-open="false">
+    <button
+      class="bio-island-trigger"
+      type="button"
+      aria-expanded="false"
+      aria-controls="bio-island-panel"
+      aria-label="Открыть быстрые действия"
+    >
+      <span class="bio-island-dot" aria-hidden="true"></span>
+      <strong id="bio-island-status">Открыт к идеям</strong>
+      <span class="island-mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <svg class="icon island-expand-icon" aria-hidden="true"><use href="#i-plus" /></svg>
+    </button>
+    <div class="bio-island-panel" id="bio-island-panel" hidden>
+      <div class="bio-island-identity">
+        <img src="{{asset:assets/bio/bio-image-0.webp}}" alt="" width="42" height="42" />
+        <div><strong>Aubeig</strong><span>Code. Create. Play.</span></div>
+        <time class="bio-island-time"></time>
+      </div>
+      <div class="bio-island-context">
+        <span>Сейчас в пространстве</span><strong id="bio-island-section">Обзор</strong>
+      </div>
+      <div class="island-quick-grid">
+        <a href="https://t.me/Aubeig" target="_blank" rel="noopener noreferrer">
+          <svg class="icon" aria-hidden="true"><use href="#i-telegram" /></svg><span>Написать мне</span>
+        </a>
+        <a href="games.html">
+          <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg><span>Поиграем?</span>
+        </a>
+      </div>
+      <div class="island-bottom-actions">
+        <button type="button" id="island-copy-contact">
+          <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg><span>@Aubeig</span>
+        </button>
+        <button type="button" data-dialog="settings-dialog">
+          <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg><span>Настройки</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

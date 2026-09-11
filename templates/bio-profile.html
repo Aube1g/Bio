@@ -1,0 +1,57 @@
+<dialog id="bio-profile-dialog" class="profile-dialog" aria-labelledby="bio-profile-title">
+  <button class="dialog-close" type="button" data-close aria-label="Закрыть профиль">
+    <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+  </button>
+  <div class="dialog-body">
+    <div class="profile-cover"><span class="profile-cover-label">AUBEIG / BEHIND THE CODE</span></div>
+    <div class="profile-hero">
+      <div class="profile-avatar">
+        <img src="{{asset:assets/bio/bio-image-0.webp}}" alt="Аватар Aubeig" />
+      </div>
+      <div class="profile-hero-copy">
+        <h2 id="bio-profile-title">Aubeig</h2>
+        <p>Fullstack developer · Creator</p>
+      </div>
+      <span class="profile-badge"
+        ><svg class="icon" aria-hidden="true"><use href="#i-check" /></svg><span>Открыт к идеям</span></span
+      >
+    </div>
+    <p class="bio-profile-summary">
+      Соединяю чистый код и эстетичный дизайн. От небольших скриптов до целых экосистем — создаю то, чем
+      хочется пользоваться.
+    </p>
+    <div class="info-grid">
+      <section class="info-card">
+        <div class="info-card-heading">
+          <svg class="icon" aria-hidden="true"><use href="#i-code" /></svg>
+          <h3>Разработка</h3>
+        </div>
+        <p>Веб-сайты, Telegram-боты, парсеры и инструменты под конкретную задачу.</p>
+      </section>
+      <section class="info-card">
+        <div class="info-card-heading">
+          <svg class="icon" aria-hidden="true"><use href="#i-nodes" /></svg>
+          <h3>Экосистемы</h3>
+        </div>
+        <p>XLI, XGO, Hydra и Anon — интерфейсы, агенты и автоматизация.</p>
+      </section>
+    </div>
+    <div class="bio-profile-stack" aria-label="Технологии">
+      <span>Go</span><span>Python</span><span>JavaScript</span><span>HTML / CSS</span><span>Telegram</span>
+    </div>
+    <div class="bio-profile-links">
+      <a href="https://t.me/Aubeig" data-contact
+        ><span>Обсудить идею</span><svg class="icon" aria-hidden="true"><use href="#i-telegram" /></svg
+      ></a>
+      <a href="https://t.me/Aube1g" target="_blank" rel="noopener noreferrer"
+        ><span>Посмотреть отзывы</span><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+      ></a>
+      <button type="button" data-profile-view="projects">
+        <span>Мои проекты</span><svg class="icon" aria-hidden="true"><use href="#i-grid" /></svg>
+      </button>
+      <a href="games.html"
+        ><span>Игровой портал</span><svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg
+      ></a>
+    </div>
+  </div>
+</dialog>

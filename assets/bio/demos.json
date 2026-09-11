@@ -1,0 +1,2198 @@
+{
+  "ru": {
+    "xliTerminalScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli \"почему падает сборка в ./cmd/worker, почини\""
+      },
+      {
+        "type": "agent",
+        "text": "XLI Agent подключился к XGO Agent..."
+      },
+      {
+        "type": "plain",
+        "text": ""
+      },
+      {
+        "type": "step",
+        "text": "Анализирую запрос..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "read_files",
+        "args": "\"./cmd/worker\""
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-comment",
+            "text": "# go build ./..."
+          },
+          {
+            "cls": "t-err",
+            "text": "# cmd/worker/handler.go:42:19: cannot use job (variable of type Job)"
+          },
+          {
+            "cls": "t-err",
+            "text": "#   as *Job value in argument to process"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Причина найдена: несовпадение типов в вызове process()"
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "cmd/worker/handler.go"
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  func (w *Worker) Handle(job Job) error {"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     return process(job)"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     return process(&job)"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go test ./cmd/worker/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/cmd/worker   0.412s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Готово",
+        "done": true
+      },
+      {
+        "type": "answer",
+        "text": "Пофиксил: process() ждал *Job, а передавался Job по значению. Правка в 1 файле (+1 −1), тесты зелёные."
+      },
+      {
+        "type": "prompt-idle"
+      }
+    ],
+    "headlessScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli --task \"поднять http-таймаут клиента с 5s до 15s\" --skip-questions"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">FIRE XLI PRO v4 — headless mode</span>"
+      },
+      {
+        "type": "step",
+        "text": "Собираю контекст (env, git diff, файлы клиента)..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "read_files",
+        "args": "\"./internal/httpclient\""
+      },
+      {
+        "type": "step",
+        "text": "PLAN: точечно поднять Timeout в конструкторе клиента",
+        "done": true
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "internal/httpclient/client.go"
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  client := &http.Client{"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     Timeout: 5 * time.Second,"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     Timeout: 15 * time.Second,"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go build ./... && go test ./internal/httpclient/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/internal/httpclient   0.201s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">Done!</span> <span class=\"t-comment\">(1 файл, +1 −1, exit code 0)</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "idle",
+        "path": "~/go/src/worker"
+      }
+    ],
+    "tuiTexts": {
+      "header1": "FIRE XLI PRO v4 · task: рефакторинг auth-middleware под JWT-ротацию · MCP: 6",
+      "logs": [
+        {
+          "cls": "t-ok",
+          "text": "✓ CODER: вынес проверку JWT в middleware/auth.go, добавлена ротация ключей"
+        },
+        {
+          "cls": "t-warn",
+          "text": "⟳ DEBUGGER: старые токены не инвалидируются при ротации — правлю кэш ключей"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ TESTER: 21/21 тестов зелёные, добавлен кейс на просроченный kid"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ OPTIMIZER: кэширование JWKS вынесено в отдельную горутину"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ REVIEWER: approve, замечаний нет"
+        }
+      ],
+      "statusBar": "Enter — run | q — skip | m — MCP | s — stream"
+    },
+    "nvimScripts": [
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">17  func LoadConfig(path string) *Config {</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-diff-rem\">18      c := parseYaml(path)</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-diff-rem\">19      return c.Timeout.Value // panic если Timeout == nil</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">20  }</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "agent",
+        "text": "floating window · buftype=prompt · questionnaire.lua"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">🔥 XLI — Task Clarification</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">════════════════════════════════════════════════════════</span>"
+      },
+      {
+        "type": "nvimq",
+        "q": "Как защититься от nil-панике в c.Timeout?",
+        "options": [
+          "Добавить nil-check и default-значение",
+          "Сделать Timeout обязательным полем в схеме YAML",
+          "Обернуть в recover() на верхнем уровне"
+        ],
+        "selectIndex": 0
+      },
+      {
+        "type": "step",
+        "text": "prompt_setcallback: применяю правку через XliCode buffer..."
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  func LoadConfig(path string) *Config {"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "      c := parseYaml(path)"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     return c.Timeout.Value"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     if c.Timeout == nil {"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+         return defaultTimeout"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     }"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     return c.Timeout.Value"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">✓ XliSuccess: буфер обновлён, LSP diagnostics чистые</span>"
+      }
+    ],
+    "terminalQnaScripts": [
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">🔥 XLI PRO — Task Clarification</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "question",
+        "q": "Какую стратегию retry выбрать для API-клиента?",
+        "options": [
+          "Exponential backoff с jitter",
+          "Фиксированная задержка (constant delay)",
+          "Без ретраев — fail fast"
+        ],
+        "selectIndex": 0
+      },
+      {
+        "type": "input",
+        "q": "Логировать каждую попытку ретрая?",
+        "default": "да",
+        "typeText": ""
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">✅ Clarification complete!</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "step",
+        "text": "Добавляю retryWithBackoff() в internal/apiclient"
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "internal/apiclient/client.go"
+      },
+      {
+        "type": "toolcall",
+        "tool": "write_file",
+        "args": "internal/apiclient/retry_test.go"
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go test ./internal/apiclient/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/internal/apiclient   0.512s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Готово: 2 файла изменены (+41 −3), 3 попытки с backoff + jitter, лог на каждую попытку",
+        "done": true
+      }
+    ],
+    "safeShellScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli \"почисти диск, там куча мусора накопилась\""
+      },
+      {
+        "type": "agent",
+        "text": "XLI Agent подключился к XGO Agent..."
+      },
+      {
+        "type": "step",
+        "text": "PLAN: найти и удалить старые логи и временные файлы"
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "find /var/log -name \"*.gz\" -mtime +30 -delete"
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok — удалено 14 файлов, освобождено 340 MB"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Модель предлагает более агрессивную очистку..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "sudo rm -rf /var/cache/*"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">SafeShell.is_dangerous(cmd) → \"sudo rm -rf\" найден в DANGEROUS_PATTERNS</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-err\">⛔ BLOCKED: Dangerous pattern detected: sudo rm -rf</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-err\">ValueError: Dangerous command blocked</span>"
+      },
+      {
+        "type": "step",
+        "text": "Команда отклонена SafeShell до выполнения. Откатываюсь к точечной очистке по маске.",
+        "done": true
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">◈ Освободил 340 MB через безопасную очистку логов. Более агрессивную команду (sudo rm -rf /var/cache/*) SafeShell заблокировал автоматически — такие правки только руками.</span>"
+      },
+      {
+        "type": "idle",
+        "path": "~/go/src/worker"
+      }
+    ],
+    "SUBSYSTEMS": [
+      {
+        "id": "healing",
+        "icon": "fa-heart-pulse",
+        "tag": "self_healing.py",
+        "title": "Self Healing",
+        "desc": "Авто-ретрай с анализом ошибки через LLM: не слепой повтор, а новый подход с учётом причины сбоя, exponential backoff + jitter.",
+        "features": [
+          "До 3 попыток с изменённым подходом",
+          "Backoff: base × 2^attempt + случайный jitter",
+          "Severity: low / medium / high / critical"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "go test ./... # падает нестабильно"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-err",
+                "text": "FAIL: TestFetch (context deadline exceeded)"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "SelfHealingEngine.analyze_error() через LLM..."
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "ErrorAnalysis(type=timeout, severity=medium, retryable=True)"
+              },
+              {
+                "cls": "t-comment",
+                "text": "suggested_approach: увеличить контекстный timeout перед вызовом"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Retry 1/3 (delay 2.3s) с изменённым подходом"
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec",
+            "args": "go test ./... -run TestFetch"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "ok  xli/worker  0.9s"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Исцелено за 1 попытку",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "sandbox",
+        "icon": "fa-box",
+        "tag": "sandbox.py",
+        "title": "Code Sandbox",
+        "desc": "Второй уровень защиты — уже для сгенерированного Python-кода, а не shell-команд: свой чёрный список, лимит памяти и timeout.",
+        "features": [
+          "Блокирует import os / socket / subprocess, eval/exec",
+          "Лимит памяти через resource, timeout через signal",
+          "Сеть отключена по умолчанию"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "Агент хочет выполнить сгенерированный код для парсинга JSON"
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec_code",
+            "args": "python: \"import socket; requests.get(...)\""
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">CodeSandbox.is_safe(code) → найден паттерн \"socket.\" / \"requests.\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-err\">⛔ BLOCKED: network access not allowed in sandbox</span>"
+          },
+          {
+            "type": "step",
+            "text": "Переписываю код без сетевых вызовов..."
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec_code",
+            "args": "python: \"json.loads(data)\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "ok — выполнено за 0.03s, память 4.2MB"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vector",
+        "icon": "fa-diagram-project",
+        "tag": "vector_store.py",
+        "title": "Vector Store",
+        "desc": "FAISS-индекс всей кодовой базы проекта — агент ищет релевантные файлы по смыслу запроса, а не только по имени или grep.",
+        "features": [
+          "Semantic search вместо ручного grep",
+          "Индексация инкрементальная по хэшу файла",
+          "CodeVectorStore — singleton на процесс"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"где у нас обрабатывается retry-логика?\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "vector_search",
+            "args": "\"retry logic backoff jitter\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "0.89  internal/apiclient/retry.go:12  retryWithBackoff()"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.71  internal/httpclient/client.go:40  Timeout config"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.64  cmd/worker/handler.go:18  error handling"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Нашёл по смыслу, а не по совпадению текста",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "memory",
+        "icon": "fa-brain",
+        "tag": "memory.py",
+        "title": "Conversation Memory",
+        "desc": "Персистентная память диалогов в SQLite — агент помнит прошлые сессии и ищет по истории, а не стартует с нуля каждый раз.",
+        "features": [
+          "SQLite, переживает рестарт процесса",
+          "Поиск по смыслу прошлых диалогов",
+          "ConversationMemory — singleton"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"мы же чинили похожий retry-баг раньше?\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "memory.search",
+            "args": "\"retry api client backoff\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "3 дня назад: \"добавить retry для API-клиента\" → exponential backoff + jitter"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Применяю тот же паттерн для нового кейса",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "skills",
+        "icon": "fa-graduation-cap",
+        "tag": "skills.py",
+        "title": "Skills Manager",
+        "desc": "200+ готовых «скиллов» — инструкций и сниппетов — в SQLite FTS, подгружаются лениво под конкретного агента и задачу.",
+        "features": [
+          "Full-text search по скиллам",
+          "Lazy load — не грузит всё сразу",
+          "get_skills_context(agent, max_skills=6)"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "CODER получает задачу: \"добавить retry в Go HTTP-клиент\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "skills.search",
+            "args": "\"go http retry backoff\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "0.94  go-retry-with-backoff.md"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.77  go-http-client-patterns.md"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.61  error-wrapping-go.md"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Топ-3 скилла добавлены в контекст агента",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "planner",
+        "icon": "fa-sitemap",
+        "tag": "planner.py",
+        "title": "Planner",
+        "desc": "Декомпозирует задачу через LLM в JSON-план с зависимостями между шагами и группами, которые можно выполнять параллельно.",
+        "features": [
+          "agent: coder / debugger / tester / optimizer / reviewer",
+          "depends_on — зависимости между шагами",
+          "parallel_groups — что можно параллельно"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"добавь rate limiting на все внешние вызовы\""
+          },
+          {
+            "type": "step",
+            "text": "PlanGenerator.generate_plan()..."
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"coder\",\"task\":\"добавить limiter\",\"depends_on\":[]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"tester\",\"task\":\"тесты лимитера\",\"depends_on\":[0]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"reviewer\",\"task\":\"код-ревью\",\"depends_on\":[0,1]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "parallel_groups: [[0], [1], [2]]"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "План готов, передаю CODER первый шаг",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "queue",
+        "icon": "fa-list-ol",
+        "tag": "queue.py",
+        "title": "Task Queue",
+        "desc": "Очередь фоновых задач с приоритетами и статусами — тяжёлые операции не блокируют основной диалог с агентом.",
+        "features": [
+          "Приоритеты: CRITICAL / HIGH / NORMAL / LOW",
+          "Статусы: pending → running → completed / failed",
+          "Персистентность между рестартами"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli --async \"прогнать полный e2e набор тестов\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "queue.add",
+            "args": "task_type=e2e_tests, priority=HIGH"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "Task a1b2c3 → status: pending"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Диалог не блокируется, задача ушла в очередь"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-warn",
+                "text": "Task a1b2c3 → status: running (started 09:14)"
+              },
+              {
+                "cls": "t-ok",
+                "text": "Task a1b2c3 → status: completed (142/142 passed)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "inbox",
+        "icon": "fa-inbox",
+        "tag": "inbox.py",
+        "title": "Team Inbox",
+        "desc": "JSONL-инбоксы между агентами (team_inbox/<project>/<team>/<agent>.jsonl) — агенты координируются напрямую, в духе OpenCode.",
+        "features": [
+          "Один JSONL-файл на агента",
+          "AgentCoordinator маршрутизирует сообщения",
+          "Разделение по project / team"
+        ],
+        "demo": [
+          {
+            "type": "agent",
+            "text": "CODER → TESTER (team_inbox/worker/default/tester.jsonl)"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">{\"from\":\"coder\",\"to\":\"tester\",\"text\":\"патч готов, прогони retry_test.go\"}</span>"
+          },
+          {
+            "type": "step",
+            "text": "TESTER читает инбокс..."
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec",
+            "args": "go test ./internal/apiclient/... -run TestRetry"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "PASS — 6/6"
+              }
+            ]
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">{\"from\":\"tester\",\"to\":\"coder\",\"text\":\"всё зелёное, можно мержить\"}</span>"
+          }
+        ]
+      },
+      {
+        "id": "git",
+        "icon": "fa-code-branch",
+        "tag": "git.py",
+        "title": "Git Integration",
+        "desc": "Встроенная git-интеграция: авто-коммит, ветки, stash, diff и лог — без выхода из диалога с агентом.",
+        "features": [
+          "auto_commit() с авто-сгенерированным сообщением",
+          "create_branch / stash / unstash",
+          "get_diff_since_last() и get_log()"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "Правка готова и тесты зелёные — коммичу"
+          },
+          {
+            "type": "toolcall",
+            "tool": "git.auto_commit",
+            "args": ""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "branch: fix/retry-backoff"
+              },
+              {
+                "cls": "t-ok",
+                "text": "[fix/retry-backoff a1c92e0] fix: add retry with backoff to apiclient"
+              },
+              {
+                "cls": "t-comment",
+                "text": "2 files changed, +41 −3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "idebug",
+        "icon": "fa-bug",
+        "tag": "interactive_debug.py",
+        "title": "Interactive Debug",
+        "desc": "Диалоговая отладка: перед фиксом агент задаёт уточняющие вопросы по ошибке, а не гадает по одному стектрейсу.",
+        "features": [
+          "DebugSession хранит вопросы и ответы",
+          "Статусы: active / resolved / abandoned",
+          "Отдельно от TerminalQuestionnaire — заточено под ошибки"
+        ],
+        "demo": [
+          {
+            "type": "raw",
+            "html": "<span class=\"t-err\">panic: runtime error: index out of range [3] with length 3</span>"
+          },
+          {
+            "type": "step",
+            "text": "InteractiveDebugger.start_debug(error, code)"
+          },
+          {
+            "type": "question",
+            "q": "Массив приходит из конфига или вычисляется в рантайме?",
+            "options": ["Из конфига (YAML/JSON)", "Вычисляется в рантайме", "Не уверен"],
+            "selectIndex": 0
+          },
+          {
+            "type": "step",
+            "text": "Причина: конфиг может быть короче ожидаемого — добавляю bounds-check",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "templates",
+        "icon": "fa-layer-group",
+        "tag": "templates.py",
+        "title": "Templates",
+        "desc": "Готовые шаблоны проектов «под ключ» — fastapi_crud, react_component, cli_tool — вместо генерации boilerplate с нуля.",
+        "features": [
+          "BUILT_IN_TEMPLATES со стандартными скелетами",
+          "TemplateEngine с подстановкой переменных",
+          "Экономит шаги агента на рутине"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"накидай CRUD для Order на FastAPI\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "templates.render",
+            "args": "\"fastapi_crud\", model_name=\"Order\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "created  order/models.py"
+              },
+              {
+                "cls": "t-ok",
+                "text": "created  order/routes.py"
+              },
+              {
+                "cls": "t-ok",
+                "text": "created  order/main.py"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Скелет готов за 1 шаг, дальше — кастомизация",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "promptlab",
+        "icon": "fa-flask",
+        "tag": "prompt_lab.py",
+        "title": "Prompt Lab",
+        "desc": "A/B-тестирование системных промптов: несколько вариантов гоняются параллельно, побеждает вариант с лучшим score.",
+        "features": [
+          "PromptVariant хранит score и число прогонов",
+          "PromptExperiment — история экспериментов",
+          "Победитель применяется автоматически"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "PromptLab.run_experiment(\"coder_system_prompt\")"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "variant A (текущий): score 0.74, runs 128"
+              },
+              {
+                "cls": "t-comment",
+                "text": "variant B (короче, с примером диффа): score 0.81, runs 128"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Winner: variant B — применяю для CODER",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "streaming",
+        "icon": "fa-tower-broadcast",
+        "tag": "streaming.py",
+        "title": "Streaming",
+        "desc": "Единый механизм стриминга ответа по чанкам, с отдельными адаптерами под TUI, Nvim и Headless — без буферизации всего ответа целиком.",
+        "features": [
+          "StreamChunk — единый формат данных для всех платформ",
+          "Tui / Nvim / Headless StreamingHandler",
+          "Первый чанк на экране раньше, чем ответ дописан"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "HeadlessStreamingHandler.on_chunk() — вывод по мере генерации"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 1/4 → \"Читаю internal/apiclient...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 2/4 → \"Добавляю retryWithBackoff()...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 3/4 → \"Гоняю тесты...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-ok\">chunk 4/4 → \"Готово, 2 файла изменены\"</span>"
+          }
+        ]
+      },
+      {
+        "id": "logger",
+        "icon": "fa-file-lines",
+        "tag": "logger.py",
+        "title": "Structured Logger",
+        "desc": "Тот самый движок, который красит и форматирует всё, что ты видел в демо выше: баннеры, цветной вывод, JSONL-лог и отдельный канал ошибок для Nvim.",
+        "features": [
+          "ANSI-цвета по компонентам (skills, git, sandbox...)",
+          "Пишет одновременно: plain + JSONL + errors",
+          "log_nvim_error() — отдельный канал для плагина"
+        ],
+        "demo": [
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">StructuredLogger(\"xli.apiclient\").log_structured(...)</span>"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "[09:14:02] INFO  apiclient  Retrying request (attempt 1/3)"
+              },
+              {
+                "cls": "t-warn",
+                "text": "[09:14:04] WARN  apiclient  Timeout after 5s, backing off"
+              },
+              {
+                "cls": "t-ok",
+                "text": "[09:14:06] INFO  apiclient  Request succeeded"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Та же запись параллельно ушла в ~/.xli/logs/xli.jsonl",
+            "done": true
+          }
+        ]
+      }
+    ],
+    "xgoReasoningScripts": [
+      {
+        "icon": "✧",
+        "text": "Анализирую запрос...",
+        "tool": null
+      },
+      {
+        "icon": "◎",
+        "text": "Нужны актуальные котировки USD за 7 дней",
+        "tool": "web_search(\"USD RUB история 7 дней\")"
+      },
+      {
+        "icon": "⌘",
+        "text": "Считаю дневное изменение и волатильность",
+        "tool": "exec_code(python)"
+      },
+      {
+        "icon": "▦",
+        "text": "Строю линейный график по курсу за неделю",
+        "tool": "chart(type=line)"
+      },
+      {
+        "icon": "✦",
+        "text": "Готово",
+        "tool": null
+      }
+    ]
+  },
+  "en": {
+    "xliTerminalScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli \"why is the build failing in ./cmd/worker, fix it\""
+      },
+      {
+        "type": "agent",
+        "text": "XLI Agent connected to XGO Agent..."
+      },
+      {
+        "type": "plain",
+        "text": ""
+      },
+      {
+        "type": "step",
+        "text": "Analyzing request..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "read_files",
+        "args": "\"./cmd/worker\""
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-comment",
+            "text": "# go build ./..."
+          },
+          {
+            "cls": "t-err",
+            "text": "# cmd/worker/handler.go:42:19: cannot use job (variable of type Job)"
+          },
+          {
+            "cls": "t-err",
+            "text": "#   as *Job value in argument to process"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Root cause found: type mismatch in the process() call"
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "cmd/worker/handler.go"
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  func (w *Worker) Handle(job Job) error {"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     return process(job)"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     return process(&job)"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go test ./cmd/worker/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/cmd/worker   0.412s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Done",
+        "done": true
+      },
+      {
+        "type": "answer",
+        "text": "Fixed it: process() expected *Job, but Job was passed by value. 1-file patch (+1 −1), tests green."
+      },
+      {
+        "type": "prompt-idle"
+      }
+    ],
+    "headlessScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli --task \"raise the http client timeout from 5s to 15s\" --skip-questions"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">FIRE XLI PRO v4 — headless mode</span>"
+      },
+      {
+        "type": "step",
+        "text": "Gathering context (env, git diff, client files)..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "read_files",
+        "args": "\"./internal/httpclient\""
+      },
+      {
+        "type": "step",
+        "text": "PLAN: bump Timeout in the client constructor",
+        "done": true
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "internal/httpclient/client.go"
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  client := &http.Client{"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     Timeout: 5 * time.Second,"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     Timeout: 15 * time.Second,"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go build ./... && go test ./internal/httpclient/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/internal/httpclient   0.201s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">Done!</span> <span class=\"t-comment\">(1 file, +1 −1, exit code 0)</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "idle",
+        "path": "~/go/src/worker"
+      }
+    ],
+    "tuiTexts": {
+      "header1": "FIRE XLI PRO v4 · task: refactor auth-middleware for JWT key rotation · MCP: 6",
+      "logs": [
+        {
+          "cls": "t-ok",
+          "text": "✓ CODER: moved JWT check into middleware/auth.go, added key rotation"
+        },
+        {
+          "cls": "t-warn",
+          "text": "⟳ DEBUGGER: old tokens are not invalidated on rotation — patching key cache"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ TESTER: 21/21 tests green, added a case for expired kid"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ OPTIMIZER: moved JWKS caching into a dedicated goroutine"
+        },
+        {
+          "cls": "t-ok",
+          "text": "✓ REVIEWER: approved, no comments"
+        }
+      ],
+      "statusBar": "Enter — run | q — skip | m — MCP | s — stream"
+    },
+    "nvimScripts": [
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">17  func LoadConfig(path string) *Config {</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-diff-rem\">18      c := parseYaml(path)</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-diff-rem\">19      return c.Timeout.Value // panics if Timeout == nil</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">20  }</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "agent",
+        "text": "floating window · buftype=prompt · questionnaire.lua"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">🔥 XLI — Task Clarification</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">════════════════════════════════════════════════════════</span>"
+      },
+      {
+        "type": "nvimq",
+        "q": "How should we guard against a nil-panic on c.Timeout?",
+        "options": [
+          "Add a nil-check with a default value",
+          "Make Timeout a required field in the YAML schema",
+          "Wrap it in a top-level recover()"
+        ],
+        "selectIndex": 0
+      },
+      {
+        "type": "step",
+        "text": "prompt_setcallback: applying the fix via the XliCode buffer..."
+      },
+      {
+        "type": "diff",
+        "lines": [
+          {
+            "cls": "t-diff-ctx",
+            "text": "  func LoadConfig(path string) *Config {"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "      c := parseYaml(path)"
+          },
+          {
+            "cls": "t-diff-rem",
+            "text": "-     return c.Timeout.Value"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     if c.Timeout == nil {"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+         return defaultTimeout"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     }"
+          },
+          {
+            "cls": "t-diff-add",
+            "text": "+     return c.Timeout.Value"
+          },
+          {
+            "cls": "t-diff-ctx",
+            "text": "  }"
+          }
+        ]
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">✓ XliSuccess: buffer updated, LSP diagnostics clean</span>"
+      }
+    ],
+    "terminalQnaScripts": [
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">🔥 XLI PRO — Task Clarification</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "question",
+        "q": "Which retry strategy for the API client?",
+        "options": [
+          "Exponential backoff with jitter",
+          "Fixed delay (constant delay)",
+          "No retries — fail fast"
+        ],
+        "selectIndex": 0
+      },
+      {
+        "type": "input",
+        "q": "Log every retry attempt?",
+        "default": "yes",
+        "typeText": ""
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-ok\">✅ Clarification complete!</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">============================================================</span>"
+      },
+      {
+        "type": "plain"
+      },
+      {
+        "type": "step",
+        "text": "Adding retryWithBackoff() to internal/apiclient"
+      },
+      {
+        "type": "toolcall",
+        "tool": "edit_file",
+        "args": "internal/apiclient/client.go"
+      },
+      {
+        "type": "toolcall",
+        "tool": "write_file",
+        "args": "internal/apiclient/retry_test.go"
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "go test ./internal/apiclient/..."
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok   xli/internal/apiclient   0.512s"
+          },
+          {
+            "cls": "t-ok",
+            "text": "PASS"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Done: 2 files changed (+41 −3), 3 attempts with backoff + jitter, each attempt logged",
+        "done": true
+      }
+    ],
+    "safeShellScripts": [
+      {
+        "type": "prompt",
+        "path": "~/go/src/worker",
+        "cmd": "xli \"clean up disk space, it's full of junk\""
+      },
+      {
+        "type": "agent",
+        "text": "XLI Agent connected to XGO Agent..."
+      },
+      {
+        "type": "step",
+        "text": "PLAN: find and remove old logs and temp files"
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "find /var/log -name \"*.gz\" -mtime +30 -delete"
+      },
+      {
+        "type": "out",
+        "lines": [
+          {
+            "cls": "t-ok",
+            "text": "ok — removed 14 files, freed 340 MB"
+          }
+        ]
+      },
+      {
+        "type": "step",
+        "text": "Model proposes a more aggressive cleanup..."
+      },
+      {
+        "type": "toolcall",
+        "tool": "exec",
+        "args": "sudo rm -rf /var/cache/*"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-comment\">SafeShell.is_dangerous(cmd) → \"sudo rm -rf\" matched in DANGEROUS_PATTERNS</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-err\">⛔ BLOCKED: Dangerous pattern detected: sudo rm -rf</span>"
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-err\">ValueError: Dangerous command blocked</span>"
+      },
+      {
+        "type": "step",
+        "text": "Command rejected by SafeShell before execution. Falling back to the targeted cleanup.",
+        "done": true
+      },
+      {
+        "type": "raw",
+        "html": "<span class=\"t-agent\">◈ Freed 340 MB with a safe log cleanup. SafeShell auto-blocked the more aggressive command (sudo rm -rf /var/cache/*) — that kind of change needs a human.</span>"
+      },
+      {
+        "type": "idle",
+        "path": "~/go/src/worker"
+      }
+    ],
+    "SUBSYSTEMS": [
+      {
+        "id": "healing",
+        "icon": "fa-heart-pulse",
+        "tag": "self_healing.py",
+        "title": "Self Healing",
+        "desc": "Auto-retry with LLM-based error analysis: not a blind repeat, but a new approach informed by the root cause, with exponential backoff + jitter.",
+        "features": [
+          "Up to 3 attempts with a revised approach",
+          "Backoff: base × 2^attempt + random jitter",
+          "Severity: low / medium / high / critical"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "go test ./... # flaky failure"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-err",
+                "text": "FAIL: TestFetch (context deadline exceeded)"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "SelfHealingEngine.analyze_error() via LLM..."
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "ErrorAnalysis(type=timeout, severity=medium, retryable=True)"
+              },
+              {
+                "cls": "t-comment",
+                "text": "suggested_approach: bump the context timeout before the call"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Retry 1/3 (delay 2.3s) with a revised approach"
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec",
+            "args": "go test ./... -run TestFetch"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "ok  xli/worker  0.9s"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Healed after 1 attempt",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "sandbox",
+        "icon": "fa-box",
+        "tag": "sandbox.py",
+        "title": "Code Sandbox",
+        "desc": "A second layer of defense — this time for generated Python code, not shell commands: its own blacklist, a memory limit and a timeout.",
+        "features": [
+          "Blocks import os / socket / subprocess, eval/exec",
+          "Memory limit via resource, timeout via signal",
+          "Network disabled by default"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "Agent wants to run generated code to parse some JSON"
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec_code",
+            "args": "python: \"import socket; requests.get(...)\""
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">CodeSandbox.is_safe(code) → matched pattern \"socket.\" / \"requests.\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-err\">⛔ BLOCKED: network access not allowed in sandbox</span>"
+          },
+          {
+            "type": "step",
+            "text": "Rewriting the code without network calls..."
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec_code",
+            "args": "python: \"json.loads(data)\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "ok — ran in 0.03s, 4.2MB memory"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vector",
+        "icon": "fa-diagram-project",
+        "tag": "vector_store.py",
+        "title": "Vector Store",
+        "desc": "A FAISS index of the entire project codebase — the agent finds relevant files by meaning, not just by name or grep.",
+        "features": [
+          "Semantic search instead of manual grep",
+          "Incremental indexing by file hash",
+          "CodeVectorStore — a process-wide singleton"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"where do we handle retry logic?\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "vector_search",
+            "args": "\"retry logic backoff jitter\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "0.89  internal/apiclient/retry.go:12  retryWithBackoff()"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.71  internal/httpclient/client.go:40  Timeout config"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.64  cmd/worker/handler.go:18  error handling"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Found by meaning, not by text match",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "memory",
+        "icon": "fa-brain",
+        "tag": "memory.py",
+        "title": "Conversation Memory",
+        "desc": "Persistent conversation memory in SQLite — the agent remembers past sessions and searches history instead of starting from zero every time.",
+        "features": [
+          "SQLite, survives a process restart",
+          "Search past conversations by meaning",
+          "ConversationMemory — a singleton"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"didn't we fix a similar retry bug before?\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "memory.search",
+            "args": "\"retry api client backoff\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "3 days ago: \"add retry to the API client\" → exponential backoff + jitter"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Applying the same pattern to the new case",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "skills",
+        "icon": "fa-graduation-cap",
+        "tag": "skills.py",
+        "title": "Skills Manager",
+        "desc": "200+ ready-made \"skills\" — instructions and snippets — in SQLite FTS, lazily loaded for the specific agent and task.",
+        "features": [
+          "Full-text search over skills",
+          "Lazy load — never loads everything at once",
+          "get_skills_context(agent, max_skills=6)"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "CODER gets the task: \"add retry to the Go HTTP client\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "skills.search",
+            "args": "\"go http retry backoff\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "0.94  go-retry-with-backoff.md"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.77  go-http-client-patterns.md"
+              },
+              {
+                "cls": "t-comment",
+                "text": "0.61  error-wrapping-go.md"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Top 3 skills added to the agent context",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "planner",
+        "icon": "fa-sitemap",
+        "tag": "planner.py",
+        "title": "Planner",
+        "desc": "Decomposes a task via the LLM into a JSON plan with step dependencies and groups that can run in parallel.",
+        "features": [
+          "agent: coder / debugger / tester / optimizer / reviewer",
+          "depends_on — dependencies between steps",
+          "parallel_groups — what can run in parallel"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"add rate limiting to all external calls\""
+          },
+          {
+            "type": "step",
+            "text": "PlanGenerator.generate_plan()..."
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"coder\",\"task\":\"add limiter\",\"depends_on\":[]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"tester\",\"task\":\"limiter tests\",\"depends_on\":[0]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "{\"agent\":\"reviewer\",\"task\":\"code review\",\"depends_on\":[0,1]}"
+              },
+              {
+                "cls": "t-comment",
+                "text": "parallel_groups: [[0], [1], [2]]"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Plan ready, handing step 1 to CODER",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "queue",
+        "icon": "fa-list-ol",
+        "tag": "queue.py",
+        "title": "Task Queue",
+        "desc": "A background task queue with priorities and statuses — heavy operations never block the main conversation with the agent.",
+        "features": [
+          "Priorities: CRITICAL / HIGH / NORMAL / LOW",
+          "Statuses: pending → running → completed / failed",
+          "Persists across restarts"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli --async \"run the full e2e test suite\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "queue.add",
+            "args": "task_type=e2e_tests, priority=HIGH"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "Task a1b2c3 → status: pending"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Conversation stays unblocked, task went to the queue"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-warn",
+                "text": "Task a1b2c3 → status: running (started 09:14)"
+              },
+              {
+                "cls": "t-ok",
+                "text": "Task a1b2c3 → status: completed (142/142 passed)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "inbox",
+        "icon": "fa-inbox",
+        "tag": "inbox.py",
+        "title": "Team Inbox",
+        "desc": "JSONL inboxes between agents (team_inbox/<project>/<team>/<agent>.jsonl) — agents coordinate directly, OpenCode-style.",
+        "features": [
+          "One JSONL file per agent",
+          "AgentCoordinator routes messages",
+          "Split by project / team"
+        ],
+        "demo": [
+          {
+            "type": "agent",
+            "text": "CODER → TESTER (team_inbox/worker/default/tester.jsonl)"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">{\"from\":\"coder\",\"to\":\"tester\",\"text\":\"patch ready, run retry_test.go\"}</span>"
+          },
+          {
+            "type": "step",
+            "text": "TESTER reads the inbox..."
+          },
+          {
+            "type": "toolcall",
+            "tool": "exec",
+            "args": "go test ./internal/apiclient/... -run TestRetry"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "PASS — 6/6"
+              }
+            ]
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">{\"from\":\"tester\",\"to\":\"coder\",\"text\":\"all green, safe to merge\"}</span>"
+          }
+        ]
+      },
+      {
+        "id": "git",
+        "icon": "fa-code-branch",
+        "tag": "git.py",
+        "title": "Git Integration",
+        "desc": "Built-in git integration: auto-commit, branches, stash, diff and log — without leaving the conversation with the agent.",
+        "features": [
+          "auto_commit() with an auto-generated message",
+          "create_branch / stash / unstash",
+          "get_diff_since_last() and get_log()"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "Patch is ready and tests are green — committing"
+          },
+          {
+            "type": "toolcall",
+            "tool": "git.auto_commit",
+            "args": ""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "branch: fix/retry-backoff"
+              },
+              {
+                "cls": "t-ok",
+                "text": "[fix/retry-backoff a1c92e0] fix: add retry with backoff to apiclient"
+              },
+              {
+                "cls": "t-comment",
+                "text": "2 files changed, +41 −3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "idebug",
+        "icon": "fa-bug",
+        "tag": "interactive_debug.py",
+        "title": "Interactive Debug",
+        "desc": "Dialog-based debugging: before proposing a fix the agent asks clarifying questions about the error instead of guessing from a stack trace alone.",
+        "features": [
+          "DebugSession stores questions and answers",
+          "Statuses: active / resolved / abandoned",
+          "Separate from TerminalQuestionnaire — built for errors specifically"
+        ],
+        "demo": [
+          {
+            "type": "raw",
+            "html": "<span class=\"t-err\">panic: runtime error: index out of range [3] with length 3</span>"
+          },
+          {
+            "type": "step",
+            "text": "InteractiveDebugger.start_debug(error, code)"
+          },
+          {
+            "type": "question",
+            "q": "Does the array come from config or get computed at runtime?",
+            "options": ["From config (YAML/JSON)", "Computed at runtime", "Not sure"],
+            "selectIndex": 0
+          },
+          {
+            "type": "step",
+            "text": "Root cause: config can be shorter than expected — adding a bounds check",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "templates",
+        "icon": "fa-layer-group",
+        "tag": "templates.py",
+        "title": "Templates",
+        "desc": "Ready-made \"turnkey\" project templates — fastapi_crud, react_component, cli_tool — instead of generating boilerplate from scratch.",
+        "features": [
+          "BUILT_IN_TEMPLATES with standard skeletons",
+          "TemplateEngine with variable substitution",
+          "Saves agent steps on boilerplate"
+        ],
+        "demo": [
+          {
+            "type": "prompt",
+            "path": "~/go/src/worker",
+            "cmd": "xli \"scaffold a CRUD for Order in FastAPI\""
+          },
+          {
+            "type": "toolcall",
+            "tool": "templates.render",
+            "args": "\"fastapi_crud\", model_name=\"Order\""
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-ok",
+                "text": "created  order/models.py"
+              },
+              {
+                "cls": "t-ok",
+                "text": "created  order/routes.py"
+              },
+              {
+                "cls": "t-ok",
+                "text": "created  order/main.py"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Skeleton ready in 1 step, next comes customization",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "promptlab",
+        "icon": "fa-flask",
+        "tag": "prompt_lab.py",
+        "title": "Prompt Lab",
+        "desc": "A/B testing for system prompts: several variants run in parallel, and the one with the best score wins.",
+        "features": [
+          "PromptVariant tracks score and run count",
+          "PromptExperiment — experiment history",
+          "Winner is applied automatically"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "PromptLab.run_experiment(\"coder_system_prompt\")"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "variant A (current): score 0.74, runs 128"
+              },
+              {
+                "cls": "t-comment",
+                "text": "variant B (shorter, with a diff example): score 0.81, runs 128"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "Winner: variant B — applying it for CODER",
+            "done": true
+          }
+        ]
+      },
+      {
+        "id": "streaming",
+        "icon": "fa-tower-broadcast",
+        "tag": "streaming.py",
+        "title": "Streaming",
+        "desc": "A single chunked response-streaming mechanism, with separate adapters for TUI, Nvim and Headless — no buffering the whole response at once.",
+        "features": [
+          "StreamChunk — one data format across platforms",
+          "Tui / Nvim / Headless StreamingHandler",
+          "First chunk on screen before the answer finishes"
+        ],
+        "demo": [
+          {
+            "type": "step",
+            "text": "HeadlessStreamingHandler.on_chunk() — printed as it's generated"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 1/4 → \"Reading internal/apiclient...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 2/4 → \"Adding retryWithBackoff()...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">chunk 3/4 → \"Running tests...\"</span>"
+          },
+          {
+            "type": "raw",
+            "html": "<span class=\"t-ok\">chunk 4/4 → \"Done, 2 files changed\"</span>"
+          }
+        ]
+      },
+      {
+        "id": "logger",
+        "icon": "fa-file-lines",
+        "tag": "logger.py",
+        "title": "Structured Logger",
+        "desc": "The very engine that colors and formats everything you've seen in the demos above: banners, colored output, a JSONL log and a separate error channel for Nvim.",
+        "features": [
+          "ANSI colors per component (skills, git, sandbox...)",
+          "Writes to plain + JSONL + errors simultaneously",
+          "log_nvim_error() — a dedicated channel for the plugin"
+        ],
+        "demo": [
+          {
+            "type": "raw",
+            "html": "<span class=\"t-comment\">StructuredLogger(\"xli.apiclient\").log_structured(...)</span>"
+          },
+          {
+            "type": "out",
+            "lines": [
+              {
+                "cls": "t-comment",
+                "text": "[09:14:02] INFO  apiclient  Retrying request (attempt 1/3)"
+              },
+              {
+                "cls": "t-warn",
+                "text": "[09:14:04] WARN  apiclient  Timeout after 5s, backing off"
+              },
+              {
+                "cls": "t-ok",
+                "text": "[09:14:06] INFO  apiclient  Request succeeded"
+              }
+            ]
+          },
+          {
+            "type": "step",
+            "text": "The same entry was written to ~/.xli/logs/xli.jsonl too",
+            "done": true
+          }
+        ]
+      }
+    ],
+    "xgoReasoningScripts": [
+      {
+        "icon": "✧",
+        "text": "Analyzing request...",
+        "tool": null
+      },
+      {
+        "icon": "◎",
+        "text": "Need current USD quotes for the last 7 days",
+        "tool": "web_search(\"USD RUB rate history 7 days\")"
+      },
+      {
+        "icon": "⌘",
+        "text": "Computing daily change and volatility",
+        "tool": "exec_code(python)"
+      },
+      {
+        "icon": "▦",
+        "text": "Building a line chart for the weekly rate",
+        "tool": "chart(type=line)"
+      },
+      {
+        "icon": "✦",
+        "text": "Done",
+        "tool": null
+      }
+    ]
+  }
+}

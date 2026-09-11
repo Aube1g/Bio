@@ -1,0 +1,419 @@
+/* The portal uses a darker arcade palette; the portfolio keeps its own accent. */
+.games-page {
+  --arcade-grid: #cba5ff06;
+}
+.portal-shell {
+  background: color-mix(in srgb, var(--surface) 48%, var(--bg));
+  border-radius: 36px;
+}
+.lobby-hero {
+  background:
+    radial-gradient(ellipse at 82% 38%, #8055b330, transparent 52%),
+    linear-gradient(140deg, #282037, #1a1728 65%);
+  border: 1px solid #b694d92a;
+  border-radius: 30px 30px 62px 30px;
+}
+.lobby-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 19px;
+  right: 24px;
+  width: 27px;
+  height: 5px;
+  border-radius: 8px;
+  background: #c6afd44f;
+}
+.lobby-hero h1 em {
+  color: #d7eda7;
+}
+.hero-grid {
+  background-image:
+    linear-gradient(#d7beef06 1px, transparent 1px), linear-gradient(90deg, #d7beef06 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.hero-card {
+  box-shadow: 0 14px 26px #0003;
+}
+.hero-cube-camera {
+  filter: drop-shadow(0 20px 18px #0005);
+}
+.plinko-feature {
+  background: radial-gradient(ellipse at 55% 38%, #b6d6701b, transparent 60%), #20251c;
+  border-color: #c3d49230;
+  border-radius: 30px 30px 30px 58px;
+}
+.mini-plinko {
+  filter: drop-shadow(0 10px 18px #d8ed9f10);
+}
+.game-card {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--card-tone, #a795cb) 7%, var(--card)),
+    var(--card)
+  );
+  border-radius: 26px;
+  transition:
+    border-color 240ms,
+    box-shadow 240ms;
+}
+.game-card[data-card='blackjack'] {
+  --card-tone: #c8b2fa;
+}
+.game-card[data-card='slots'] {
+  --card-tone: #e7b98d;
+}
+.game-card[data-card='dice'] {
+  --card-tone: #97d3e8;
+}
+.game-card[data-card='plinko'] {
+  --card-tone: #c5dd91;
+}
+.game-card:hover {
+  border-color: color-mix(in srgb, var(--card-tone) 44%, transparent);
+  box-shadow: 0 12px 36px #0002;
+}
+.game-card .card-launch {
+  color: var(--card-tone);
+  background: color-mix(in srgb, var(--card-tone) 8%, transparent);
+  border-color: color-mix(in srgb, var(--card-tone) 24%, transparent);
+}
+.game-card-main:hover .game-art {
+  transform: translateY(-5px) rotate(-3deg);
+}
+.game-art {
+  transition: transform 480ms var(--spring);
+}
+.game-scene {
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      color-mix(in srgb, var(--felt-bright) 66%, transparent),
+      transparent 70%
+    ),
+    var(--surface);
+}
+.scene-topline {
+  padding-bottom: 4px;
+}
+.scene-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.scene-sound {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+}
+.scene-sound .icon {
+  width: 15px;
+  height: 15px;
+}
+.scene-sound[aria-pressed='true'] {
+  background: var(--primary);
+  color: white;
+}
+.game-heading-copy {
+  position: relative;
+  padding-left: 62px;
+}
+.active-game-glyph {
+  position: absolute;
+  left: 0;
+  top: 7px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 50px;
+  border-radius: 16px;
+  color: var(--primary-text);
+  background: color-mix(in srgb, var(--primary) 12%, var(--panel));
+  border: 1px solid var(--line);
+}
+.active-game-glyph .icon {
+  width: 24px;
+  height: 24px;
+}
+[data-game='plinko'] .active-game-glyph {
+  color: var(--lime);
+}
+[data-game='dice'] .active-game-glyph {
+  color: var(--cyan);
+}
+[data-game='slots'] .active-game-glyph {
+  color: var(--gold);
+}
+.plinko-canvas-wrap {
+  margin: 12px 20px 0;
+  height: 450px;
+}
+.plinko-bins {
+  height: 36px;
+  bottom: -2px;
+}
+.plinko-bin {
+  padding: 0 1px;
+  height: 32px;
+  min-height: 32px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--bin-font, 9px);
+  letter-spacing: -0.15px;
+  cursor: pointer;
+  box-shadow: inset 0 1px #ffffff1a;
+  border-top: 1px solid #ffffff10;
+  border-bottom-width: 3px;
+  transition: filter 180ms;
+}
+.plinko-bin span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+.plinko-bin.hot {
+  background: #de9a8f;
+  color: #391d1b;
+}
+.plinko-bin.warm {
+  background: #dfcc91;
+  color: #382a15;
+}
+.plinko-bin.cool {
+  background: #4b3f5b;
+  color: #eee2fc;
+}
+.plinko-bin.is-last {
+  box-shadow:
+    0 0 0 2px var(--lime),
+    0 0 20px #d4ef8e30;
+  z-index: 2;
+}
+.plinko-bin.is-inspected {
+  filter: brightness(1.13);
+}
+.plinko-bin:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+  z-index: 3;
+}
+.plinko-inspector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-height: 51px;
+  margin: 11px 28px 0;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 10px;
+  color: var(--muted);
+}
+.plinko-inspector > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plinko-inspector .icon {
+  width: 15px;
+  height: 15px;
+}
+.plinko-inspector > strong {
+  font-size: 21px;
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: -0.6px;
+}
+.plinko-inspector b {
+  font-weight: 800;
+  color: var(--ink);
+}
+.board-caption {
+  padding-top: 12px;
+}
+.bet-panel {
+  border-radius: 27px;
+  background: color-mix(in srgb, var(--panel) 45%, var(--surface));
+}
+.play-button {
+  border-radius: 19px;
+  min-height: 57px;
+  box-shadow:
+    0 5px 0 color-mix(in srgb, var(--lime) 50%, #111),
+    0 12px 20px #0002;
+  transition:
+    background 160ms,
+    box-shadow 160ms;
+}
+.play-button:active:not(:disabled) {
+  box-shadow:
+    0 2px 0 color-mix(in srgb, var(--lime) 50%, #111),
+    0 4px 10px #0002;
+}
+.play-button:disabled {
+  box-shadow: none;
+}
+.play-key {
+  font:
+    12px ui-monospace,
+    monospace;
+}
+.result-strip[data-result='win'] {
+  border-color: #aacd7540;
+  background: color-mix(in srgb, var(--lime) 6%, var(--surface));
+}
+.playing-card {
+  animation: none;
+}
+.dice-orbit::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 30px;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #0004;
+  filter: blur(15px);
+}
+.guest-button {
+  min-height: 57px;
+  border-radius: 18px;
+}
+.guest-button[data-busy='true'] > .icon:last-child {
+  animation: guest-loading 800ms linear infinite;
+}
+@keyframes guest-loading {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.game-island {
+  border-color: #b89ce127;
+  background: #141119;
+  border-radius: 28px;
+}
+.game-island[data-open='true'] {
+  border-radius: 29px;
+}
+.island-panel {
+  transform-origin: 50% 0;
+}
+.surface-incoming {
+  transform-origin: 50% 25%;
+}
+.surface-transition {
+  overflow: clip;
+}
+body:has(.surface-transition) .ambient *,
+body:has(dialog[open]) .ambient * {
+  animation-play-state: paused;
+}
+.portal-dialog.morphing::backdrop {
+  backdrop-filter: none;
+}
+.settings-dialog #guest-warning:empty {
+  display: none;
+}
+[data-theme='light'] .lobby-hero {
+  background:
+    radial-gradient(ellipse at 82% 38%, #c6afe954, transparent 60%), linear-gradient(135deg, #eeebf7, #e2d7f1);
+  border-color: #ab8dd336;
+}
+[data-theme='light'] .lobby-hero h1 em {
+  color: #4b6428;
+}
+[data-theme='light'] .plinko-feature {
+  background: #e4ead7;
+  border-color: #748f4430;
+}
+[data-theme='light'] .game-card {
+  --card: #fff;
+}
+[data-theme='light'] .game-card .card-launch {
+  color: var(--ink);
+}
+[data-theme='light'] .active-game-glyph {
+  color: var(--ink);
+}
+[data-theme='light'] .game-island {
+  color: #f2edf9;
+}
+@media (max-width: 850px) {
+  .plinko-canvas-wrap {
+    height: 370px;
+    margin-inline: 12px;
+  }
+}
+@media (max-width: 620px) {
+  .lobby-hero {
+    border-radius: 25px 25px 44px 25px;
+  }
+  .plinko-feature {
+    border-radius: 24px;
+  }
+  .game-heading-copy {
+    padding-left: 48px;
+  }
+  .active-game-glyph {
+    width: 36px;
+    height: 40px;
+    border-radius: 12px;
+    top: 3px;
+  }
+  .active-game-glyph .icon {
+    width: 19px;
+    height: 19px;
+  }
+  .game-heading-copy h1 {
+    font-size: 29px;
+  }
+  .game-heading-copy > p:last-child {
+    font-size: 10px;
+    max-width: 230px;
+  }
+  .plinko-canvas-wrap {
+    margin-inline: 10px;
+    height: 345px;
+  }
+  .plinko-inspector {
+    margin-inline: 12px;
+    gap: 12px;
+    padding-inline: 9px;
+    font-size: 9px;
+  }
+  .plinko-inspector .icon {
+    display: none;
+  }
+  .plinko-inspector > strong {
+    font-size: 19px;
+  }
+  .scene-tools {
+    gap: 7px;
+  }
+  .scene-sound {
+    width: 30px;
+    height: 30px;
+  }
+  .scene-topline {
+    padding-right: 14px;
+  }
+  .play-button {
+    min-height: 49px;
+  }
+}
+[data-motion='off'] .guest-button .icon {
+  animation: none;
+}
+
+[data-theme='light'] .plinko-feature :is(.eyebrow, p) {
+  color: #526036;
+}

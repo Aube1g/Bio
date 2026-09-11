@@ -1,0 +1,97 @@
+<dialog id="game-settings-dialog" class="portal-dialog settings-dialog" aria-labelledby="game-settings-title">
+  <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+    <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+  </button>
+  <div class="dialog-content">
+    <p class="eyebrow" data-t="yourRules">ТВОЁ ПРОСТРАНСТВО · ТВОИ ПРАВИЛА</p>
+    <h2 id="game-settings-title" data-t="settingsTitle">На твоей волне.</h2>
+    <div class="settings-language">
+      <span
+        ><svg class="icon" aria-hidden="true"><use href="#i-globe" /></svg
+        ><span data-t="language">Язык</span></span
+      >
+      <div class="segmented spring-group">
+        <button type="button" data-language="ru" aria-pressed="true">RU</button
+        ><button type="button" data-language="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <div class="settings-grid">{{game-toggles}}</div>
+    <div class="volume-row">
+      <label for="sound-volume" data-t="volume">Громкость</label
+      ><input id="sound-volume" type="range" class="range-control" min="0" max="100" value="25" /><output
+        id="sound-volume-value"
+        >25%</output
+      >
+    </div>
+    <div class="settings-block">
+      <h3>
+        <svg class="icon" aria-hidden="true"><use href="#i-palette" /></svg
+        ><span data-t="tableColor">Цвет игрового стола</span>
+      </h3>
+      <div class="table-swatches" role="group" aria-label="Цвет стола">
+        <button type="button" data-table-color="royal" aria-pressed="true" aria-label="Фиолетовый">
+          <i></i></button
+        ><button type="button" data-table-color="green" aria-pressed="false" aria-label="Зелёный">
+          <i></i></button
+        ><button type="button" data-table-color="crimson" aria-pressed="false" aria-label="Красный">
+          <i></i></button
+        ><button type="button" data-table-color="midnight" aria-pressed="false" aria-label="Синий">
+          <i></i></button
+        ><button type="button" data-table-color="gold" aria-pressed="false" aria-label="Золотой">
+          <i></i>
+        </button>
+      </div>
+    </div>
+    <div class="settings-block">
+      <h3>
+        <svg class="icon" aria-hidden="true"><use href="#i-star" /></svg
+        ><span data-t="atmosphere">Атмосфера</span>
+      </h3>
+      <div class="segmented background-switch spring-group">
+        <button type="button" data-background="constellation" aria-pressed="true">
+          <span class="bg-sample constellation"></span><span data-t="constellation">Созвездие</span></button
+        ><button type="button" data-background="aurora" aria-pressed="false">
+          <span class="bg-sample aurora"></span><span data-t="aurora">Аура</span></button
+        ><button type="button" data-background="plain" aria-pressed="false">
+          <span class="bg-sample plain"></span><span data-t="plain">Тишина</span>
+        </button>
+      </div>
+    </div>
+    <div class="settings-block">
+      <label class="field-label" for="transition-style"
+        ><span data-t="transitions">Характер переходов</span></label
+      ><select id="transition-style" hidden aria-hidden="true" tabindex="-1">
+        <option value="mix" data-t="mix">Микс</option>
+        <option value="hyprland">Hyprland · Slide</option>
+        <option value="caelestia">Caelestia · Pop</option>
+        <option value="liquid">Liquid</option>
+        <option value="iris">Iris</option>
+        <option value="shutters">Shutters</option>
+        <option value="cascade">Cascade</option></select
+      ><button
+        class="motion-picker-trigger"
+        type="button"
+        data-open="motion-picker-dialog"
+        data-motion-picker
+        aria-haspopup="dialog"
+      >
+        <span class="motion-trigger-art" aria-hidden="true"><i></i><i></i></span
+        ><span class="motion-trigger-copy"
+          ><strong data-motion-current>Hyprland</strong
+          ><small data-motion-hint>Сдвиг и упругая остановка</small></span
+        ><svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+      </button>
+    </div>
+    <p class="small-note" id="reduced-note" hidden data-t="reducedNote">
+      Анимации ограничены системной настройкой уменьшения движения.
+    </p>
+    <footer class="settings-actions">
+      <button class="text-button" type="button" id="reset-preferences">
+        <svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg
+        ><span data-t="reset">Сбросить</span></button
+      ><button class="primary-button" type="button" data-close>
+        <span data-t="done">Готово</span><svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+      </button>
+    </footer>
+  </div>
+</dialog>
