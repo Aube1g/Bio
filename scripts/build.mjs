@@ -112,8 +112,11 @@ for (const page of ['bio', 'games']) {
     htmlWhitespaceSensitivity: 'css',
     embeddedLanguageFormatting: 'off',
   });
-  const filename = page === 'bio' ? 'bio.html' : 'games.html';
-  await writeFile(filename + '.tmp', output + '\n' + license + '\n');
-  await rename(filename + '.tmp', filename);
-  console.log(`${filename}: ${Buffer.byteLength(output + license).toLocaleString('en')} bytes`);
+  const filenames = page === 'bio' ? ['bio.html'] : ['games.html', 'Портал (2).html'];
+  const document = output + '\n' + license + '\n';
+  for (const filename of filenames) {
+    await writeFile(filename + '.tmp', document);
+    await rename(filename + '.tmp', filename);
+    console.log(`${filename}: ${Buffer.byteLength(document).toLocaleString('en')} bytes`);
+  }
 }

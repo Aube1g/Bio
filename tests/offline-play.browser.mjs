@@ -2,8 +2,10 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:8000';
+const entry = process.env.GAME_HTML || 'games.html';
 const artifacts = process.env.ARTIFACT_DIR || 'test-results/offline-play';
 await mkdir(artifacts, { recursive: true });
 const launch = () =>
@@ -33,7 +35,7 @@ const pass = (message) => {
     page.on('request', (request) => {
       if (request.url().includes('/api/')) requests.push(request.url());
     });
-    await page.goto('file://' + resolve('games.html'));
+    await page.goto(pathToFileURL(resolve(entry)).href);
     await page.waitForFunction(
       () => document.documentElement.dataset.ready === 'true' && !document.documentElement.dataset.booting,
     );
@@ -92,7 +94,7 @@ const pass = (message) => {
     assert.deepEqual(requests, []);
     assert.deepEqual(errors, []);
     pass(
-      'Downloaded games.html, offline: all four games, balances, proofs and Blackjack reload/double with zero API requests',
+      `Downloaded ${entry}, offline: all four games, balances, proofs and Blackjack reload/double with zero API requests`,
     );
   } finally {
     await browser.close();
@@ -115,7 +117,7 @@ const pass = (message) => {
     await page.setContent(
       '<iframe title="Downloaded portal" sandbox="allow-scripts allow-forms allow-modals" style="width:100vw;height:100vh;border:0"></iframe>',
     );
-    const source = await readFile('games.html', 'utf8');
+    const source = await readFile(entry, 'utf8');
     await page.locator('iframe').evaluate((iframe, source) => {
       iframe.srcdoc = source;
     }, source);
@@ -155,7 +157,7 @@ const pass = (message) => {
       apiRequests++;
       return route.abort();
     });
-    await page.goto(base + '/games.html');
+    await page.goto(base + '/' + encodeURIComponent(entry));
     await page.waitForFunction(
       () => document.documentElement.dataset.ready === 'true' && !document.documentElement.dataset.booting,
     );
