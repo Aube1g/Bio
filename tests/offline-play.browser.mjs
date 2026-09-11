@@ -1,3 +1,4 @@
+import { enterGame } from './ui-helpers.mjs';
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
@@ -43,7 +44,7 @@ const pass = (message) => {
     assert.equal(await page.locator('html').getAttribute('data-play-mode'), 'local');
     const snapshot = () => page.evaluate(() => JSON.parse(sessionStorage.getItem('aubeig.practice.session')));
     for (const game of ['dice', 'slots', 'plinko']) {
-      await page.locator(`.game-dock [data-go="${game}"]`).click();
+      await enterGame(page, game);
       const before = (await snapshot()).balance;
       await page.locator('#play-button').click();
       await page.waitForFunction(() => !document.querySelector('#result-proof').hidden);
@@ -58,7 +59,7 @@ const pass = (message) => {
       );
       await page.keyboard.press('Escape');
     }
-    await page.locator('.game-dock [data-go="blackjack"]').click();
+    await enterGame(page, 'blackjack');
     let hand;
     for (let i = 0; i < 15; i++) {
       await page.locator('#play-button').click();
@@ -87,7 +88,7 @@ const pass = (message) => {
       /совпадают|match/.test(document.querySelector('#verify-status').textContent),
     );
     await page.keyboard.press('Escape');
-    await page.locator('.game-dock [data-go="plinko"]').click();
+    await enterGame(page, 'plinko');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: `${artifacts}/file-play-mobile.png`, fullPage: true });
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
@@ -126,12 +127,12 @@ const pass = (message) => {
       () => document.documentElement.dataset.ready === 'true' && !document.documentElement.dataset.booting,
     );
     assert.equal(await frame.evaluate(() => location.origin), 'null');
-    await frame.locator('.game-dock [data-go="dice"]').click();
+    await enterGame(frame, 'dice');
     await frame.locator('#play-button').click();
     await frame.waitForFunction(() => !document.querySelector('#result-proof').hidden);
     assert.match(await frame.locator('#dice-value').textContent(), /^[1-6]$/);
     for (const game of ['slots', 'plinko']) {
-      await frame.locator(`.game-dock [data-go="${game}"]`).click();
+      await enterGame(frame, game);
       await frame.locator('#play-button').click();
       await frame.waitForFunction(() => !document.querySelector('#result-proof').hidden);
     }
@@ -162,6 +163,7 @@ const pass = (message) => {
       () => document.documentElement.dataset.ready === 'true' && !document.documentElement.dataset.booting,
     );
     await page.locator('#practice-launch').click();
+    await enterGame(page, 'plinko');
     const requestsBeforePlay = apiRequests;
     await page.locator('#play-button').click();
     await page.waitForFunction(() => !document.querySelector('#result-proof').hidden);

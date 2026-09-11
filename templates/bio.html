@@ -1411,19 +1411,22 @@
               </svg>
             </header>
             <div class="partners-grid">
-              <article class="partner-card">
+              <article
+                class="partner-card partner-inactive"
+                aria-disabled="true"
+                data-partner="firstplatform"
+              >
                 <span class="eyebrow muted">Сообщество авторов</span>
-                <div class="partner-monogram" aria-hidden="true">
-                  fp<span style="font-size: 30px; vertical-align: top">↗</span>
-                </div>
+                <div class="partner-monogram" aria-hidden="true">fp</div>
                 <h3>First Platform</h3>
                 <p>
                   Место, где блогеры, стримеры и авторы Telegram-каналов находят друзей, партнёров по съёмкам
                   и новые идеи.
                 </p>
-                <button class="solid-button" type="button" data-project="firstplatform">
-                  О сообществе<svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
-                </button>
+                <div class="partner-unavailable">
+                  <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg
+                  ><span>Временно неактивен</span>
+                </div>
               </article>
               <article class="partner-card clawback-card">
                 <span class="eyebrow">Intelligence Division</span
@@ -1704,10 +1707,6 @@
             Материалы предоставляются «как есть», без каких-либо гарантий. Использование осуществляется на
             собственный риск.
           </p>
-        </section>
-        <section class="modal-section-card">
-          <h3>Шрифт и иконки</h3>
-          <p>Nunito — SIL Open Font License 1.1. Font Awesome Free — CC BY 4.0.</p>
         </section>
         <div class="dialog-actions">
           <button class="solid-button" type="button" data-close>

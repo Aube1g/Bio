@@ -1,3 +1,7 @@
+import { bindPressRepeat } from '../shared/press-repeat.js';
+import { LaunchQueue } from './launch-queue.js';
+import { GameFeedback } from './feedback.js';
+import { BlackjackRenderer } from './blackjack-renderer.js';
 import { finishBoot } from '../shared/boot-screen.js';
 import { initializeTextMotion } from '../shared/text-motion.js';
 import { initializeMotionPicker } from '../shared/motion-picker.js';
@@ -54,6 +58,11 @@ const state = {
   stats: emptyStats(),
   activeBlackjack: null,
   game: 'lobby',
+  selectedGame: null,
+  batchCount: 1,
+  batchRunning: false,
+  batchRemaining: 0,
+  batchReceipts: new Map(),
   betMinor: 1000,
   plinko: { rows: 12, risk: 'medium' },
   dice: { mode: 'under', target: 4 },
@@ -79,8 +88,18 @@ const api = new GameApi(),
   sound = new GameSound(),
   morph = new MorphDialogs();
 const dice = new DiceRenderer($('#dice-cube')),
-  slots = new SlotsRenderer($('#slot-reels'), () => sound.impact());
-const plinko = new PlinkoRenderer($('#plinko-canvas'), $('#plinko-bins'), () => sound.impact());
+  slots = new SlotsRenderer($('#slot-reels'), (index) => sound.play('reelStop', index));
+const plinko = new PlinkoRenderer($('#plinko-canvas'), $('#plinko-bins'), (row) =>
+  sound.play('plinkoPeg', row),
+);
+const blackjack = new BlackjackRenderer($('#board-blackjack'), sound);
+const feedback = new GameFeedback($('#game-scene'));
+const launchQueue = new LaunchQueue((queue) => {
+  state.batchRunning = queue.running;
+  state.batchRemaining = queue.remaining;
+  renderControls();
+  finishBatchFeedback();
+});
 const syncIndicators = springGroups();
 let toastTimer;
 let actionEpoch = 0;
@@ -191,6 +210,9 @@ function onError(error) {
   renderChrome();
 }
 function finishVisuals() {
+  launchQueue.cancel();
+  feedback.clear();
+  blackjack.finish?.();
   dice.finish?.();
   slots.finish?.();
   plinko.finishAll();
@@ -204,7 +226,7 @@ const dialogs = new PortalDialogs({
   onData: ingest,
   onSession: setSession,
   finishVisuals,
-  onNavigate: navigate,
+  onNavigate: requestGame,
   onServerLogin: openServerLogin,
 });
 
@@ -259,12 +281,21 @@ function renderChrome() {
   $('#available-balance').textContent = state.user ? money(displayedBalance()) : '—';
   $('#account-button').setAttribute('aria-label', state.user ? t('profile') : t('signIn'));
   updateFavorites();
+  renderSelection();
+}
+function setPressed(button, value) {
+  const next = String(value);
+  if (button.getAttribute('aria-pressed') !== next) button.setAttribute('aria-pressed', next);
 }
 function renderControls() {
+  document.documentElement.dataset.gameBusy = String(
+    state.networkBusy || state.batchRunning || Object.values(state.busy).some(Boolean),
+  );
   if (state.game === 'lobby') return;
   const game = state.game,
     locked = Boolean(
       state.networkBusy ||
+        state.batchRunning ||
         state.uncertain ||
         (game === 'plinko' ? state.busy.plinko : state.busy[game]) ||
         (game === 'blackjack' && state.activeBlackjack),
@@ -273,15 +304,17 @@ function renderControls() {
   $('#bet-amount').disabled = locked;
   $$('[data-bet-step],[data-bet-factor]').forEach((button) => (button.disabled = locked));
   $$('[data-risk],[data-rows]').forEach((button) => {
-    button.disabled = Boolean(state.busy.plinko || state.networkBusy || state.uncertain);
+    button.disabled = Boolean(
+      state.busy.plinko || state.batchRunning || state.networkBusy || state.uncertain,
+    );
     const selected = button.dataset.risk
       ? button.dataset.risk === state.plinko.risk
       : Number(button.dataset.rows) === state.plinko.rows;
-    button.setAttribute('aria-pressed', String(selected));
+    setPressed(button, selected);
   });
   $$('[data-dice-mode]').forEach((button) => {
     button.disabled = state.busy.dice || state.networkBusy || state.uncertain;
-    button.setAttribute('aria-pressed', String(button.dataset.diceMode === state.dice.mode));
+    setPressed(button, button.dataset.diceMode === state.dice.mode);
   });
   const slider = $('#dice-target');
   slider.min = state.dice.mode === 'under' ? 2 : 1;
@@ -301,22 +334,35 @@ function renderControls() {
     (_, i) =>
       `<span class="possible-face ${(state.dice.mode === 'under' ? i + 1 < state.dice.target : i + 1 > state.dice.target) ? 'is-win' : ''}">${i + 1}</span>`,
   ).join('');
+  $$('[data-batch]').forEach((button) => {
+    button.disabled = Boolean(
+      state.networkBusy || state.batchRunning || state.busy.plinko || state.uncertain,
+    );
+    setPressed(button, Number(button.dataset.batch) === state.batchCount);
+  });
+  $('#batch-cost').textContent = money(state.betMinor * state.batchCount);
   $('#plinko-max').textContent = money(
-    Math.floor(state.betMinor * plinkoTable(state.plinko.rows, state.plinko.risk)[0]),
+    Math.floor(state.betMinor * state.batchCount * plinkoTable(state.plinko.rows, state.plinko.risk)[0]),
   );
   $('#play-label').textContent = state.networkBusy
     ? t(api.isPractice ? 'calculating' : 'waitingServer')
     : !state.user
       ? t('startPractice')
-      : t(games[game].play);
+      : game === 'plinko' && state.batchCount > 1
+        ? t('dropBatch', { count: state.batchCount })
+        : t(games[game].play);
   $('#play-button').dataset.busy = String(state.networkBusy);
   $('.play-button-icon use').setAttribute('href', '#i-' + (state.networkBusy ? 'replay' : games[game].icon));
   $('#play-button').hidden = game === 'blackjack' && Boolean(state.activeBlackjack);
   $('#play-button').disabled = Boolean(
     state.networkBusy ||
       state.uncertain ||
-      (game === 'plinko' ? state.busy.plinko >= 8 : state.busy[game]) ||
-      (state.user && displayedBalance() < state.betMinor),
+      (game === 'plinko'
+        ? state.batchRunning ||
+          (state.batchCount > 1 && state.busy.plinko > 0) ||
+          state.busy.plinko + state.batchCount > 8
+        : state.busy[game]) ||
+      (state.user && displayedBalance() < state.betMinor * (game === 'plinko' ? state.batchCount : 1)),
   );
   $('#blackjack-actions').hidden = !state.activeBlackjack;
   $$('[data-bj-action]').forEach(
@@ -325,16 +371,19 @@ function renderControls() {
         state.networkBusy ||
           state.uncertain ||
           !state.activeBlackjack ||
+          state.busy.blackjack ||
           (button.dataset.bjAction === 'double' &&
             (!state.activeBlackjack?.outcome.canDouble ||
               displayedBalance() < state.activeBlackjack.betMinor)),
       )),
   );
-  $('#round-queue').hidden = !state.busy.plinko;
-  $('#round-queue-label').textContent = t('activeBalls', { count: state.busy.plinko });
+  $('#round-queue').hidden = !state.busy.plinko && !state.batchRunning;
+  $('#round-queue-label').textContent =
+    t('activeBalls', { count: state.busy.plinko }) +
+    (state.batchRemaining ? ' · ' + t('ballsQueued', { count: state.batchRemaining }) : '');
   const active = game === 'blackjack' ? Boolean(state.activeBlackjack) : Boolean(state.busy[game]);
   $('#scene-status-text').textContent = state.networkBusy
-    ? t('waitingServer')
+    ? t(api.isPractice ? 'calculating' : 'waitingServer')
     : active
       ? t(game === 'blackjack' ? 'handActive' : 'playing')
       : t('ready');
@@ -348,11 +397,9 @@ function renderControls() {
           : '3 REELS';
 }
 function renderHand(round = state.activeBlackjack) {
-  renderCardHand($('#dealer-hand'), round?.outcome.dealer || [null, null]);
-  renderCardHand($('#player-hand'), round?.outcome.player || [null, null]);
-  $('#dealer-score').textContent = round?.outcome.dealerValue.total ?? '—';
-  $('#player-score').textContent = round?.outcome.playerValue.total ?? '—';
+  if (!state.busy.blackjack) blackjack.restore(round);
 }
+let recentKey = '';
 function renderRecent() {
   if (state.game === 'lobby') return;
   const rounds = [...state.rounds.values()]
@@ -362,6 +409,14 @@ function renderRecent() {
     )
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 8);
+  const key =
+    state.game +
+    ':' +
+    preferences.lang +
+    ':' +
+    rounds.map((round) => round.id + ':' + round.version).join(',');
+  if (key === recentKey) return;
+  recentKey = key;
   $('#recent-rounds-list').innerHTML = rounds.length
     ? rounds
         .map(
@@ -390,6 +445,12 @@ function showResult(round) {
   if (state.game === round.game) {
     const type = round.netMinor > 0 ? 'win' : round.netMinor === 0 ? 'push' : 'loss';
     $('#result-strip').dataset.result = type;
+    $('#result-amount').hidden = false;
+    $('#result-net').textContent = signedMoney(round.netMinor);
+    $('.result-icon use').setAttribute(
+      'href',
+      '#i-' + (type === 'win' ? 'check' : type === 'push' ? 'equal' : 'close'),
+    );
     $('#result-title').textContent = t(
       type === 'win' ? 'winTitle' : type === 'push' ? 'pushTitle' : 'lossTitle',
     );
@@ -409,7 +470,21 @@ function showResult(round) {
       duration: 530,
       easing: 'cubic-bezier(.34,1.56,.64,1)',
     });
-  sound.result(round.netMinor > 0);
+  const batch = state.batchReceipts.has(round.id);
+  if (!batch && state.game === round.game && !document.hidden) {
+    const type = round.netMinor > 0 ? 'win' : round.netMinor === 0 ? 'push' : 'loss';
+    feedback.show({
+      type,
+      title:
+        round.outcome.reason === 'blackjack'
+          ? 'BLACKJACK'
+          : t(type === 'win' ? 'winTitle' : type === 'push' ? 'pushTitle' : 'lossTitle'),
+      value: signedMoney(round.netMinor),
+      game: games[round.game].title,
+    });
+    sound.play(round.outcome.reason === 'blackjack' ? 'blackjack' : type);
+  }
+  finishBatchFeedback();
   renderChrome();
   renderRecent();
 }
@@ -419,6 +494,8 @@ function renderAll() {
   renderRecent();
 }
 function resetResult() {
+  feedback.clear();
+  $('#result-amount').hidden = true;
   delete $('#result-strip').dataset.result;
   $('#result-title').textContent = t('makeYourMove');
   $('#result-detail').textContent = t('chooseBet');
@@ -450,6 +527,54 @@ function updateGame() {
   plinko.resize();
   renderAll();
 }
+function renderSelection() {
+  const selected = state.selectedGame;
+  const show = state.game === 'lobby' && Boolean(selected);
+  $('#lobby-launch').hidden = !show;
+  document.documentElement.dataset.gameSelected = show ? selected : '';
+  $$('[data-card]').forEach((card) => {
+    const active = card.dataset.card === selected;
+    card.classList.toggle('is-selected', active);
+    card.querySelector('.card-launch use')?.setAttribute('href', active ? '#i-check' : '#i-arrow');
+    card.querySelector('.game-card-main')?.setAttribute('aria-pressed', String(active));
+  });
+  if (show) {
+    $('#launch-game-name').textContent = games[selected].title;
+    $('#launch-game-icon').setAttribute('href', '#i-' + games[selected].icon);
+  }
+  $('#launch-selected').disabled = state.authBusy || state.networkBusy || state.uncertain;
+}
+function requestGame(game, source = null) {
+  if (game === 'lobby' || !games[game]) {
+    state.selectedGame = null;
+    navigate('lobby', source);
+    renderSelection();
+    return;
+  }
+  if (state.game === game) return;
+  if (state.game !== 'lobby') navigate('lobby', source);
+  state.selectedGame = game;
+  renderSelection();
+  sound.play('select');
+  if (motionEnabled())
+    $('#lobby-launch')
+      .animate(
+        [
+          { opacity: 0, translate: '0 14px', scale: 0.96 },
+          { opacity: 1, translate: '0 0', scale: 1 },
+        ],
+        { duration: 410, easing: 'cubic-bezier(.16,1,.3,1)' },
+      )
+      .finished.catch(() => {});
+}
+async function activateSelected() {
+  const selected = state.selectedGame;
+  if (!selected || state.networkBusy || state.authBusy || state.uncertain) return;
+  if (!state.user) await startPractice(null);
+  if (!state.user) return;
+  sound.play('launch');
+  navigate(selected, $('#launch-selected'));
+}
 function navigate(game, source = null, push = true, animate = true) {
   if (game !== 'lobby' && !games[game]) game = 'lobby';
   if (game === state.game && document.documentElement.dataset.ready) return;
@@ -460,6 +585,7 @@ function navigate(game, source = null, push = true, animate = true) {
     Math.sign(order.indexOf(game) - order.indexOf(state.game)) || 1,
   );
   state.game = game;
+  if (game === 'lobby') state.selectedGame = null;
   document.documentElement.dataset.game = game;
   safeStorage.set('games.lastGame', game);
   const change = () => {
@@ -489,10 +615,12 @@ function navigate(game, source = null, push = true, animate = true) {
   const heading = game === 'lobby' ? $('#lobby-title') : $('#active-game-title');
   heading.tabIndex = -1;
   heading.focus({ preventScroll: true });
+  renderSelection();
 }
 function setBet(value) {
   if (
     state.networkBusy ||
+    state.batchRunning ||
     state.uncertain ||
     (state.game === 'plinko' ? state.busy.plinko : state.busy[state.game]) ||
     (state.game === 'blackjack' && state.activeBlackjack)
@@ -500,10 +628,14 @@ function setBet(value) {
     return;
   const number = Number(value);
   if (!Number.isFinite(number)) return;
-  state.betMinor = clamp(Math.round(number) * 100, MIN_BET, MAX_BET);
+  const next = clamp(Math.round(number) * 100, MIN_BET, MAX_BET);
+  if (next === state.betMinor) return false;
+  state.betMinor = next;
   renderControls();
+  return true;
 }
-async function animateRound(round) {
+async function animateRound(round, action = 'deal') {
+  const owner = state.user?.id;
   if (shownRounds.has(round.id)) return;
   shownRounds.add(round.id);
   if (state.game !== round.game || document.hidden) {
@@ -525,6 +657,7 @@ async function animateRound(round) {
     state.busy.dice = true;
     renderControls();
     await dice.land(round.outcome.face);
+    sound.play('diceLand');
     state.busy.dice = false;
   } else if (round.game === 'slots') {
     state.busy.slots = true;
@@ -532,18 +665,72 @@ async function animateRound(round) {
     await slots.spin(round.outcome.symbols);
     state.busy.slots = false;
   }
+  if (round.game === 'blackjack') {
+    state.busy.blackjack = true;
+    renderControls();
+    await blackjack.play(round, action);
+    state.busy.blackjack = false;
+  }
   state.pendingCredits.delete(round.id);
-  showResult(round);
+  if (state.user?.id !== owner) {
+    renderControls();
+    return;
+  }
+  if (round.status === 'settled') showResult(round);
+  else {
+    $('#result-title').textContent = t('yourTurn');
+    $('#result-detail').textContent = t('waitingForMove');
+  }
   renderControls();
+}
+function finishBatchFeedback() {
+  if (state.batchRunning || state.busy.plinko || !state.batchReceipts.size) return;
+  const rounds = [...state.batchReceipts.values()];
+  state.batchReceipts.clear();
+  if (state.game !== 'plinko' || document.hidden) return;
+  const net = rounds.reduce((sum, round) => sum + round.netMinor, 0);
+  const paid = rounds.reduce((sum, round) => sum + round.payoutMinor, 0);
+  const type = net > 0 ? 'win' : net === 0 ? 'push' : 'loss';
+  const title = t('batchFinished', { count: rounds.length });
+  $('#result-strip').dataset.result = type;
+  $('#result-title').textContent = title;
+  $('#result-detail').textContent = t('batchReturn', { value: money(paid) });
+  $('#result-amount').hidden = false;
+  $('#result-net').textContent = signedMoney(net);
+  feedback.show({ type, title, value: signedMoney(net), game: 'Plinko' });
+  sound.play(type);
 }
 async function play() {
   const game = state.game;
-  if (!games[game] || state.networkBusy || state.uncertain) return;
+  if (
+    !games[game] ||
+    state.networkBusy ||
+    state.uncertain ||
+    state.batchRunning ||
+    (state.busy[game] && game !== 'plinko')
+  )
+    return;
   if (!state.user) {
     await startPractice(null);
-    if (state.user) return play();
     return;
   }
+  const count = game === 'plinko' ? state.batchCount : 1;
+  if (game === 'plinko' && (state.busy.plinko + count > 8 || (count > 1 && state.busy.plinko > 0))) return;
+  if (displayedBalance() < state.betMinor * count) {
+    notify(t('insufficient'));
+    return;
+  }
+  if (count === 1) {
+    await submitRound(game);
+    return;
+  }
+  state.batchReceipts.clear();
+  resetResult();
+  await launchQueue.run(count, () => submitRound('plinko', true), { spacing: motionEnabled() ? 170 : 0 });
+}
+async function submitRound(game, batch = false) {
+  if (!games[game] || state.networkBusy || state.uncertain) return;
+  if (!state.user) return false;
   if (game === 'plinko' ? state.busy.plinko >= 8 : state.busy[game]) return;
   const entered = Number($('#bet-amount').value);
   if (!Number.isInteger(entered) || entered * 100 < MIN_BET || entered * 100 > MAX_BET) {
@@ -555,9 +742,14 @@ async function play() {
     notify(t('insufficient'));
     return;
   }
+  if (!batch) {
+    state.batchReceipts.clear();
+    resetResult();
+  }
   state.networkBusy = true;
   actionEpoch++;
   sound.unlock();
+  sound.play({ dice: 'diceRoll', slots: 'reelSpin', plinko: 'plinkoDrop', blackjack: 'launch' }[game]);
   renderControls();
   $('#result-title').textContent = t(api.isPractice ? 'calculating' : 'waitingServer');
   $('#result-detail').textContent = '';
@@ -576,43 +768,38 @@ async function play() {
     if (data.round.status === 'settled') state.pendingCredits.set(data.round.id, data.round.payoutMinor);
     ingest(data);
     state.networkBusy = false;
-    if (data.round.status === 'active') {
-      renderHand(data.round);
-      $('#result-title').textContent = t('handActive');
-      $('#result-detail').textContent = t('waitingForMove');
-      renderAll();
-    } else {
-      animateRound(data.round).catch(onError);
-      renderControls();
-    }
+    if (batch) state.batchReceipts.set(data.round.id, data.round);
+    animateRound(data.round).catch(onError);
+    renderControls();
+    return true;
   } catch (error) {
     state.networkBusy = false;
     onError(error);
+    return false;
   }
 }
 async function blackjackAction(action) {
   const round = state.activeBlackjack;
-  if (!round || state.networkBusy || state.uncertain) return;
+  if (!round || state.networkBusy || state.busy.blackjack || state.uncertain) return;
   state.networkBusy = true;
   actionEpoch++;
   renderControls();
   sound.unlock();
+  sound.play(action);
+  feedback.clear();
   try {
     const data = await api.mutate(`/api/blackjack/${round.id}/action`, {
       actionId: uuid(),
       action,
       version: round.version,
     });
+    if (data.round.status === 'settled') state.pendingCredits.set(data.round.id, data.round.payoutMinor);
     ingest(data);
-    renderHand(data.round);
     state.networkBusy = false;
-    if (data.round.status === 'settled') showResult(data.round);
-    else {
-      sound.impact();
-      $('#result-title').textContent = t('handActive');
-      $('#result-detail').textContent = t('waitingForMove');
-    }
-    renderControls();
+    // An action updates the same round; replay this new visual version once.
+    shownRounds.delete(data.round.id);
+    await animateRound(data.round, action);
+    renderAll();
   } catch (error) {
     state.networkBusy = false;
     onError(error);
@@ -667,7 +854,7 @@ function setAuthBusy(busy) {
   $('#guest-login').dataset.busy = String(busy);
   $('#auth-dialog').setAttribute('aria-busy', String(busy));
 }
-async function startPractice(target = 'plinko') {
+async function startPractice(target = null) {
   if ((state.authBusy && api.isPractice) || state.networkBusy || state.uncertain) return;
   setAuthBusy(true);
   finishVisuals();
@@ -680,7 +867,12 @@ async function startPractice(target = 'plinko') {
     $('#connection-banner').hidden = true;
     $('#auth-error').textContent = '';
     await morph.close($('#auth-dialog'));
-    if (target && state.game === 'lobby') navigate(target);
+    if (target && state.game === 'lobby') requestGame(target);
+    else if (state.game === 'lobby')
+      $('#game-collection').scrollIntoView({
+        behavior: motionEnabled() ? 'smooth' : 'instant',
+        block: 'start',
+      });
     renderAll();
   } catch (error) {
     onError(error);
@@ -767,7 +959,7 @@ $$('[data-go]').forEach((button) =>
   button.addEventListener('click', (event) => {
     if (event.ctrlKey || event.metaKey || event.shiftKey) return;
     event.preventDefault();
-    navigate(button.dataset.go, button);
+    requestGame(button.dataset.go, button);
   }),
 );
 $$('.dock-games a').forEach((link, index) => link.setAttribute('aria-keyshortcuts', `Alt+${index + 1}`));
@@ -795,7 +987,7 @@ $('#account-button').addEventListener('click', (event) =>
 $('#guest-login').addEventListener('click', guestLogin);
 $('#practice-login').addEventListener('click', () => startPractice(null));
 $('#practice-launch').addEventListener('click', () => startPractice());
-$('#practice-retry').addEventListener('click', () => startPractice(state.game === 'lobby' ? 'plinko' : null));
+$('#practice-retry').addEventListener('click', () => startPractice());
 $('#telegram-login').addEventListener('click', telegramLogin);
 
 document.addEventListener('click', (event) => {
@@ -812,7 +1004,7 @@ document.addEventListener('keydown', (event) => {
     const name = ['lobby', 'blackjack', 'slots', 'dice', 'plinko'][Number(event.key) - 1];
     if (name) {
       event.preventDefault();
-      navigate(name);
+      requestGame(name);
       return;
     }
   }
@@ -832,6 +1024,15 @@ document.addEventListener('keydown', (event) => {
   }
 });
 $('#play-button').addEventListener('click', play);
+$('#launch-selected').addEventListener('click', activateSelected);
+$$('[data-batch]').forEach((button) =>
+  button.addEventListener('click', () => {
+    if (state.networkBusy || state.batchRunning || state.busy.plinko || state.uncertain) return;
+    state.batchCount = Number(button.dataset.batch);
+    renderControls();
+    sound.play('select');
+  }),
+);
 $('#scene-sound').addEventListener('click', () => {
   sound.unlock();
   savePreferences({ sound: !preferences.sound });
@@ -839,7 +1040,11 @@ $('#scene-sound').addEventListener('click', () => {
 });
 $('#bet-amount').addEventListener('change', (event) => setBet(event.target.value));
 $$('[data-bet-step]').forEach((button) =>
-  button.addEventListener('click', () => setBet(state.betMinor / 100 + Number(button.dataset.betStep))),
+  bindPressRepeat(button, () => {
+    const changed = setBet(state.betMinor / 100 + Number(button.dataset.betStep));
+    if (changed) sound.play(Number(button.dataset.betStep) > 0 ? 'betUp' : 'betDown');
+    return changed;
+  }),
 );
 $$('[data-bet-factor]').forEach((button) =>
   button.addEventListener('click', () =>
@@ -898,6 +1103,7 @@ window.addEventListener('offline', () => {
   renderChrome();
 });
 document.addEventListener('visibilitychange', () => {
+  document.documentElement.dataset.fxPaused = String(document.hidden);
   if (document.hidden) finishVisuals();
   else if (!state.networkBusy) synchronize(false).catch(onError);
 });

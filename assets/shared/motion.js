@@ -23,6 +23,7 @@ const effectName = () =>
 let surface;
 export function transitionSurface(stage, change, source) {
   surface?.finish();
+  const sourceBox = source?.getBoundingClientRect?.();
   const current = $('.portal-view:not([hidden])', stage),
     before = current?.getBoundingClientRect();
   if (!motionEnabled() || !current || !before.width) {
@@ -56,7 +57,7 @@ export function transitionSurface(stage, change, source) {
   stage.classList.add('surface-transition');
   stage.setAttribute('aria-busy', 'true');
   incoming.classList.add('surface-incoming');
-  const rect = source?.getBoundingClientRect(),
+  const rect = sourceBox,
     origin = {
       x: rect ? rect.x - after.x + rect.width / 2 : after.width / 2,
       y: Math.min(after.height / 2, 240),

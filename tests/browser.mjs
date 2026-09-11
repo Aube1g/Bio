@@ -1,3 +1,4 @@
+import { enterGame } from './ui-helpers.mjs';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -46,7 +47,7 @@ async function audit(name) {
   await writeFile(`${artifacts}/audits.json`, JSON.stringify(audits, null, 2));
 }
 async function game(name) {
-  await page.locator(`.game-dock [data-go="${name}"]`).click();
+  await enterGame(page, name);
   await page.waitForFunction((name) => document.documentElement.dataset.game === name, name);
 }
 async function play(name) {

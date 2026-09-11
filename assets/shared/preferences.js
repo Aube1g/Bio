@@ -8,7 +8,7 @@ const defaults = {
   liquid: true,
   glass: true,
   background: 'constellation',
-  table: 'royal',
+  table: 'green',
   transition: 'star',
   sound: false,
   volume: 0.25,

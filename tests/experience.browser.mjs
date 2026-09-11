@@ -1,3 +1,4 @@
+import { enterGame } from './ui-helpers.mjs';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -127,10 +128,11 @@ try {
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.locator('#practice-launch').click();
+  await enterGame(page, 'plinko');
   await page.locator('#play-button').click();
   await page.locator('#result-proof').waitFor();
   await audit('local-plinko-dark');
-  await page.locator('.game-dock [data-go="blackjack"]').click();
+  await enterGame(page, 'blackjack');
   await page.locator('#rules-button').click();
   assert(await page.locator('#rules-content .inline-pill').count());
   assert(await page.locator('#rules-content .rich-emphasis').count());
@@ -149,7 +151,7 @@ try {
   await close('motion-picker-dialog');
   await close('game-settings-dialog');
   for (const game of ['lobby', 'plinko', 'dice', 'slots', 'blackjack']) {
-    await page.locator(`.game-dock [data-go="${game}"]`).click();
+    await enterGame(page, game);
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   }
   await audit('local-game-320-light');

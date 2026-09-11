@@ -61,7 +61,7 @@ export class DiceRenderer {
           { transform: `translateY(-4px) rotateX(${x + 722}deg) rotateY(${y + 722}deg)`, offset: 0.93 },
           { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)` },
         ],
-        { duration: 1300, easing: 'cubic-bezier(.16,.7,.22,1)' },
+        { duration: 2100, easing: 'cubic-bezier(.2,.55,.24,1)' },
       );
       let done = false;
       const finish = () => {
@@ -86,6 +86,7 @@ export class SlotsRenderer {
     this.show([0, 4, 5]);
   }
   show(symbols) {
+    delete this.element.dataset.spinning;
     this.element.innerHTML = symbols
       .map(
         (symbol) =>
@@ -104,7 +105,9 @@ export class SlotsRenderer {
       let frame,
         done = false;
       const start = performance.now();
-      const positions = [23, 29, 35];
+      const positions = [31, 39, 47];
+      const stops = [2100, 2550, 3050];
+      this.element.dataset.spinning = 'true';
       this.element.innerHTML = symbols
         .map((symbol, i) => {
           const values = Array.from({ length: positions[i] + 3 }, (_, j) =>
@@ -126,15 +129,15 @@ export class SlotsRenderer {
       };
       const tick = (now) => {
         reels.forEach((reel, index) => {
-          const t = clamp((now - start) / (1400 + index * 320), 0, 1),
+          const t = clamp((now - start) / stops[index], 0, 1),
             p = 1 - (1 - t) ** 4;
           const position = 1 + (positions[index] - 1) * p;
           reel.style.transform = `translateY(calc(${1 - position} * var(--reel-cell)))`;
           const window = reel.closest('.reel-window');
-          if (t === 1 && !window.classList.contains('stopped')) this.onStop();
+          if (t === 1 && !window.classList.contains('stopped')) this.onStop(index);
           window.classList.toggle('stopped', t === 1);
         });
-        if (now - start < 2040 && motionEnabled()) frame = requestAnimationFrame(tick);
+        if (now - start < 3050 && motionEnabled()) frame = requestAnimationFrame(tick);
         else this.finish?.();
       };
       frame = requestAnimationFrame(tick);
@@ -144,7 +147,7 @@ export class SlotsRenderer {
 
 export { PlinkoRenderer } from './plinko-renderer.js';
 
-export function renderCardHand(container, cards) {
+export function renderCardHand(container, cards, { animate = motionEnabled() } = {}) {
   const previous = [...container.children];
   let added = 0;
   cards.forEach((card, index) => {
@@ -157,7 +160,7 @@ export function renderCardHand(container, cards) {
     const flip = previous[index]?.dataset.card === 'hidden' && card !== null;
     if (previous[index]) previous[index].replaceWith(node);
     else container.append(node);
-    if (motionEnabled()) {
+    if (animate) {
       const animation = node.animate(
         [
           {
@@ -166,10 +169,21 @@ export function renderCardHand(container, cards) {
           },
           { opacity: 1, transform: 'none' },
         ],
-        { duration: flip ? 390 : 420, delay: added++ * 75, easing: 'cubic-bezier(.16,1,.3,1)' },
+        {
+          duration: flip ? 480 : 520,
+          delay: added++ * 60,
+          easing: 'cubic-bezier(.16,1,.3,1)',
+          composite: 'add',
+        },
       );
       animation.finished.catch(() => {});
     }
   });
   previous.slice(cards.length).forEach((node) => node.remove());
+  [...container.children].forEach((node, index) =>
+    node.style.setProperty(
+      '--card-angle',
+      (index - (cards.length - 1) / 2) * Math.min(3, 12 / Math.max(2, cards.length)) + 'deg',
+    ),
+  );
 }

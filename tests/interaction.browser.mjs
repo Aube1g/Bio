@@ -1,3 +1,4 @@
+import { enterGame } from './ui-helpers.mjs';
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -45,7 +46,7 @@ try {
   assert.match(await page.locator('#account-label').textContent(), /Гость|Guest/);
   assert.equal((await page.evaluate(() => fetch('/api/session').then((r) => r.json()))).user.kind, 'guest');
   pass('A late anonymous bootstrap cannot overwrite a successful guest login');
-  await page.locator('.game-dock [data-go="dice"]').click();
+  await enterGame(page, 'dice');
   let saved;
   await page.route('**/api/games/dice', async (route) => {
     const response = await route.fetch();
@@ -97,7 +98,7 @@ try {
     /^[a-f0-9]{64}$/,
   );
   assert.equal((await blocked.cookies()).length, 0);
-  await frame.locator('.game-dock [data-go="plinko"]').click();
+  await enterGame(frame, 'plinko');
   const paid = parent.waitForResponse(
     (response) => response.url().endsWith('/api/games/plinko') && response.status() === 200,
   );

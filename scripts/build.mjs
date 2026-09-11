@@ -81,6 +81,7 @@ for (const page of ['bio', 'games']) {
     (await read('assets/shared/modal-panels.css')) +
     '\n' +
     (await read('assets/shared/experience.css'));
+  css += '\n' + (await read(page === 'bio' ? 'assets/bio/refinements.css' : 'assets/games/garden.css'));
   const formattedCSS = await format(css, { parser: 'css', printWidth: 110 });
   let template = await read(`templates/${page}.html`);
   if (page === 'bio') {
@@ -96,6 +97,7 @@ for (const page of ['bio', 'games']) {
     .replace('{{bio-profile}}', await read('templates/bio-profile.html'))
     .replace('{{motion-picker}}', motionPicker)
     .replace('{{boot-screen}}', await read('templates/boot-screen.html'))
+    .replace('{{garden}}', await read('templates/garden.html'))
     .replace(`{{styles:${page}}}`, `<style>\n${formattedCSS}\n</style>`)
     .replace('{{bootstrap}}', bootstrap)
     .replace(
@@ -104,7 +106,11 @@ for (const page of ['bio', 'games']) {
         `<script>\nrequestAnimationFrame(() => requestAnimationFrame(() => {\n${result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')}\n}));\n</script>`,
     );
   template = await embedAssets(template);
-  if (/\{\{(?:asset:|script:|styles:|icons|game-|bio-island|bio-profile|motion-|boot-screen)/.test(template))
+  if (
+    /\{\{(?:asset:|script:|styles:|icons|game-|bio-island|bio-profile|motion-|boot-screen|garden)/.test(
+      template,
+    )
+  )
     throw new Error('Unresolved template token');
   const output = await format(template, {
     parser: 'html',

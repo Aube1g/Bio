@@ -620,5 +620,10 @@
   "Чередовать все стили": "Cycle through every style",
   "Сдвиг и упругая остановка": "Slide and spring landing",
   "Мягкое раскрытие панели": "Soft panel expansion",
-  "Движение уменьшено в настройках системы.": "Motion is reduced by your system settings."
+  "Движение уменьшено в настройках системы.": "Motion is reduced by your system settings.",
+  "Временно неактивен": "Currently inactive",
+  "Пошагово": "Step by step",
+  "Следующий шаг": "Next step",
+  "Повторять автоматически": "Loop playback",
+  "Скорость демонстрации": "Playback speed"
 }

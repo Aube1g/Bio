@@ -14,7 +14,8 @@
     "test:interactions": "node tests/interaction.browser.mjs",
     "test:glass": "node tests/glass-ui.browser.mjs",
     "test:offline": "node tests/offline-play.browser.mjs",
-    "test:experience": "node tests/experience.browser.mjs"
+    "test:experience": "node tests/experience.browser.mjs",
+    "test:garden": "node tests/garden.browser.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

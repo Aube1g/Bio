@@ -392,20 +392,47 @@ import demos from './demos.json';
       this.queue = [];
       this.index = 0;
       this.timer = 0;
+      this.loopTimer = 0;
       this.remaining = null;
       this.speed = 1;
       this.paused = false;
       this.visible = false;
       this.instant = false;
       this.follow = true;
+      this.loopEnabled = true;
+      this.manualStepping = false;
+      this.finishedWithoutMotion = false;
+      this.statusKey = '';
       this.observer = new IntersectionObserver(
         (entries) => {
-          this.visible = entries[0].isIntersecting;
-          this.sync();
+          const entry = entries[0];
+          const visible =
+            entry.isIntersecting && entry.intersectionRect.height >= Math.min(160, root.clientHeight * 0.18);
+          const entered = visible && !this.visible;
+          this.visible = visible;
+          if (
+            entered &&
+            state.motion &&
+            this.loopEnabled &&
+            this.queue.length &&
+            this.index >= this.queue.length &&
+            this.playable()
+          )
+            this.replay();
+          else this.sync();
         },
-        { threshold: 0.025 },
+        { threshold: [0, 0.08, 0.2, 0.4] },
       );
       this.observer.observe(root);
+      const engage = (event) => {
+        if (!event.target.closest('.demo-controls')) {
+          this.loopEnabled = false;
+          this.stopLoop();
+          this.status();
+        }
+      };
+      root.addEventListener('pointerdown', engage);
+      root.addEventListener('focusin', engage);
       root._player = this;
       demoPlayers.add(this);
     }
@@ -422,7 +449,12 @@ import demos from './demos.json';
         !this.root.closest('dialog.is-morphing')
       );
     }
+    stopLoop() {
+      clearTimeout(this.loopTimer);
+      this.loopTimer = 0;
+    }
     clear() {
+      this.stopLoop();
       if (this.timer) {
         clearTimeout(this.timer);
         this.timer = 0;
@@ -437,6 +469,8 @@ import demos from './demos.json';
       this.paused = false;
       this.instant = false;
       this.follow = true;
+      this.finishedWithoutMotion = false;
+      this.statusKey = '';
       this.sync();
     }
     sync() {
@@ -444,17 +478,41 @@ import demos from './demos.json';
         this.clear();
         return;
       }
+      if (this.manualStepping && !state.motion) {
+        this.clear();
+        this.status();
+        return;
+      }
       if (!state.motion) {
+        this.finishedWithoutMotion = true;
         this.finish();
         return;
+      }
+      if (this.manualStepping) {
+        this.manualStepping = false;
+        this.paused = false;
+        this.remaining = null;
       }
       if (!this.playable()) {
         this.clear();
         this.status();
         return;
       }
+      if (this.finishedWithoutMotion) {
+        this.finishedWithoutMotion = false;
+        this.replay();
+        return;
+      }
       this.status();
-      if (this.timer || this.index >= this.queue.length) return;
+      if (this.timer) return;
+      if (this.index >= this.queue.length) {
+        if (this.loopEnabled && !this.loopTimer)
+          this.loopTimer = setTimeout(() => {
+            this.loopTimer = 0;
+            if (this.playable() && this.loopEnabled) this.replay();
+          }, 6500);
+        return;
+      }
       const job = this.queue[this.index],
         delay = this.remaining ?? job.delay / this.speed;
       this.remaining = null;
@@ -473,9 +531,7 @@ import demos from './demos.json';
     finish() {
       this.clear();
       this.instant = true;
-      while (this.index < this.queue.length) {
-        this.queue[this.index++].run();
-      }
+      while (this.index < this.queue.length) this.queue[this.index++].run();
       this.instant = false;
       this.remaining = null;
       this.status();
@@ -483,36 +539,92 @@ import demos from './demos.json';
     status() {
       const done = this.index >= this.queue.length,
         paused = this.paused || !state.motion;
+      const key = [done, paused, this.speed, this.loopEnabled, this.manualStepping, state.motion].join(':');
+      if (key === this.statusKey) return;
+      this.statusKey = key;
+      this.root.dataset.playback = done ? 'done' : paused ? 'paused' : 'playing';
       const label = $('[data-demo-status]', this.root);
-      if (label) label.textContent = done ? tr('Готово') : paused ? tr('На паузе') : tr('Воспроизведение');
+      if (label)
+        label.textContent = done
+          ? tr('Готово')
+          : this.manualStepping
+            ? tr('Пошагово')
+            : paused
+              ? tr('На паузе')
+              : tr('Воспроизведение');
       const pause = $('[data-demo-pause]', this.root);
       if (pause) {
-        pause.disabled = done || !state.motion;
+        pause.hidden = !state.motion;
+        pause.disabled = false;
         pause.setAttribute(
           'aria-label',
-          this.paused ? 'Продолжить демонстрацию' : 'Приостановить демонстрацию',
+          tr(
+            done
+              ? 'Повторить демонстрацию'
+              : this.paused
+                ? 'Продолжить демонстрацию'
+                : 'Приостановить демонстрацию',
+          ),
         );
-        pause.innerHTML = icons(this.paused ? 'play' : 'pause');
+        pause.innerHTML = icons(done || this.paused ? 'play' : 'pause');
       }
       const speed = $('[data-demo-speed]', this.root);
       if (speed) {
         speed.textContent = this.speed + '×';
-        speed.setAttribute('aria-label', 'Скорость демонстрации ' + this.speed + '×. Изменить');
+        speed.disabled = !state.motion;
+        speed.setAttribute('aria-label', tr('Скорость демонстрации') + ' ' + this.speed + '×');
+      }
+      const step = $('[data-demo-step]', this.root);
+      if (step) {
+        step.hidden = state.motion;
+        step.disabled = !this.queue.length;
+      }
+      const loop = $('[data-demo-loop]', this.root);
+      if (loop) {
+        loop.hidden = !state.motion;
+        loop.setAttribute('aria-pressed', String(this.loopEnabled));
       }
     }
     toggle() {
-      if (this.index >= this.queue.length) return;
+      if (this.index >= this.queue.length) {
+        this.replay(true);
+        return;
+      }
       this.paused = !this.paused;
       this.sync();
     }
-    replay() {
+    replay(manual = false) {
+      this.manualStepping = manual && !state.motion;
       this.build();
+      if (this.manualStepping) this.step();
+    }
+    step() {
+      this.manualStepping = true;
+      this.loopEnabled = false;
+      this.clear();
+      if (this.index >= this.queue.length) this.build();
+      this.paused = true;
+      this.instant = true;
+      if (this.index < this.queue.length) this.queue[this.index++].run();
+      while (this.index < this.queue.length && this.queue[this.index].delay <= 45)
+        this.queue[this.index++].run();
+      this.instant = false;
+      this.remaining = null;
+      this.statusKey = '';
+      this.status();
+    }
+    toggleLoop() {
+      this.loopEnabled = !this.loopEnabled;
+      this.stopLoop();
+      this.statusKey = '';
+      this.sync();
     }
     changeSpeed() {
       this.clear();
       const old = this.speed;
       this.speed = old === 1 ? 2 : 1;
       if (this.remaining !== null) this.remaining *= old / this.speed;
+      this.statusKey = '';
       this.sync();
     }
     destroy() {
@@ -552,11 +664,17 @@ import demos from './demos.json';
       icons('pause') +
       '</button><button class="demo-control" type="button" data-demo-replay aria-label="Повторить демонстрацию">' +
       icons('replay') +
+      '</button><button class="demo-control" type="button" data-demo-loop aria-pressed="true" aria-label="Повторять автоматически">' +
+      icons('loop') +
+      '</button><button class="demo-control" type="button" data-demo-step hidden aria-label="Следующий шаг">' +
+      icons('step') +
       '</button></div>'
     );
   }
   function bindPlayerControls(root, player) {
-    $('[data-demo-replay]', root)?.addEventListener('click', () => player.replay());
+    $('[data-demo-replay]', root)?.addEventListener('click', () => player.replay(true));
+    $('[data-demo-loop]', root)?.addEventListener('click', () => player.toggleLoop());
+    $('[data-demo-step]', root)?.addEventListener('click', () => player.step());
     $('[data-demo-pause]', root)?.addEventListener('click', () => player.toggle());
     $('[data-demo-speed]', root)?.addEventListener('click', () => player.changeSpeed());
   }
@@ -2687,6 +2805,7 @@ import demos from './demos.json';
     }
   });
   function openProject(id, opener = document.activeElement) {
+    if (id === 'firstplatform') return;
     const project = projects[id];
     if (!project) return;
     const dialog = $('#detail-dialog');

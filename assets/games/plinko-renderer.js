@@ -25,6 +25,7 @@ export class PlinkoRenderer {
     this.frame = 0;
     this.last = 0;
     this.geometry = null;
+    this.layoutKey = '';
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(canvas);
     bins.addEventListener('pointerover', (event) => this.inspect(event.target.closest('[data-bin]')));
@@ -56,6 +57,17 @@ export class PlinkoRenderer {
   resize() {
     const rect = this.canvas.getBoundingClientRect();
     if (rect.width < 100 || rect.height < 120) return;
+    const key = [
+      Math.round(rect.width * 10),
+      Math.round(rect.height * 10),
+      this.rows,
+      this.risk,
+      preferences.theme,
+      preferences.lang,
+      Math.min(devicePixelRatio || 1, 2),
+    ].join(':');
+    if (key === this.layoutKey) return;
+    this.layoutKey = key;
     this.ratio = Math.min(devicePixelRatio || 1, 2);
     this.canvas.width = this.staticLayer.width = Math.round(rect.width * this.ratio);
     this.canvas.height = this.staticLayer.height = Math.round(rect.height * this.ratio);
@@ -132,7 +144,7 @@ export class PlinkoRenderer {
         const peg = ball.path.steps[step]?.from.peg;
         if (peg) {
           this.impacts.push({ ...peg, life: 1 });
-          this.onImpact();
+          this.onImpact(peg.row);
         }
       }
       ball.step = position.step;

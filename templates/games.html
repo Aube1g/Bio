@@ -16,7 +16,7 @@
     {{styles:games}} {{bootstrap}}
   </head>
   <body class="games-page">
-    {{boot-screen}}
+    {{garden}} {{boot-screen}}
     <a class="skip-link" href="#portal-stage" data-t="skip">Перейти к играм</a>
     {{icons}}
     <div class="ambient" aria-hidden="true">
@@ -89,6 +89,9 @@
           <div class="lobby-bento">
             <article class="lobby-hero">
               <div class="hero-grid" aria-hidden="true"></div>
+              <svg class="hero-garden" viewBox="0 0 500 360" aria-hidden="true">
+                <use href="#sakura-branch" />
+              </svg>
               <div class="hero-caption">
                 <span>PLAY A LITTLE.</span><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
               </div>
@@ -358,7 +361,13 @@
                   </button>
                 </div>
               </div>
-              <div class="game-board blackjack-board" id="board-blackjack" hidden>
+              <div class="game-board blackjack-board" id="board-blackjack" hidden data-turn="idle">
+                <div class="blackjack-table-head">
+                  <span class="bj-status"
+                    ><i></i><span id="blackjack-phase" data-t="ready">Готов к игре</span></span
+                  ><span class="bj-mini-rule">S17 <b>3:2</b></span>
+                </div>
+                <div class="card-shoe" aria-hidden="true"><i></i><i></i><i></i></div>
                 <div class="felt-inner-line" aria-hidden="true"></div>
                 <div class="hand-area dealer-area">
                   <div class="hand-label">
@@ -370,8 +379,13 @@
                   <strong>BLACKJACK PAYS 3:2</strong
                   ><span data-t="dealerStands">Дилер стоит на мягких 17</span>
                   <div class="table-chip" aria-hidden="true">
-                    <svg class="brand-mark"><use href="#i-mark" /></svg>
+                    <img
+                      class="viola-icon viola-on-dark"
+                      src="{{asset:assets/games/art/violas.webp}}"
+                      alt=""
+                    />
                   </div>
+                  <strong class="table-stake" id="table-bet">—</strong>
                 </div>
                 <div class="hand-area player-area">
                   <div class="hand-label">
@@ -380,6 +394,11 @@
                   <div class="playing-hand" id="player-hand"></div>
                 </div>
               </div>
+              <div class="round-feedback" id="round-feedback" hidden aria-hidden="true">
+                <span class="feedback-symbol"></span><span class="feedback-game"></span
+                ><strong class="feedback-label"></strong><b class="feedback-value"></b>
+              </div>
+              <div class="result-particles" aria-hidden="true"></div>
               <div class="result-strip" id="result-strip" role="status" aria-live="polite">
                 <span class="result-icon"
                   ><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg
@@ -387,6 +406,9 @@
                 <div>
                   <strong id="result-title" data-t="makeYourMove">Твой ход.</strong
                   ><span id="result-detail" data-t="chooseBet">Выбери ставку и начинай.</span>
+                </div>
+                <div class="result-amount" id="result-amount" hidden>
+                  <strong id="result-net"></strong><span data-t="netResult">Итог партии</span>
                 </div>
                 <button
                   class="result-proof"
@@ -443,6 +465,16 @@
                 </div>
                 <div class="potential">
                   <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
+                </div>
+                <label class="field-label" data-t="ballCount">За один запуск</label>
+                <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
+                  <button type="button" data-batch="1" aria-pressed="true">1</button
+                  ><button type="button" data-batch="3" aria-pressed="false">3</button
+                  ><button type="button" data-batch="5" aria-pressed="false">5</button
+                  ><button type="button" data-batch="8" aria-pressed="false">8</button>
+                </div>
+                <div class="batch-price">
+                  <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
                 </div>
                 <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
                   Ряды и риск фиксируются, пока летят шары.
@@ -544,6 +576,16 @@
         </button>
       </footer>
     </div>
+    <aside class="lobby-launch" id="lobby-launch" hidden aria-label="Выбранная игра">
+      <span class="launch-symbol"
+        ><svg class="icon" aria-hidden="true"><use id="launch-game-icon" href="#i-plinko" /></svg
+      ></span>
+      <div><span data-t="selectedGame">Выбрана игра</span><strong id="launch-game-name">Plinko</strong></div>
+      <button type="button" id="launch-selected">
+        <span data-t="enterGame">Играть</span
+        ><svg class="icon" aria-hidden="true"><use href="#i-play" /></svg>
+      </button>
+    </aside>
     <nav class="game-dock" aria-label="Игровой док">
       <div class="dock-games spring-group">
         <a href="#lobby" data-go="lobby" aria-current="page" aria-label="Коллекция"

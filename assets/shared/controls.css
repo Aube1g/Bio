@@ -319,3 +319,56 @@
     transition: none !important;
   }
 }
+
+/* Glass is a real material preference for both switches and segmented pills. */
+[data-glass='true'] :is(.spring-thumb, .spring-indicator) {
+  background:
+    linear-gradient(155deg, #ffffff22, transparent 32%, #ffffff08 70%, #ffffff18),
+    var(--button-primary, var(--primary));
+  box-shadow:
+    inset 0 1px 1px #ffffff5c,
+    inset 0 -1px 2px #14072338,
+    0 3px 9px #35195b23;
+  border: 1px solid #ffffff30;
+  backdrop-filter: blur(5px) saturate(1.3);
+}
+[data-glass='true']
+  :is(.skill-tags span, .dialog-tags span, .inline-pill, .file-chip, .small-pill, .feature-status) {
+  box-shadow:
+    inset 0 1px #ffffff19,
+    0 2px 5px #00000008;
+  background-image: linear-gradient(150deg, #ffffff12, transparent 60%);
+}
+[data-glass='false'] .setting-row .glass-switch .glass-switch-lens {
+  background: #eeeaf4;
+  border-color: #c6c2d1;
+  box-shadow: 0 2px 4px #0003;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+[data-glass='false'] .glass-switch-lens::before,
+[data-glass='false'] .glass-switch-lens::after {
+  display: none;
+}
+[data-glass='false'] .setting-row :is(.switch-track, .toggle-track)::before {
+  background: var(--switch-on);
+  box-shadow: none;
+}
+[data-glass='false'] .setting-row :is(.switch-track, .toggle-track)::after {
+  display: none;
+}
+[data-glass='false'] :is(.spring-thumb, .spring-indicator) {
+  background: var(--button-primary, var(--primary));
+  box-shadow: none;
+  border: 0;
+  backdrop-filter: none;
+}
+[data-glass='false']
+  :is(.skill-tags span, .dialog-tags span, .inline-pill, .file-chip, .small-pill, .feature-status) {
+  background-image: none;
+  box-shadow: none;
+}
+[data-theme='light'][data-glass='false'] .setting-row .glass-switch .glass-switch-lens {
+  background: #fff;
+  border-color: #a6aeb0;
+}

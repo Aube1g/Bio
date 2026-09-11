@@ -166,6 +166,8 @@ try {
   await audit('wallet-dark');
   await close('wallet-dialog');
   await page.locator('[data-profile-game="dice"]').click();
+  await page.locator('#lobby-launch').waitFor({ state: 'visible' });
+  await page.locator('#launch-selected').click();
   await page.waitForFunction(
     () => document.documentElement.dataset.game === 'dice' && !document.querySelector('#account-dialog').open,
   );
