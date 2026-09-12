@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="ru" data-theme="dark" data-table="royal">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#080813" />
+    <meta
+      name="description"
+      content="Aubeig Games — Blackjack, Slots, Dice и Plinko. Игровое пространство на тренировочные фишки."
+    />
+    <title>Aubeig Games — твой ход</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='20' fill='%23211a30'/%3E%3Cpath d='M16 45 29 18h9l11 27H37l-4-13-6 13Z' fill='%23d4ef8e'/%3E%3C/svg%3E"
+    />
+    {{styles:games}} {{bootstrap}}
+  </head>
+  <body class="games-page">
+    {{garden}} {{boot-screen}}
+    <a class="skip-link" href="#portal-stage" data-t="skip">Перейти к играм</a>
+    {{icons}}
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient-orb"></div>
+      <div class="ambient-dots"></div>
+    </div>
+    <div class="site-wrap">
+      <header class="site-header">
+        <a class="site-brand" href="#lobby" data-go="lobby" aria-label="Aubeig Games"
+          ><svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg
+          ><span class="brand-word">aubeig<sup>®</sup></span
+          ><span class="brand-tag">GAMES</span></a
+        >
+        <div class="island-anchor">
+          <div class="game-island" id="game-island" data-open="false">
+            <button
+              class="island-trigger"
+              id="island-trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="island-panel"
+            >
+              <span class="island-coin"
+                ><img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /></span
+              ><span class="island-copy"
+                ><strong id="island-value">Твой игровой счёт</strong
+                ><small id="island-subtitle" data-t="practice">Тренировочные фишки</small></span
+              ><span class="island-dot" id="connection-dot" aria-hidden="true"></span
+              ><svg class="icon island-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+            </button>
+            <div class="island-panel" id="island-panel" hidden>
+              <div class="island-panel-head">
+                <span data-t="session">Твоя сессия</span><span id="island-session-type">—</span>
+              </div>
+              <div class="island-stats">
+                <div><strong id="island-rounds">0</strong><span data-t="rounds">партий</span></div>
+                <div><strong id="island-wins">0</strong><span data-t="wins">побед</span></div>
+                <div><strong id="island-net">0</strong><span data-t="net">результат</span></div>
+              </div>
+              <p id="island-activity" data-t="firstRound">Первая партия впереди.</p>
+              <button class="island-history" type="button" data-open="history-dialog">
+                <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg
+                ><span data-t="history">История партий</span
+                ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a class="bio-link" href="bio.html"
+            ><svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg
+            ><span data-t="toBio">К био</span></a
+          ><button class="account-button" id="account-button" type="button">
+            <span class="account-avatar"
+              ><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg></span
+            ><span id="account-label" data-t="signIn">Войти</span>
+          </button>
+        </div>
+      </header>
+      <main class="portal-shell" id="portal-stage" tabindex="-1">
+        <section class="portal-view" id="view-lobby" aria-labelledby="lobby-title">
+          <div class="lobby-topline">
+            <span class="eyebrow"
+              ><i class="live-dot"></i><span data-t="yourSpace">Твоё игровое пространство</span></span
+            ><span class="tiny-code">04 GAMES · INFINITE MOODS</span
+            ><span class="practice-mode-badge" id="practice-mode-badge" hidden data-t="localPractice"
+              >Тестовый режим · в браузере</span
+            >
+          </div>
+          <div class="lobby-bento">
+            <article class="lobby-hero">
+              <div class="hero-grid" aria-hidden="true"></div>
+              <svg class="hero-garden" viewBox="0 0 500 360" aria-hidden="true">
+                <use href="#sakura-branch" />
+              </svg>
+              <div class="hero-caption">
+                <span>PLAY A LITTLE.</span><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
+              </div>
+              <div class="lobby-hero-copy">
+                <p class="eyebrow" data-t="makeYourMove">ТВОЙ ХОД.</p>
+                <h1 id="lobby-title">
+                  <span data-t="heroLine1">Немного риска.</span><em data-t="heroLine2">Много эмоций.</em>
+                </h1>
+                <p data-t="heroDescription">
+                  Четыре игры. Один ритм. Выбирай настроение — остальное оставь случаю.
+                </p>
+                <button class="hero-play" type="button" id="choose-game">
+                  <span data-t="chooseGame">Выбрать игру</span
+                  ><span class="round-icon"
+                    ><svg class="icon" aria-hidden="true"><use href="#i-arrow-down" /></svg
+                  ></span>
+                </button>
+                <button class="practice-launch text-button" id="practice-launch" type="button">
+                  <svg class="icon" aria-hidden="true"><use href="#i-play" /></svg
+                  ><span data-t="tryWithoutServer">Попробовать без входа</span>
+                </button>
+              </div>
+              <div class="hero-playground" aria-hidden="true">
+                <div class="orbit-ring one"></div>
+                <div class="orbit-ring two"></div>
+                <div class="hero-card card-one">
+                  <span>A</span><svg class="icon"><use href="#i-spade" /></svg>
+                </div>
+                <div class="hero-card card-two">
+                  <span>K</span><svg class="icon"><use href="#i-heart" /></svg>
+                </div>
+                <div class="hero-cube-camera"><div class="cube hero-cube" id="hero-cube"></div></div>
+                <div class="floating-chip chip-one">A</div>
+                <div class="floating-chip chip-two">✦</div>
+                <span class="playground-star star-one">✦</span><span class="playground-star star-two">+</span>
+              </div>
+              <div class="hero-bottom-code">AUBEIG / AFTER HOURS</div>
+            </article>
+            <button class="plinko-feature" type="button" data-go="plinko">
+              <div class="feature-heading">
+                <span class="eyebrow">THE DROP</span><span class="small-pill">8 · 12 · 16</span>
+              </div>
+              <div class="mini-plinko" id="mini-plinko" aria-hidden="true"></div>
+              <div class="plinko-feature-bottom">
+                <div>
+                  <h2>Plinko</h2>
+                  <p data-t="plinkoFeature">Каждый отскок — новая история.</p>
+                </div>
+                <span class="feature-arrow"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+                ></span>
+              </div>
+            </button>
+          </div>
+          <header class="collection-heading" id="game-collection">
+            <div>
+              <span class="eyebrow" data-t="collection">КОЛЛЕКЦИЯ / 04</span>
+              <h2 data-t="pickMood">Во что сыграем?</h2>
+            </div>
+            <div class="collection-legend">
+              <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
+                data-t="practiceShort"
+                >Играем на фишки</span
+              >
+            </div>
+          </header>
+          <div class="game-collection">
+            <article class="game-card" data-card="blackjack">
+              <button
+                class="favorite-button"
+                type="button"
+                data-favorite="blackjack"
+                aria-label="Blackjack — избранное"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></button
+              ><button class="game-card-main" type="button" data-go="blackjack">
+                <span class="card-topline">01 / THE TABLE</span>
+                <div class="game-art art-blackjack" aria-hidden="true">
+                  <img src="{{asset:assets/games/art/blackjack.webp}}" alt="" />
+                </div>
+                <span class="game-card-meta">3:2 BLACKJACK</span>
+                <h3>Blackjack</h3>
+                <p data-t="blackjackCard">Ближе к 21. Дальше от перебора.</p>
+                <span class="card-launch"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+                ></span>
+              </button>
+            </article>
+            <article class="game-card" data-card="slots">
+              <button
+                class="favorite-button"
+                type="button"
+                data-favorite="slots"
+                aria-label="Slots — избранное"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></button
+              ><button class="game-card-main" type="button" data-go="slots">
+                <span class="card-topline">02 / THE SPIN</span>
+                <div class="game-art art-slots" aria-hidden="true">
+                  <img src="{{asset:assets/games/art/slots.webp}}" alt="" />
+                </div>
+                <span class="game-card-meta">3 REELS · 8 SYMBOLS</span>
+                <h3>Slots</h3>
+                <p data-t="slotsCard">Три барабана. Та самая линия.</p>
+                <span class="card-launch"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+                ></span>
+              </button>
+            </article>
+            <article class="game-card" data-card="dice">
+              <button
+                class="favorite-button"
+                type="button"
+                data-favorite="dice"
+                aria-label="Dice — избранное"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></button
+              ><button class="game-card-main" type="button" data-go="dice">
+                <span class="card-topline">03 / THE ROLL</span>
+                <div class="game-art art-dice" aria-hidden="true">
+                  <img src="{{asset:assets/games/art/dice.webp}}" alt="" />
+                </div>
+                <span class="game-card-meta">6 SIDES · YOUR CALL</span>
+                <h3>Dice</h3>
+                <p data-t="diceCard">На какой грани твоя удача?</p>
+                <span class="card-launch"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+                ></span>
+              </button>
+            </article>
+            <article class="game-card" data-card="plinko">
+              <button
+                class="favorite-button"
+                type="button"
+                data-favorite="plinko"
+                aria-label="Plinko — избранное"
+                aria-pressed="false"
+              >
+                <svg class="icon" aria-hidden="true"><use href="#i-star" /></svg></button
+              ><button class="game-card-main" type="button" data-go="plinko">
+                <span class="card-topline">04 / THE DROP</span>
+                <div class="game-art art-plinko" aria-hidden="true">
+                  <img src="{{asset:assets/games/art/plinko.webp}}" alt="" />
+                </div>
+                <span class="game-card-meta">3 RISKS · 3 HEIGHTS</span>
+                <h3>Plinko</h3>
+                <p data-t="plinkoCard">От вершины — к своему множителю.</p>
+                <span class="card-launch"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg
+                ></span>
+              </button>
+            </article>
+          </div>
+          <section class="session-strip">
+            <div class="session-symbol">
+              <svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>
+            </div>
+            <div>
+              <h3 data-t="yourRhythm">У каждой сессии свой ритм.</h3>
+              <p id="session-summary" data-t="firstRound">Первая партия впереди.</p>
+            </div>
+            <button class="text-button" type="button" data-open="history-dialog">
+              <span data-t="history">История партий</span
+              ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></button
+            ><button class="resume-round" id="resume-round" type="button" data-go="blackjack" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-play" /></svg
+              ><span data-t="resumeHand">Продолжить раздачу</span>
+            </button>
+          </section>
+        </section>
+        <section class="portal-view" id="view-game" hidden aria-labelledby="active-game-title">
+          <header class="game-heading">
+            <button class="back-button" type="button" data-go="lobby" aria-label="К коллекции">
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
+            </button>
+            <div class="game-heading-copy">
+              <span class="active-game-glyph" aria-hidden="true"
+                ><svg class="icon"><use id="active-game-glyph" href="#i-plinko" /></svg
+              ></span>
+              <p class="eyebrow" id="active-game-code">04 / THE DROP</p>
+              <h1 id="active-game-title">Plinko</h1>
+              <p id="active-game-description"></p>
+            </div>
+            <button class="rules-button" type="button" id="rules-button">
+              <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg
+              ><span data-t="rules">Правила</span>
+            </button>
+          </header>
+          <div class="game-layout">
+            <div class="game-scene" id="game-scene">
+              <div class="scene-topline">
+                <span class="scene-status"
+                  ><i class="live-dot"></i
+                  ><span id="scene-status-text" data-t="ready">Готов к игре</span></span
+                >
+                <div class="scene-tools">
+                  <span class="scene-badge" id="scene-badge">FAIR PLAY</span
+                  ><button
+                    class="scene-sound"
+                    id="scene-sound"
+                    type="button"
+                    aria-pressed="false"
+                    aria-label="Звук"
+                  >
+                    <svg class="icon" aria-hidden="true"><use href="#i-volume" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="game-board" id="board-plinko">
+                <div class="plinko-canvas-wrap">
+                  <canvas
+                    id="plinko-canvas"
+                    role="img"
+                    aria-label="Плинко: шарик, пины и ячейки множителей"
+                  ></canvas>
+                  <div class="plinko-bins" id="plinko-bins" aria-label="Множители"></div>
+                </div>
+                <div class="plinko-inspector" aria-live="polite">
+                  <div>
+                    <svg class="icon" aria-hidden="true"><use href="#i-plinko" /></svg
+                    ><span data-t="slotCell">Ячейка</span><b id="plinko-inspect-slot">7 / 13</b>
+                  </div>
+                  <strong id="plinko-inspect-multiplier">—</strong>
+                  <div><span data-t="chance">Шанс</span><b id="plinko-inspect-chance">—</b></div>
+                </div>
+                <div class="board-caption">
+                  <span
+                    ><svg class="icon" aria-hidden="true"><use href="#i-bolt" /></svg
+                    ><span data-t="eachBounce">Каждый отскок имеет значение</span></span
+                  ><button class="text-button" type="button" id="plinko-table-button">
+                    <svg class="icon" aria-hidden="true"><use href="#i-table" /></svg
+                    ><span data-t="multipliers">Множители</span>
+                  </button>
+                </div>
+              </div>
+              <div class="game-board" id="board-dice" hidden>
+                <div class="dice-orbit" aria-hidden="true">
+                  <div class="dice-orbit-ring"></div>
+                  <span class="dice-satellite">✦</span>
+                </div>
+                <div class="dice-camera">
+                  <div class="cube" id="dice-cube" role="img" aria-label="Кубик"></div>
+                </div>
+                <div class="dice-readout">
+                  <span data-t="faceValue">На грани</span><strong id="dice-value">—</strong
+                  ><span id="dice-relation" data-t="yourCall">Твой выбор. Твой бросок.</span>
+                </div>
+                <div class="dice-possible" id="dice-possible" aria-label="Выигрышные грани"></div>
+              </div>
+              <div class="game-board" id="board-slots" hidden>
+                <div class="slot-machine-caption">
+                  <span>AUBEIG</span><strong>LUCKY LINE</strong><span>✦ ✦ ✦</span>
+                </div>
+                <div class="slot-machine">
+                  <div class="reels" id="slot-reels"></div>
+                  <span class="payline-pointer left">▸</span><span class="payline-pointer right">◂</span>
+                </div>
+                <div class="slots-under">
+                  <span class="small-pill">192× MAX</span
+                  ><span data-t="slotsHint">Совпадения считаются слева направо</span
+                  ><button class="text-button" type="button" id="slot-table-button">
+                    <svg class="icon" aria-hidden="true"><use href="#i-table" /></svg
+                    ><span data-t="payouts">Выплаты</span>
+                  </button>
+                </div>
+              </div>
+              <div class="game-board blackjack-board" id="board-blackjack" hidden data-turn="idle">
+                <div class="blackjack-table-head">
+                  <span class="bj-status"
+                    ><i></i><span id="blackjack-phase" data-t="ready">Готов к игре</span></span
+                  ><span class="bj-mini-rule">S17 <b>3:2</b></span>
+                </div>
+                <div class="card-shoe" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="felt-inner-line" aria-hidden="true"></div>
+                <div class="hand-area dealer-area">
+                  <div class="hand-label">
+                    <span data-t="dealer">Дилер</span><strong id="dealer-score">—</strong>
+                  </div>
+                  <div class="playing-hand" id="dealer-hand"></div>
+                </div>
+                <div class="table-inscription">
+                  <strong>BLACKJACK PAYS 3:2</strong
+                  ><span data-t="dealerStands">Дилер стоит на мягких 17</span>
+                  <div class="table-chip" aria-hidden="true">
+                    <img
+                      class="viola-icon viola-on-dark"
+                      src="{{asset:assets/games/art/violas.webp}}"
+                      alt=""
+                    />
+                  </div>
+                  <strong class="table-stake" id="table-bet">—</strong>
+                </div>
+                <div class="hand-area player-area">
+                  <div class="hand-label">
+                    <span data-t="yourHand">Твоя рука</span><strong id="player-score">—</strong>
+                  </div>
+                  <div class="playing-hand" id="player-hand"></div>
+                </div>
+              </div>
+              <div class="round-feedback" id="round-feedback" hidden aria-hidden="true">
+                <span class="feedback-symbol"></span><span class="feedback-game"></span
+                ><strong class="feedback-label"></strong><b class="feedback-value"></b>
+              </div>
+              <div class="result-particles" aria-hidden="true"></div>
+              <div class="result-strip" id="result-strip" role="status" aria-live="polite">
+                <span class="result-icon"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg
+                ></span>
+                <div>
+                  <strong id="result-title" data-t="makeYourMove">Твой ход.</strong
+                  ><span id="result-detail" data-t="chooseBet">Выбери ставку и начинай.</span>
+                </div>
+                <div class="result-amount" id="result-amount" hidden>
+                  <strong id="result-net"></strong><span data-t="netResult">Итог партии</span>
+                </div>
+                <button
+                  class="result-proof"
+                  id="result-proof"
+                  type="button"
+                  hidden
+                  aria-label="Проверить партию"
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+                </button>
+              </div>
+            </div>
+            <aside class="bet-panel" aria-label="Управление игрой">
+              <header class="bet-panel-heading">
+                <span class="eyebrow" data-t="controlRoom">ТВОИ НАСТРОЙКИ</span
+                ><svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg>
+              </header>
+              <label class="field-label" for="bet-amount"
+                ><span data-t="bet">Ставка</span><span class="field-unit" data-t="chips">фишки</span></label
+              >
+              <div class="bet-input">
+                <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><input
+                  type="number"
+                  id="bet-amount"
+                  value="10"
+                  min="5"
+                  max="500"
+                  step="1"
+                  inputmode="numeric"
+                />
+                <div class="bet-steppers">
+                  <button type="button" data-bet-step="-5" aria-label="Уменьшить ставку">−</button
+                  ><button type="button" data-bet-step="5" aria-label="Увеличить ставку">+</button>
+                </div>
+              </div>
+              <div class="bet-shortcuts">
+                <button type="button" data-bet-factor="half">½</button
+                ><button type="button" data-bet-factor="double">2×</button
+                ><button type="button" data-bet-factor="max">MAX</button>
+              </div>
+              <div class="game-options" id="plinko-options">
+                <label class="field-label" data-t="risk">Риск</label>
+                <div class="segmented spring-group risk-control" role="group" aria-label="Риск">
+                  <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
+                  ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
+                    Средний</button
+                  ><button type="button" data-risk="high" aria-pressed="false" data-t="high">Высокий</button>
+                </div>
+                <label class="field-label" data-t="rowCount">Количество рядов</label>
+                <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
+                  <button type="button" data-rows="8" aria-pressed="false">8</button
+                  ><button type="button" data-rows="12" aria-pressed="true">12</button
+                  ><button type="button" data-rows="16" aria-pressed="false">16</button>
+                </div>
+                <div class="potential">
+                  <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
+                </div>
+                <label class="field-label" data-t="ballCount">За один запуск</label>
+                <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
+                  <button type="button" data-batch="1" aria-pressed="true">1</button
+                  ><button type="button" data-batch="3" aria-pressed="false">3</button
+                  ><button type="button" data-batch="5" aria-pressed="false">5</button
+                  ><button type="button" data-batch="8" aria-pressed="false">8</button>
+                </div>
+                <div class="batch-price">
+                  <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
+                </div>
+                <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
+                  Ряды и риск фиксируются, пока летят шары.
+                </p>
+              </div>
+              <div class="game-options" id="dice-options" hidden>
+                <label class="field-label" data-t="prediction">Твой прогноз</label>
+                <div class="segmented spring-group" role="group" aria-label="Прогноз">
+                  <button type="button" data-dice-mode="under" aria-pressed="true">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-down" /></svg
+                    ><span data-t="under">Меньше</span></button
+                  ><button type="button" data-dice-mode="over" aria-pressed="false">
+                    <svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg
+                    ><span data-t="over">Больше</span>
+                  </button>
+                </div>
+                <label class="field-label" for="dice-target"
+                  ><span data-t="target">Порог</span><strong id="dice-target-value">4</strong></label
+                ><input
+                  class="range-control"
+                  type="range"
+                  id="dice-target"
+                  min="2"
+                  max="6"
+                  step="1"
+                  value="4"
+                />
+                <div class="dice-odds">
+                  <div><span data-t="chance">Шанс</span><strong id="dice-chance">50%</strong></div>
+                  <div>
+                    <span data-t="multiplier">Множитель</span><strong id="dice-multiplier">1.96×</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="game-options slot-options" id="slots-options" hidden>
+                <div class="slot-promise">
+                  <svg class="icon" aria-hidden="true"><use href="#i-gem" /></svg
+                  ><strong data-t="onePayline">Одна линия. Три совпадения.</strong>
+                  <p data-t="slotPromise">Две одинаковые слева — 1,75×. Три — до 192×.</p>
+                </div>
+              </div>
+              <div class="game-options blackjack-options" id="blackjack-options" hidden>
+                <div class="rule-chip">
+                  <svg class="icon" aria-hidden="true"><use href="#i-spade" /></svg
+                  ><span>BLACKJACK <strong>3:2</strong></span>
+                </div>
+                <p class="small-note" data-t="blackjackNote">
+                  Туз — 1 или 11. Удвоение доступно на первых двух картах.
+                </p>
+                <div class="blackjack-actions" id="blackjack-actions" hidden>
+                  <button class="secondary-button" type="button" data-bj-action="hit">
+                    <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg
+                    ><span data-t="hit">Ещё</span></button
+                  ><button class="secondary-button" type="button" data-bj-action="stand">
+                    <svg class="icon" aria-hidden="true"><use href="#i-hand" /></svg
+                    ><span data-t="stand">Хватит</span></button
+                  ><button class="secondary-button double-button" type="button" data-bj-action="double">
+                    <span>2×</span><span data-t="double">Удвоить</span>
+                  </button>
+                </div>
+              </div>
+              <button class="play-button" id="play-button" type="button">
+                <span class="play-button-icon"
+                  ><svg class="icon" aria-hidden="true"><use href="#i-play" /></svg></span
+                ><span id="play-label" data-t="dropBall">Бросить шар</span><kbd class="play-key">↵</kbd>
+              </button>
+              <div class="bet-available">
+                <span data-t="available">На счёте</span><strong id="available-balance">—</strong>
+              </div>
+              <div class="round-queue" id="round-queue" hidden>
+                <span class="queue-dots" aria-hidden="true"></span><span id="round-queue-label"></span>
+              </div>
+              <button class="verification-link" type="button" id="fairness-button">
+                <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg
+                ><span data-t="verifiable">Проверяемый результат</span
+                ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+              </button>
+            </aside>
+          </div>
+          <section class="recent-rounds">
+            <span class="eyebrow" data-t="recentRounds">ПОСЛЕДНИЕ ПАРТИИ</span>
+            <div id="recent-rounds-list">
+              <span class="muted" data-t="noRounds">Здесь появятся твои результаты.</span>
+            </div>
+            <button type="button" class="text-button" data-open="history-dialog">
+              <span data-t="allHistory">Вся история</span
+              ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </button>
+          </section>
+        </section>
+      </main>
+      <footer class="site-footer">
+        <span>© 2026 Aubeig</span><span class="footer-motto">CODE. CREATE. PLAY.</span
+        ><button class="text-button" type="button" data-open="wallet-dialog">
+          <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
+            data-t="practiceShort"
+            >Играем на фишки</span
+          >
+        </button>
+      </footer>
+    </div>
+    <aside class="lobby-launch" id="lobby-launch" hidden aria-label="Выбранная игра">
+      <span class="launch-symbol"
+        ><svg class="icon" aria-hidden="true"><use id="launch-game-icon" href="#i-plinko" /></svg
+      ></span>
+      <div><span data-t="selectedGame">Выбрана игра</span><strong id="launch-game-name">Plinko</strong></div>
+      <button type="button" id="launch-selected">
+        <span data-t="enterGame">Играть</span
+        ><svg class="icon" aria-hidden="true"><use href="#i-play" /></svg>
+      </button>
+    </aside>
+    <nav class="game-dock" aria-label="Игровой док">
+      <div class="dock-games spring-group">
+        <a href="#lobby" data-go="lobby" aria-current="page" aria-label="Коллекция"
+          ><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg
+          ><span data-t="lobby">Коллекция</span></a
+        ><a href="#blackjack" data-go="blackjack" aria-label="Blackjack"
+          ><svg class="icon" aria-hidden="true"><use href="#i-spade" /></svg><span>Blackjack</span></a
+        ><a href="#slots" data-go="slots" aria-label="Slots"
+          ><svg class="icon" aria-hidden="true"><use href="#i-slot" /></svg><span>Slots</span></a
+        ><a href="#dice" data-go="dice" aria-label="Dice"
+          ><svg class="icon" aria-hidden="true"><use href="#i-dice" /></svg><span>Dice</span></a
+        ><a href="#plinko" data-go="plinko" aria-label="Plinko"
+          ><svg class="icon" aria-hidden="true"><use href="#i-plinko" /></svg><span>Plinko</span></a
+        >
+      </div>
+      <span class="dock-divider"></span
+      ><button type="button" data-open="game-settings-dialog" aria-label="Настройки">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>
+      </button>
+    </nav>
+    <div class="connection-banner" id="connection-banner" role="status" hidden>
+      <svg class="icon" aria-hidden="true"><use href="#i-wifi" /></svg><span id="connection-message"></span
+      ><button type="button" id="retry-connection" data-t="retry">Повторить</button
+      ><button type="button" id="practice-retry" data-t="startPractice">Тестовая игра</button>
+    </div>
+    <dialog id="auth-dialog" class="portal-dialog auth-dialog" aria-labelledby="auth-title">
+      <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <div class="dialog-content">
+        <span class="dialog-symbol"
+          ><svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg
+        ></span>
+        <p class="eyebrow" data-t="welcome">РАД ТЕБЯ ВИДЕТЬ</p>
+        <h2 id="auth-title" data-t="loginTitle">Твоя игра начинается здесь.</h2>
+        <p class="dialog-lead" data-t="loginDescription">Войди через Telegram или просто загляни в гости.</p>
+        <button type="button" class="telegram-button" id="telegram-login">
+          <svg class="icon" aria-hidden="true"><use href="#i-telegram" /></svg
+          ><span data-t="telegramLogin">Войти через Telegram</span
+          ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+        </button>
+        <div id="telegram-widget"></div>
+        <div class="auth-divider"><span data-t="or">или</span></div>
+        <button type="button" class="guest-button" id="guest-login">
+          <svg class="icon" aria-hidden="true"><use href="#i-user" /></svg
+          ><span data-t="guestLogin">Продолжить гостем</span
+          ><svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg>
+        </button>
+        <p class="small-note" data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</p>
+        <button class="practice-login" id="practice-login" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg
+          ><span data-t="tryWithoutServer">Попробовать без входа</span>
+        </button>
+        <p class="form-error" id="auth-error" role="alert"></p>
+      </div>
+    </dialog>
+    {{game-profile}}
+    <dialog id="history-dialog" class="portal-dialog wide-dialog" aria-labelledby="history-title">
+      <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <div class="dialog-content">
+        <p class="eyebrow">YOUR PLAYBOOK</p>
+        <h2 id="history-title" data-t="history">История партий</h2>
+        <p class="dialog-lead" data-t="historyDescription">
+          Каждая ставка, каждый результат. Нажми на партию, чтобы проверить её.
+        </p>
+        <div id="history-list" class="history-list"></div>
+        <button type="button" id="history-more" class="secondary-button" data-t="loadMore" hidden>
+          Показать ещё
+        </button>
+      </div>
+    </dialog>
+    <dialog id="rules-dialog" class="portal-dialog wide-dialog" aria-labelledby="rules-title">
+      <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <div class="dialog-content">
+        <p class="eyebrow" data-t="howToPlay">КАК ИГРАТЬ</p>
+        <h2 id="rules-title"></h2>
+        <div id="rules-content" class="prose"></div>
+      </div>
+    </dialog>
+    <dialog id="proof-dialog" class="portal-dialog wide-dialog" aria-labelledby="proof-title">
+      <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <div class="dialog-content">
+        <p class="eyebrow">FAIR PLAY</p>
+        <h2 id="proof-title" data-t="proofTitle">Не на слово. По хэшу.</h2>
+        <div id="proof-content" class="prose"></div>
+      </div>
+    </dialog>
+    <dialog id="wallet-dialog" class="portal-dialog" aria-labelledby="wallet-title">
+      <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+      <div class="dialog-content">
+        <div class="wallet-identity">
+          <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" />
+          <div>
+            <p class="eyebrow" data-t="gameAccount">Игровой счёт</p>
+            <h2 id="wallet-title" data-t="violas">Виолы</h2>
+          </div>
+        </div>
+        <p class="info-callout" data-t="walletDescription">
+          Этот счёт не связан с кошельком Виол. Фишки нельзя купить или вывести. Можно обновить тренировочный
+          баланс до 1 000.
+        </p>
+        <div class="wallet-balance-panel">
+          <span data-t="practice">Тренировочные фишки</span>
+          <div class="wallet-amount" id="wallet-amount">—</div>
+        </div>
+        <button class="primary-button" id="practice-reset" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg
+          ><span data-t="resetPractice">Обновить до 1 000</span>
+        </button>
+        <p class="small-note" data-t="resetNote">Не чаще раза в минуту, после завершения Blackjack.</p>
+      </div>
+    </dialog>
+    {{game-settings}}
+    <div class="portal-toast" id="portal-toast" role="status" aria-live="polite"></div>
+    <noscript
+      ><div class="noscript-message">
+        Для игр нужен JavaScript. <a href="bio.html">Перейти к био Aubeig</a>.
+      </div></noscript
+    >
+    {{motion-picker}} {{script:games}}
+  </body>
+</html>

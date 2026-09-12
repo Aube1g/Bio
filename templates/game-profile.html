@@ -1,0 +1,73 @@
+<dialog id="account-dialog" class="portal-dialog profile-dialog" aria-labelledby="account-title">
+  <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+    <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+  </button>
+  <div class="dialog-content">
+    <div class="profile-cover">
+      <span class="profile-cover-label">AUBEIG / PLAYER SPACE</span
+      ><img
+        class="cover-emblem viola-icon viola-on-dark"
+        src="{{asset:assets/games/art/violas.webp}}"
+        alt=""
+      />
+    </div>
+    <div class="profile-hero">
+      <div class="profile-avatar" id="player-avatar" aria-hidden="true">Г</div>
+      <div class="profile-hero-copy">
+        <h2 id="account-title"></h2>
+        <p id="account-type"></p>
+      </div>
+      <span class="profile-badge" id="account-badge"></span>
+    </div>
+    <section class="profile-balance-card">
+      <div>
+        <p data-t="gameAccount">Игровой счёт</p>
+        <strong id="profile-balance">—</strong><small data-t="practice">Тренировочные фишки</small
+        ><button type="button" data-open="wallet-dialog">
+          <span data-t="openWallet">Открыть счёт</span
+          ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+      <img class="viola-icon viola-large viola-on-dark" src="{{asset:assets/games/art/violas.webp}}" alt="" />
+    </section>
+    <div class="profile-stat-grid" id="account-stats"></div>
+    <div class="profile-section-heading">
+      <h3 data-t="quickPlay">Быстрый старт</h3>
+      <span id="profile-favorites-label"></span>
+    </div>
+    <div class="profile-game-grid" id="profile-games"></div>
+    <section class="modal-section-card" style="margin-top: 16px">
+      <div class="info-card-heading">
+        <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg>
+        <h3 data-t="yourSession">Твоя сессия</h3>
+      </div>
+      <p id="profile-session-summary"></p>
+      <button class="text-button" type="button" data-open="history-dialog">
+        <span data-t="history">История партий</span
+        ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+      </button>
+    </section>
+    <div class="profile-actions">
+      <button type="button" id="copy-account-id">
+        <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg
+        ><span id="profile-account-id">ID</span>
+      </button>
+      <button type="button" data-open="game-settings-dialog">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg
+        ><span data-t="settings">Настройки</span>
+      </button>
+      <button type="button" id="server-login-action" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-telegram" /></svg
+        ><span data-t="serverLogin">Серверный вход</span></button
+      ><button type="button" id="logout-button">
+        <svg class="icon" aria-hidden="true"><use href="#i-logout" /></svg><span data-t="logout">Выйти</span>
+      </button>
+    </div>
+    <aside class="info-callout" id="guest-profile-warning">
+      <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+      <p class="small-note" data-t="guestWarning">
+        Гостевой вход привязан к этому браузеру. После выхода доступ к гостевому счёту не восстановить.
+      </p>
+    </aside>
+  </div>
+</dialog>

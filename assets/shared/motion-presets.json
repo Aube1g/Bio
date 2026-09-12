@@ -1,0 +1,65 @@
+[
+  {
+    "id": "star",
+    "title": "Star",
+    "ru": "Четыре луча → мягкое окно",
+    "en": "Four rays → a soft window",
+    "icon": "star"
+  },
+  {
+    "id": "bloom",
+    "title": "Bloom",
+    "ru": "Шесть лепестков → панель",
+    "en": "Six petals → a panel",
+    "icon": "clover"
+  },
+  {
+    "id": "orbit",
+    "title": "Orbit",
+    "ru": "Кольцо раскрывает середину",
+    "en": "A ring opens its center",
+    "icon": "replay"
+  },
+  {
+    "id": "ribbon",
+    "title": "Ribbon",
+    "ru": "Диагональный разворот листа",
+    "en": "A diagonal page unfold",
+    "icon": "file"
+  },
+  {
+    "id": "hyprland",
+    "title": "Hyprland",
+    "ru": "Боковой сдвиг и отскок",
+    "en": "Sideways slide and rebound",
+    "icon": "arrow-right"
+  },
+  {
+    "id": "caelestia",
+    "title": "Caelestia",
+    "ru": "Всплытие и мягкая остановка",
+    "en": "Rise and a soft landing",
+    "icon": "window"
+  },
+  {
+    "id": "liquid",
+    "title": "Liquid",
+    "ru": "Капля растягивается в окно",
+    "en": "A droplet stretches into a window",
+    "icon": "wave"
+  },
+  {
+    "id": "iris",
+    "title": "Iris",
+    "ru": "Круг от центра к краям",
+    "en": "A circle from center to edges",
+    "icon": "eye"
+  },
+  {
+    "id": "mix",
+    "title": "Mix",
+    "ru": "Чередовать все стили",
+    "en": "Cycle through every style",
+    "icon": "sliders"
+  }
+]

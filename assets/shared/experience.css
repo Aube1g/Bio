@@ -1,0 +1,460 @@
+/* The liquid clock returns from the original index.html. No API request blocks it. */
+.app-preloader {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: var(--bg, #050510);
+  color: var(--ink, #e8e8ff);
+}
+html[data-booting='true'] .app-preloader {
+  display: flex;
+  animation: boot-failsafe 4.5s step-end forwards;
+}
+.loader-clock {
+  width: 140px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  animation: clock-appear 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.loader-clock-blob {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #ffffff25;
+  background: linear-gradient(135deg, #ffffff0d, #ffffff03);
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  box-shadow:
+    0 0 40px #7000ff35,
+    inset 0 1px #ffffff1a;
+  overflow: hidden;
+  animation: loader-liquid 8s infinite ease-in-out;
+}
+.loader-shimmer {
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
+  animation: loader-shimmer 2.2s ease-in-out infinite;
+}
+.loader-clock-ticks {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--primary-text) 35%, transparent);
+}
+.loader-clock-center {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-text);
+  z-index: 2;
+}
+.loader-clock-hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  border-radius: 4px;
+  transform-origin: 50% 100%;
+}
+.loader-clock-hand.hour {
+  height: 35px;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--ink);
+}
+.loader-clock-hand.minute {
+  height: 50px;
+  width: 2px;
+  margin-left: -1px;
+  background: #4cdbea;
+}
+.loader-clock-hand.second {
+  height: 60px;
+  width: 1px;
+  background: #fc5474;
+}
+.loader-label {
+  margin-top: 24px;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--primary-text);
+}
+[data-theme='light'] .loader-clock-blob {
+  background: linear-gradient(135deg, #8a4fff15, #00c2d60c);
+  border-color: #8a4fff30;
+}
+@keyframes loader-liquid {
+  0%,
+  100% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  33% {
+    border-radius: 65% 35% 35% 65% / 60% 35% 65% 40%;
+  }
+  66% {
+    border-radius: 35% 65% 55% 45% / 35% 65% 35% 65%;
+  }
+}
+@keyframes loader-shimmer {
+  from {
+    transform: translateX(-80%);
+  }
+  to {
+    transform: translateX(80%);
+  }
+}
+@keyframes clock-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.76) rotate(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes boot-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* A visible mid-frame and a scrubber make each contour identifiable. */
+.motion-preview-stage {
+  height: 211px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in srgb, var(--primary) 17%, transparent),
+    transparent 70%
+  );
+}
+.motion-preview-window {
+  left: calc(50% - 140px);
+  top: 28px;
+  width: 280px;
+  height: 155px;
+  border-radius: 22px;
+}
+.motion-preview-outline {
+  position: absolute;
+  left: calc(50% - 140px);
+  top: 28px;
+  width: 280px;
+  height: 155px;
+  pointer-events: none;
+  overflow: visible;
+  transform-origin: 50% 40%;
+}
+.motion-preview-outline path {
+  stroke: var(--primary-text);
+  stroke-width: 1.25;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.8;
+}
+.motion-window-bar {
+  padding: 13px;
+}
+.motion-window-mark {
+  left: 25px;
+  top: 66px;
+}
+.motion-window-mark .brand-mark {
+  width: 36px;
+  height: 36px;
+}
+.motion-window-lines {
+  left: 83px;
+  top: 72px;
+  gap: 12px;
+}
+.motion-window-lines i {
+  width: 135px;
+  height: 7px;
+}
+.motion-window-lines i:last-child {
+  width: 91px;
+}
+.motion-preview-neighbor {
+  left: calc(50% - 153px);
+  top: 43px;
+  width: 241px;
+  height: 141px;
+}
+.motion-preview-source {
+  left: calc(50% + 155px);
+  top: 144px;
+}
+.motion-preview-directions {
+  width: fit-content;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 0 auto 12px;
+  background: var(--panel);
+}
+.motion-preview-directions button {
+  position: relative;
+  min-height: 32px;
+  padding: 6px 13px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+}
+.motion-preview-directions button[aria-pressed='true'] {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--primary) 18%, var(--panel));
+}
+.motion-timeline {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 16px 16px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.motion-timeline .range-control {
+  flex: 1;
+  min-width: 30px;
+  width: auto;
+  accent-color: var(--primary);
+  margin: 0;
+}
+.motion-timeline output {
+  width: 30px;
+  text-align: right;
+  font:
+    10px ui-monospace,
+    monospace;
+}
+.motion-timeline button {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--primary-text);
+  font-size: 10px;
+}
+.motion-picker-footer {
+  position: sticky;
+  bottom: -1px;
+  z-index: 5;
+  background: var(--card-bg, var(--surface));
+  padding: 15px 0 0;
+  border-top: 1px solid var(--line);
+  margin-top: 17px;
+}
+
+/* Small, HTML-safe Markdown accents for actual information, not decorative filler. */
+.inline-pill {
+  display: inline;
+  padding: 0.07em 0.42em;
+  margin: 0 0.08em;
+  border: 1px solid color-mix(in srgb, var(--primary-text) 20%, transparent);
+  border-radius: 0.48em;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary-text);
+  font-size: 0.91em;
+  font-weight: 800;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.inline-code {
+  display: inline;
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--line);
+  border-radius: 0.4em;
+  background: var(--panel);
+  color: var(--primary-text);
+  font:
+    0.91em/1.6 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.rich-emphasis {
+  font-weight: 900;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--primary-text) 55%, transparent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.info-card p,
+.info-callout p,
+.detail-features.info-grid li {
+  line-height: 1.95;
+}
+.proof-field > span {
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+  font-size: 9px;
+  font-weight: 900;
+}
+.proof-field > code {
+  display: block;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+}
+
+/* Practice mode is available from the downloaded HTML, not only the development server. */
+.practice-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 0 14px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border-radius: 13px;
+  border: 1px solid #d4ef8e35;
+  background: #d4ef8e0a;
+  color: var(--lime);
+  font-size: 11px;
+}
+.practice-launch .icon {
+  width: 13px;
+  height: 13px;
+}
+.practice-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 13px;
+  min-height: 52px;
+  border: 1px solid #d4ef8e45;
+  background: #d4ef8e14;
+  color: var(--lime);
+  border-radius: 17px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.practice-login .icon {
+  width: 19px;
+  height: 19px;
+}
+.practice-mode-badge {
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 5px 10px;
+  font-size: 9px;
+  color: var(--primary-text);
+}
+.lobby-topline {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#practice-retry {
+  color: var(--lime-ink);
+  background: var(--lime);
+  padding: 7px 11px;
+  border-radius: 10px;
+}
+[data-play-mode='local'] #connection-dot {
+  background: var(--primary-text);
+}
+[data-theme='light'] .practice-login,
+[data-theme='light'] .practice-launch {
+  color: #425b20;
+  border-color: #698c334a;
+  background: #b9d38e24;
+}
+[data-motion='off'] .loader-clock,
+[data-motion='off'] .loader-clock * {
+  animation: none !important;
+}
+@media (max-width: 700px) {
+  .motion-preview-stage {
+    height: 176px;
+  }
+  .motion-preview-window,
+  .motion-preview-outline {
+    left: calc(50% - 107px);
+    top: 24px;
+    width: 214px;
+    height: 128px;
+  }
+  .motion-preview-neighbor {
+    left: calc(50% - 119px);
+    top: 37px;
+    width: 186px;
+    height: 110px;
+  }
+  .motion-preview-source {
+    display: none;
+  }
+  .motion-window-mark {
+    left: 16px;
+    top: 55px;
+  }
+  .motion-window-mark .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+  .motion-window-lines {
+    left: 62px;
+    top: 59px;
+    gap: 8px;
+  }
+  .motion-window-lines i {
+    width: 112px;
+    height: 6px;
+  }
+  .motion-window-lines i:last-child {
+    width: 78px;
+  }
+  .motion-timeline {
+    gap: 8px;
+    padding-inline: 11px;
+  }
+  .motion-timeline label {
+    display: none;
+  }
+  .motion-timeline button {
+    font-size: 9px;
+  }
+  .practice-launch {
+    margin-left: 0;
+    font-size: 10px;
+  }
+  .connection-banner {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-clock,
+  .loader-clock * {
+    animation: none !important;
+  }
+}
+.practice-launch {
+  pointer-events: auto;
+}
+.hero-grid {
+  pointer-events: none;
+}
+
+.motion-picker-footer {
+  padding-bottom: 12px;
+  bottom: 0;
+}
+.motion-preview-directions button[aria-pressed='true'] {
+  color: #fff;
+  background: var(--button-primary, var(--primary));
+}

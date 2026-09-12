@@ -1,0 +1,78 @@
+<dialog
+  id="motion-picker-dialog"
+  class="portal-dialog motion-picker-dialog"
+  aria-labelledby="motion-picker-title"
+>
+  <button class="dialog-close" type="button" data-close aria-label="Закрыть">
+    <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+  </button>
+  <div class="dialog-body dialog-content motion-picker-content">
+    <header class="panel-heading">
+      <span class="panel-symbol"
+        ><svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg
+      ></span>
+      <div>
+        <p class="eyebrow" data-motion-text="eyebrow">ДВИЖЕНИЕ ПРОСТРАНСТВА</p>
+        <h2 id="motion-picker-title" data-motion-text="title">Свой характер.</h2>
+      </div>
+    </header>
+    <div class="motion-preview-card">
+      <div class="motion-preview-top">
+        <span id="motion-preview-name">Hyprland</span
+        ><button type="button" id="motion-preview-replay">
+          <svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg
+          ><span data-motion-text="replay">Повторить</span>
+        </button>
+      </div>
+      <div class="motion-preview-stage" aria-hidden="true">
+        <div class="motion-preview-neighbor"></div>
+        <div class="motion-preview-window">
+          <div class="motion-window-bar"><i></i><i></i><i></i></div>
+          <div class="motion-window-mark">
+            <svg class="brand-mark"><use href="#i-mark" /></svg>
+          </div>
+          <div class="motion-window-lines"><i></i><i></i></div>
+        </div>
+        <svg class="motion-preview-outline" aria-hidden="true"><path fill="none" /></svg>
+        <div class="motion-preview-source">
+          <svg class="icon"><use href="#i-window" /></svg>
+        </div>
+      </div>
+      <p id="motion-preview-description"></p>
+      <div class="motion-preview-directions segmented spring-group" role="group" aria-label="Направление">
+        <button type="button" data-preview-direction="open" aria-pressed="true" data-motion-text="open">
+          Открытие
+        </button>
+        <button type="button" data-preview-direction="close" aria-pressed="false" data-motion-text="close">
+          Закрытие
+        </button>
+      </div>
+      <div class="motion-timeline">
+        <label for="motion-preview-progress" data-motion-text="frame">Кадр</label
+        ><input
+          class="range-control"
+          type="range"
+          id="motion-preview-progress"
+          min="0"
+          max="100"
+          step="1"
+          value="45"
+        /><output id="motion-preview-percent">45%</output
+        ><button type="button" id="motion-preview-mid" data-motion-text="mid">Середина</button>
+      </div>
+    </div>
+    <div class="motion-choice-grid" role="radiogroup" aria-label="Анимация окон" id="motion-choices">
+      {{motion-choices}}
+    </div>
+    <p class="motion-accessibility-note" id="motion-reduced-note" hidden data-motion-text="reduced">
+      Движение уменьшено в настройках системы.
+    </p>
+    <footer class="motion-picker-footer">
+      <button class="text-button" type="button" data-close data-motion-text="cancel">Отмена</button>
+      <button class="primary-button solid-button" type="button" id="motion-apply">
+        <span data-motion-text="apply">Применить</span
+        ><svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+      </button>
+    </footer>
+  </div>
+</dialog>
