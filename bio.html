@@ -11986,92 +11986,119 @@
       .loader-orbit {
         display: none;
       }
-      /* The liquid clock returns from the original index.html: a morphing glass blob
-         with real hour/minute/second hands. */
+      /* The liquid clock — the exact preloader from the original index.html:
+         a morphing glass blob with a purple glow and three thin, real-time hands. */
       .clock-container {
         position: relative;
-        width: 148px;
-        height: 148px;
-        display: grid;
-        place-items: center;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
       }
       .clock-blob {
         position: absolute;
         inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(157, 123, 255, 0.04));
-        border: 1px solid color-mix(in srgb, var(--primary-text, #a98cff) 32%, transparent);
-        backdrop-filter: blur(12px);
-        box-shadow:
-          0 0 42px color-mix(in srgb, var(--primary-text, #7b37f5) 34%, transparent),
-          inset 0 0 26px rgba(255, 255, 255, 0.05);
+        animation: liquidMorph 8s infinite ease-in-out;
+        box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
         overflow: hidden;
-        animation: liquidMorph 9s ease-in-out infinite;
+      }
+      [data-theme="light"] .clock-blob {
+        background: linear-gradient(135deg, rgba(138, 79, 255, 0.1), rgba(0, 194, 214, 0.05));
+        border: 1px solid rgba(138, 79, 255, 0.2);
+        box-shadow: 0 0 40px rgba(138, 79, 255, 0.2);
       }
       .clock-shimmer {
         position: absolute;
-        inset: -60% -30%;
-        background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.12) 50%, transparent 58%);
-        transform: translateX(-60%) rotate(8deg);
-        animation: clock-shimmer 3.4s ease-in-out infinite;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .clock-shimmer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 45%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0) 20%,
+          rgba(255, 255, 255, 0.35) 50%,
+          rgba(255, 255, 255, 0) 80%,
+          transparent 100%
+        );
+        animation: shimmerSweep 2.4s ease-in-out infinite;
+      }
+      [data-theme="light"] .clock-shimmer::before {
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0) 20%,
+          rgba(255, 255, 255, 0.55) 50%,
+          rgba(255, 255, 255, 0) 80%,
+          transparent 100%
+        );
       }
       .clock-center {
         position: absolute;
-        width: 9px;
-        height: 9px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: var(--primary-text, #a98cff);
-        box-shadow: 0 0 12px var(--primary-text, #a98cff);
-        z-index: 6;
+        background: var(--primary, #7000ff);
+        box-shadow: 0 0 10px var(--primary, #7000ff);
+        z-index: 10;
       }
       .clock-hand {
         position: absolute;
-        left: 50%;
         bottom: 50%;
+        left: 50%;
+        border-radius: 4px;
         transform-origin: bottom center;
-        border-radius: 6px;
         z-index: 5;
         transform: rotate(0deg);
-        transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
       }
       .clock-hand.hour {
-        width: 5px;
-        height: 40px;
-        margin-left: -2.5px;
-        background: var(--ink, #e8e8ff);
+        height: 35px;
+        width: 4px;
+        margin-left: -2px;
+        background: var(--text, #e8e8ff);
       }
       .clock-hand.min {
-        width: 3px;
-        height: 56px;
-        margin-left: -1.5px;
-        background: var(--primary-text, #a98cff);
+        height: 50px;
+        width: 2px;
+        margin-left: -1px;
+        background: var(--accent, #00f0ff);
       }
       .clock-hand.sec {
-        width: 1.5px;
-        height: 64px;
-        margin-left: -0.75px;
-        background: #4cdbea;
+        height: 60px;
+        width: 1px;
+        margin-left: -0.5px;
+        background: var(--hydra, #ff003c);
       }
       @keyframes liquidMorph {
-        0%,
+        0% {
+          border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        50% {
+          border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+        }
         100% {
-          border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-        }
-        33% {
-          border-radius: 60% 40% 34% 66% / 58% 36% 64% 42%;
-        }
-        66% {
-          border-radius: 34% 66% 58% 42% / 44% 60% 40% 56%;
+          border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
         }
       }
-      @keyframes clock-shimmer {
-        0%,
-        55% {
-          transform: translateX(-70%) rotate(8deg);
+      @keyframes shimmerSweep {
+        0% {
+          transform: translateX(-150%) skewX(-20deg);
         }
         100% {
-          transform: translateX(90%) rotate(8deg);
+          transform: translateX(250%) skewX(-20deg);
         }
       }
       .loader-bar {
@@ -12095,8 +12122,21 @@
         margin-top: 17px;
         letter-spacing: 0.22em;
         font-size: 11px;
-        font-weight: 900;
-        color: var(--primary-text);
+        font-weight: 800;
+        background: linear-gradient(100deg, var(--primary, #7000ff) 40%, #fff 50%, var(--primary, #7000ff) 60%);
+        background-size: 300% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shimmerBg 2.2s ease-in-out infinite;
+      }
+      @keyframes shimmerBg {
+        0% {
+          background-position: 100% 0;
+        }
+        100% {
+          background-position: -100% 0;
+        }
       }
       /* New Year atmosphere: night sky, moon, aurora, garland, fir forest and snow. */
       .ny-scene {
@@ -12117,7 +12157,7 @@
         width: 100%;
         height: 100%;
       }
-      .ny-sky {
+      .ny-aurora {
         animation: ny-aurora-drift 14s ease-in-out infinite;
       }
       @keyframes ny-aurora-drift {
@@ -12153,6 +12193,31 @@
           opacity: 1;
         }
       }
+      .ny-shooting .shooting-star {
+        stroke: #ffffff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: ny-shoot 6s ease-in-out infinite;
+      }
+      @keyframes ny-shoot {
+        0%,
+        72% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        76% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 0;
+          transform: translate(150px, 110px);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(150px, 110px);
+        }
+      }
       .ny-garland circle:nth-of-type(n) {
         animation: ny-bulb-glow 3s ease-in-out infinite;
       }
@@ -12168,7 +12233,7 @@
           filter: brightness(0.92);
         }
         50% {
-          filter: brightness(1.28);
+          filter: brightness(1.3);
         }
       }
       .ny-trees {
@@ -12177,6 +12242,10 @@
       .ny-snow {
         position: absolute;
         inset: 0;
+      }
+      .ny-snow-back {
+        opacity: 0.55;
+        filter: blur(1px);
       }
       .ny-snow i {
         position: absolute;
@@ -12224,7 +12293,7 @@
         display: none;
       }
       [data-background="newyear"] {
-        --bg: #0a0d16;
+        --bg: #0b1230;
       }
       [data-background="newyear"][data-theme="light"] {
         --bg: #e9eef6;
@@ -12735,6 +12804,41 @@
       .store-card:hover {
         border-radius: 20px 40px 18px 22px;
       }
+      /* More organic silhouettes across the bio workspace. */
+      .preview-window {
+        border-radius: 26px 42px 22px 20px;
+      }
+      .preview-window:nth-child(even) {
+        border-radius: 42px 22px 24px 38px;
+      }
+      .rail-brand {
+        border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+      }
+      .rail-brand:hover {
+        border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+      }
+      .rail {
+        border-radius: 30px 18px 32px 20px;
+      }
+      .header-clock {
+        border-radius: 14px 22px 14px 24px;
+        padding: 6px 13px;
+        background: color-mix(in srgb, var(--primary) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+      }
+      .partner-monogram {
+        display: inline-grid;
+        place-items: center;
+        width: 74px;
+        height: 74px;
+        margin: 26px 0 20px;
+        border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+        color: var(--primary);
+        font-size: 34px;
+        letter-spacing: 0;
+      }
       button:not(.rail-link):not(.rail-action):not(.dialog-close) {
         transition:
           transform 0.35s var(--spring),
@@ -12752,10 +12856,66 @@
         transition-duration: 0.09s;
       }
 
-      .bio-rainbow {
+      .bio-stamp {
         position: fixed;
         inset: 0;
         z-index: 89;
+        pointer-events: none;
+        display: grid;
+        place-items: center;
+      }
+      .bio-stamp .stamp-mark {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 130px;
+        height: 130px;
+        border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+        background: linear-gradient(150deg, #8a4fff, #7000ff);
+        color: #fff;
+        font-size: 58px;
+        font-weight: 900;
+        box-shadow: 0 0 40px #7000ff88;
+        animation: bio-stamp-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+      }
+      .bio-stamp .stamp-ring {
+        position: absolute;
+        width: 132px;
+        height: 132px;
+        border-radius: 50%;
+        border: 3px solid #00f0ff;
+        opacity: 0;
+        animation: bio-stamp-ring 0.9s ease-out;
+      }
+      .bio-stamp .stamp-ring.two {
+        border-color: #ff003c;
+        animation-delay: 0.14s;
+      }
+      @keyframes bio-stamp-pop {
+        0% {
+          transform: scale(0) rotate(-24deg);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+      @keyframes bio-stamp-ring {
+        0% {
+          transform: scale(0.4);
+          opacity: 0.9;
+        }
+        100% {
+          transform: scale(3.2);
+          opacity: 0;
+        }
+      }
+      .bio-rainbow {
+        position: fixed;
+        inset: 0;
+        z-index: 88;
         pointer-events: none;
         background: linear-gradient(
           115deg,
@@ -12852,36 +13012,42 @@
     <div class="ny-scene" aria-hidden="true">
       <svg class="ny-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
         <defs>
+          <linearGradient id="ny-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#070d24" />
+            <stop offset="0.45" stop-color="#0e1a3f" />
+            <stop offset="0.78" stop-color="#1a2a55" />
+            <stop offset="1" stop-color="#27407266" />
+          </linearGradient>
           <linearGradient id="ny-needle" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#3f9368" />
-            <stop offset="0.55" stop-color="#256848" />
-            <stop offset="1" stop-color="#123f2a" />
+            <stop offset="0" stop-color="#57b983" />
+            <stop offset="0.5" stop-color="#2f7a52" />
+            <stop offset="1" stop-color="#164a2f" />
           </linearGradient>
           <linearGradient id="ny-needle-r" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#4aa376" />
-            <stop offset="1" stop-color="#1c5738" />
+            <stop offset="0" stop-color="#63c791" />
+            <stop offset="1" stop-color="#1f5c3b" />
           </linearGradient>
           <linearGradient id="ny-trunk" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#7a5533" />
-            <stop offset="1" stop-color="#5d3f24" />
+            <stop offset="0" stop-color="#8a6340" />
+            <stop offset="1" stop-color="#5d4026" />
           </linearGradient>
           <radialGradient id="ny-moonglow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stop-color="#f6efd8" stop-opacity="0.55" />
-            <stop offset="0.6" stop-color="#f6efd8" stop-opacity="0.12" />
-            <stop offset="1" stop-color="#f6efd8" stop-opacity="0" />
+            <stop offset="0" stop-color="#fdf6dd" stop-opacity="0.5" />
+            <stop offset="0.55" stop-color="#fdf6dd" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#fdf6dd" stop-opacity="0" />
           </radialGradient>
           <linearGradient id="ny-aurora-a" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#3ecf9a" stop-opacity="0" />
-            <stop offset="0.5" stop-color="#3ecf9a" stop-opacity="0.16" />
-            <stop offset="1" stop-color="#3ecf9a" stop-opacity="0" />
+            <stop offset="0" stop-color="#34e0a6" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#34e0a6" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#34e0a6" stop-opacity="0" />
           </linearGradient>
           <linearGradient id="ny-aurora-b" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stop-color="#8a6bff" stop-opacity="0" />
-            <stop offset="0.5" stop-color="#8a6bff" stop-opacity="0.14" />
+            <stop offset="0.5" stop-color="#8a6bff" stop-opacity="0.18" />
             <stop offset="1" stop-color="#8a6bff" stop-opacity="0" />
           </linearGradient>
           <g id="ny-fir">
-            <ellipse cx="0" cy="10" rx="150" ry="20" fill="#eef4f8" opacity="0.28" />
+            <ellipse cx="0" cy="10" rx="150" ry="22" fill="#bcd4ec" opacity="0.16" />
             <rect x="-11" y="-46" width="22" height="46" rx="5" fill="url(#ny-trunk)" />
             <path d="M0 -256 L66 -152 L-66 -152 Z" fill="url(#ny-needle)" />
             <path d="M0 -196 L92 -88 L-92 -88 Z" fill="url(#ny-needle)" />
@@ -12889,51 +13055,51 @@
             <path d="M0 -60 L132 44 L-132 44 Z" fill="url(#ny-needle)" />
             <path
               d="M0 -256 L66 -152 M0 -256 L-66 -152"
-              stroke="#eef4f8"
+              stroke="#e9f3fb"
               stroke-width="7"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -196 L92 -88 M0 -196 L-92 -88"
-              stroke="#e6eef6"
+              stroke="#e4eef8"
               stroke-width="7"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -130 L112 -24 M0 -130 L-112 -24"
-              stroke="#e6eef6"
+              stroke="#e4eef8"
               stroke-width="7"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -60 L132 44 M0 -60 L-132 44"
-              stroke="#e9f1f7"
+              stroke="#eef5fb"
               stroke-width="7"
               stroke-linecap="round"
               fill="none"
             />
             <path d="M0 -262 L34 -174 L-34 -174 Z" fill="#f4f9fb" opacity="0.5" />
-            <circle cx="0" cy="-216" r="6.4" fill="#e8546b" />
-            <circle cx="-34" cy="-188" r="6.4" fill="#f2c14e" />
-            <circle cx="40" cy="-162" r="6.4" fill="#5aa9e6" />
-            <circle cx="-52" cy="-140" r="6.4" fill="#9b6bd6" />
-            <circle cx="14" cy="-110" r="6.4" fill="#e8546b" />
-            <circle cx="-20" cy="-76" r="6.4" fill="#5aa9e6" />
-            <circle cx="46" cy="-60" r="6.4" fill="#f2c14e" />
-            <circle cx="-60" cy="-28" r="6.4" fill="#9b6bd6" />
-            <circle cx="8" cy="-16" r="6.4" fill="#f2c14e" />
-            <circle cx="66" cy="-8" r="6.4" fill="#e8546b" />
+            <circle cx="0" cy="-216" r="6.4" fill="#ff6b84" />
+            <circle cx="-34" cy="-188" r="6.4" fill="#ffd166" />
+            <circle cx="40" cy="-162" r="6.4" fill="#6fc3ff" />
+            <circle cx="-52" cy="-140" r="6.4" fill="#b48cff" />
+            <circle cx="14" cy="-110" r="6.4" fill="#ff6b84" />
+            <circle cx="-20" cy="-76" r="6.4" fill="#6fc3ff" />
+            <circle cx="46" cy="-60" r="6.4" fill="#ffd166" />
+            <circle cx="-60" cy="-28" r="6.4" fill="#b48cff" />
+            <circle cx="8" cy="-16" r="6.4" fill="#ffd166" />
+            <circle cx="66" cy="-8" r="6.4" fill="#ff6b84" />
             <path
               d="M0 -278 l5.2 10.4 11.4 1.5 -8.4 8 2.2 11.2 -10.4 -5.6 -10.4 5.6 2.2 -11.2 -8.4 -8 11.4 -1.5 Z"
               fill="#ffd76a"
             />
-            <circle cx="0" cy="-270" r="14" fill="#ffd76a" opacity="0.22" />
+            <circle cx="0" cy="-270" r="14" fill="#ffd76a" opacity="0.25" />
           </g>
           <g id="ny-fir-r">
-            <ellipse cx="0" cy="8" rx="120" ry="16" fill="#eef4f8" opacity="0.22" />
+            <ellipse cx="0" cy="8" rx="120" ry="16" fill="#bcd4ec" opacity="0.13" />
             <rect x="-9" y="-38" width="18" height="38" rx="4" fill="url(#ny-trunk)" />
             <path d="M0 -210 L56 -126 L-56 -126 Z" fill="url(#ny-needle-r)" />
             <path d="M0 -158 L78 -72 L-78 -72 Z" fill="url(#ny-needle-r)" />
@@ -12941,62 +13107,58 @@
             <path d="M0 -44 L112 36 L-112 36 Z" fill="url(#ny-needle-r)" />
             <path
               d="M0 -210 L56 -126 M0 -210 L-56 -126"
-              stroke="#e9f1f7"
+              stroke="#e9f3fb"
               stroke-width="6"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -158 L78 -72 M0 -158 L-78 -72"
-              stroke="#e6eef6"
+              stroke="#e4eef8"
               stroke-width="6"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -102 L96 -16 M0 -102 L-96 -16"
-              stroke="#e6eef6"
+              stroke="#e4eef8"
               stroke-width="6"
               stroke-linecap="round"
               fill="none"
             />
             <path
               d="M0 -44 L112 36 M0 -44 L-112 36"
-              stroke="#eef4f8"
+              stroke="#eef5fb"
               stroke-width="6"
               stroke-linecap="round"
               fill="none"
             />
-            <circle cx="0" cy="-176" r="5.4" fill="#f2c14e" />
-            <circle cx="-30" cy="-150" r="5.4" fill="#5aa9e6" />
-            <circle cx="34" cy="-120" r="5.4" fill="#e8546b" />
-            <circle cx="-16" cy="-88" r="5.4" fill="#9b6bd6" />
-            <circle cx="28" cy="-58" r="5.4" fill="#f2c14e" />
-            <circle cx="-42" cy="-34" r="5.4" fill="#e8546b" />
+            <circle cx="0" cy="-176" r="5.4" fill="#ffd166" />
+            <circle cx="-30" cy="-150" r="5.4" fill="#6fc3ff" />
+            <circle cx="34" cy="-120" r="5.4" fill="#ff6b84" />
+            <circle cx="-16" cy="-88" r="5.4" fill="#b48cff" />
+            <circle cx="28" cy="-58" r="5.4" fill="#ffd166" />
+            <circle cx="-42" cy="-34" r="5.4" fill="#ff6b84" />
             <path
               d="M0 -224 l4.6 9.4 10.2 1.3 -7.6 7.2 2 10.2 -9.2 -5 -9.2 5 2 -10.2 -7.6 -7.2 10.2 -1.3 Z"
               fill="#ffe08a"
             />
           </g>
           <g id="ny-gift-r">
-            <rect x="-17" y="-24" width="34" height="24" rx="3" fill="#b0425a" />
-            <rect x="-17" y="-9" width="34" height="6" fill="#f2e2c4" />
-            <rect x="-3" y="-24" width="6" height="24" fill="#f2e2c4" />
+            <rect x="-17" y="-24" width="34" height="24" rx="3" fill="#c74b63" />
+            <rect x="-17" y="-9" width="34" height="6" fill="#ffe9c9" />
+            <rect x="-3" y="-24" width="6" height="24" fill="#ffe9c9" />
           </g>
           <g id="ny-gift-g">
-            <rect x="-17" y="-22" width="34" height="22" rx="3" fill="#2f7d55" />
+            <rect x="-17" y="-22" width="34" height="22" rx="3" fill="#2f8a5f" />
             <rect x="-17" y="-8" width="34" height="5" fill="#ffd76a" />
             <rect x="-3" y="-22" width="5" height="22" fill="#ffd76a" />
           </g>
         </defs>
-        <g class="ny-sky">
-          <rect x="0" y="0" width="1440" height="560" fill="url(#ny-aurora-a)" opacity="0.9" />
-          <rect x="0" y="60" width="1440" height="420" fill="url(#ny-aurora-b)" opacity="0.9" />
-          <circle cx="1186" cy="176" r="130" fill="url(#ny-moonglow)" />
-          <circle cx="1186" cy="176" r="52" fill="#f4efdc" />
-          <circle cx="1170" cy="166" r="8" fill="#e7e0c8" opacity="0.6" />
-          <circle cx="1202" cy="192" r="6" fill="#e7e0c8" opacity="0.5" />
-          <circle cx="1188" cy="152" r="4" fill="#e7e0c8" opacity="0.5" />
+        <rect x="0" y="0" width="1440" height="900" fill="url(#ny-sky)" />
+        <g class="ny-aurora">
+          <rect x="0" y="120" width="1440" height="220" fill="url(#ny-aurora-a)" />
+          <rect x="0" y="70" width="1440" height="260" fill="url(#ny-aurora-b)" />
         </g>
         <g class="ny-stars">
           <circle class="ny-star" cx="84" cy="80" r="2.1" />
@@ -13022,37 +13184,47 @@
           <circle class="ny-star" cx="760" cy="470" r="1.8" />
           <circle class="ny-star" cx="1340" cy="500" r="1.5" />
         </g>
+        <g class="ny-moon">
+          <circle cx="1186" cy="176" r="130" fill="url(#ny-moonglow)" />
+          <circle cx="1186" cy="176" r="52" fill="#fdf6dd" />
+          <circle cx="1170" cy="166" r="8" fill="#e9dfc0" opacity="0.6" />
+          <circle cx="1202" cy="192" r="6" fill="#e9dfc0" opacity="0.5" />
+          <circle cx="1188" cy="152" r="4" fill="#e9dfc0" opacity="0.5" />
+        </g>
+        <g class="ny-shooting">
+          <line class="shooting-star" x1="150" y1="40" x2="262" y2="118" />
+        </g>
         <g class="ny-garland">
           <path
             d="M0 46 Q 240 108 480 78 T 960 88 T 1440 60"
             fill="none"
-            stroke="#1d5738"
+            stroke="#3a1f12"
             stroke-width="3.6"
-            opacity="0.7"
+            opacity="0.85"
           />
           <path
             d="M0 58 Q 240 120 480 90 T 960 100 T 1440 72"
             fill="none"
-            stroke="#123f2a"
+            stroke="#241208"
             stroke-width="2"
             opacity="0.5"
           />
-          <circle cx="96" cy="72" r="8" fill="#e8546b" />
-          <circle cx="240" cy="88" r="8" fill="#f2c14e" />
-          <circle cx="384" cy="84" r="8" fill="#5aa9e6" />
-          <circle cx="528" cy="82" r="8" fill="#9b6bd6" />
-          <circle cx="672" cy="86" r="8" fill="#e8546b" />
-          <circle cx="816" cy="90" r="8" fill="#f2c14e" />
-          <circle cx="960" cy="90" r="8" fill="#5aa9e6" />
-          <circle cx="1104" cy="84" r="8" fill="#9b6bd6" />
-          <circle cx="1248" cy="72" r="8" fill="#e8546b" />
-          <circle cx="1386" cy="62" r="8" fill="#f2c14e" />
-          <circle cx="96" cy="72" r="13" fill="#e8546b" opacity="0.2" />
-          <circle cx="528" cy="82" r="13" fill="#9b6bd6" opacity="0.2" />
-          <circle cx="960" cy="90" r="13" fill="#5aa9e6" opacity="0.2" />
+          <circle cx="96" cy="72" r="8" fill="#ff6b84" />
+          <circle cx="240" cy="88" r="8" fill="#ffd166" />
+          <circle cx="384" cy="84" r="8" fill="#6fc3ff" />
+          <circle cx="528" cy="82" r="8" fill="#b48cff" />
+          <circle cx="672" cy="86" r="8" fill="#ff6b84" />
+          <circle cx="816" cy="90" r="8" fill="#ffd166" />
+          <circle cx="960" cy="90" r="8" fill="#6fc3ff" />
+          <circle cx="1104" cy="84" r="8" fill="#b48cff" />
+          <circle cx="1248" cy="72" r="8" fill="#ff6b84" />
+          <circle cx="1386" cy="62" r="8" fill="#ffd166" />
+          <circle cx="96" cy="72" r="13" fill="#ff6b84" opacity="0.22" />
+          <circle cx="528" cy="82" r="13" fill="#b48cff" opacity="0.22" />
+          <circle cx="960" cy="90" r="13" fill="#6fc3ff" opacity="0.22" />
         </g>
-        <path d="M0 900 L0 812 Q 360 782 720 812 T 1440 806 L1440 900 Z" fill="#eaf2f7" opacity="0.12" />
-        <path d="M0 900 L0 854 Q 420 824 840 856 T 1440 848 L1440 900 Z" fill="#f4f9fb" opacity="0.16" />
+        <path d="M0 900 L0 812 Q 360 782 720 812 T 1440 806 L1440 900 Z" fill="#cfe0f4" opacity="0.1" />
+        <path d="M0 900 L0 856 Q 420 826 840 858 T 1440 850 L1440 900 Z" fill="#eaf3fd" opacity="0.18" />
         <g class="ny-trees" transform="translate(0 0)">
           <g transform="translate(140 862) scale(0.5)" opacity="0.55"><use href="#ny-fir-r" /></g>
           <g transform="translate(500 884) scale(0.62)" opacity="0.8"><use href="#ny-fir-r" /></g>
@@ -13068,6 +13240,17 @@
           <use href="#ny-gift-g" transform="translate(866 896)" />
         </g>
       </svg>
+      <span class="ny-snow ny-snow-back"
+        ><i style="--x: 4%; --delay: -2s; --dur: 16s; --size: 5px; --drift: 30px"></i
+        ><i class="crystal" style="--x: 15%; --delay: -9s; --dur: 20s; --size: 6px; --drift: -26px"></i
+        ><i style="--x: 26%; --delay: -5s; --dur: 17s; --size: 5px; --drift: 34px"></i
+        ><i class="crystal" style="--x: 37%; --delay: -12s; --dur: 22s; --size: 6px; --drift: -30px"></i
+        ><i style="--x: 48%; --delay: -3s; --dur: 15s; --size: 5px; --drift: 28px"></i
+        ><i class="crystal" style="--x: 59%; --delay: -8s; --dur: 19s; --size: 6px; --drift: -34px"></i
+        ><i style="--x: 70%; --delay: -6s; --dur: 16s; --size: 5px; --drift: 32px"></i
+        ><i class="crystal" style="--x: 81%; --delay: -14s; --dur: 23s; --size: 6px; --drift: -28px"></i
+        ><i style="--x: 92%; --delay: -4s; --dur: 17s; --size: 5px; --drift: 30px"></i
+      ></span>
       <span class="ny-snow"
         ><i style="--x: 4%; --delay: -2s; --dur: 13s; --size: 8px; --drift: 40px"></i
         ><i class="crystal" style="--x: 11%; --delay: -9s; --dur: 17s; --size: 9px; --drift: -34px"></i
@@ -21465,6 +21648,7 @@
               index = 0;
               sound.play("secret");
               flash();
+              stamp();
               burst(".brand-mark", 16, ["✦", "❋", "✧"]);
               $$2('button[data-background="nebula"]').forEach((button) => button.hidden = false);
               toast(tr("Секрет разблокирован: атмосфера «Туманность» появилась в настройках."));
@@ -21485,6 +21669,15 @@
               const layer = document.createElement("div");
               layer.className = "bio-rainbow";
               layer.setAttribute("aria-hidden", "true");
+              document.body.append(layer);
+              setTimeout(() => layer.remove(), 1500);
+            }
+            function stamp() {
+              if (!state.motion) return;
+              const layer = document.createElement("div");
+              layer.className = "bio-stamp";
+              layer.setAttribute("aria-hidden", "true");
+              layer.innerHTML = `<span class="stamp-mark">A</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
               document.body.append(layer);
               setTimeout(() => layer.remove(), 1500);
             }

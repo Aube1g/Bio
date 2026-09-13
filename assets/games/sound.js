@@ -30,6 +30,8 @@ export const SOUND_EVENTS = [
   'whoosh',
   'softPop',
   'tick',
+  'deal',
+  'sparkle',
 ];
 
 export class GameSound {
@@ -261,6 +263,15 @@ export class GameSound {
         break;
       case 'tick':
         this.tone(1200, 0.025, 0, 0.02, 'sine', 1180);
+        break;
+      case 'deal':
+        this.noise(0.06, 0, 0.05, 2900);
+        this.noise(0.05, 0.09, 0.045, 2600);
+        this.tone(640, 0.05, 0.02, 0.04, 'triangle', 900);
+        break;
+      case 'sparkle':
+        this.tone(1568, 0.06, 0, 0.022, 'sine', 1760);
+        this.tone(2093, 0.08, 0.05, 0.018, 'sine', 2217);
         break;
     }
   }

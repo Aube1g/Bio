@@ -808,6 +808,9 @@
 }
 .hero-seven {
   border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  animation:
+    hero-seven-morph 7s ease-in-out infinite,
+    card-float 4.4s 0.8s ease-in-out infinite alternate;
   transition: border-radius 0.8s var(--spring);
 }
 .hero-seven:hover {
@@ -817,8 +820,33 @@
     inset 0 0 0 2px #ffffff55,
     0 14px 26px #0006;
 }
+@keyframes hero-seven-morph {
+  0%,
+  100% {
+    border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  }
+  33% {
+    border-radius: 62% 38% 38% 62% / 40% 60% 42% 58%;
+  }
+  66% {
+    border-radius: 40% 60% 62% 38% / 58% 44% 56% 42%;
+  }
+}
 .hero-ball {
   border-radius: 58% 42% 54% 46%;
+}
+/* Blobs for faces and glyph chips so nothing in the portal is a plain box. */
+.profile-avatar {
+  border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+}
+.profile-game {
+  border-radius: 16px 26px 16px 28px;
+}
+.profile-game:nth-child(even) {
+  border-radius: 26px 16px 28px 16px;
+}
+.profile-cover {
+  border-radius: 34px 18px 44px 20px;
 }
 /* Softer, springier feel across panels. */
 .portal-dialog {
@@ -843,12 +871,29 @@ button:not(.text-button):not(.dialog-close):not(.favorite-button) {
 }
 /* A quick, squishy press that springs back on release. */
 button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
-  transform: scale(0.93) translateY(1px);
+  transform: scale(0.94) translateY(1px);
   transition-duration: 0.09s;
 }
-.game-card-main:active {
-  transform: scale(0.975) translateY(2px);
-  transition-duration: 0.09s;
+/* Game cards dip into the table like a physical tile when pressed. */
+.game-card {
+  transition:
+    transform 0.4s var(--spring),
+    filter 0.4s ease,
+    box-shadow 0.4s ease,
+    border-radius 0.7s var(--spring);
+  transform-origin: center bottom;
+}
+.game-card:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.03);
+}
+.game-card:has(.game-card-main:active) {
+  transform: translateY(3px) scale(0.97);
+  filter: brightness(0.96);
+  transition-duration: 0.08s;
+}
+.game-card:has(.game-card-main:active) .game-art {
+  transform: translateY(2px) scale(0.98);
 }
 
 /* Selection tray springs up from the one dock; Play is a deliberate, pretty tap. */
@@ -894,15 +939,21 @@ button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
   width: 46px;
   height: 46px;
   border-radius: 16px 21px 16px 23px;
-  background: linear-gradient(150deg, color-mix(in srgb, var(--tray-accent) 42%, #ffffff), color-mix(in srgb, var(--tray-accent) 78%, #000));
-  color: #10121c;
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--tray-accent) 30%, #ffffff),
+    color-mix(in srgb, var(--tray-accent) 85%, #000000)
+  );
+  color: #ffffff;
   flex-shrink: 0;
-  box-shadow: inset 0 1px #ffffff66;
+  box-shadow:
+    inset 0 1px #ffffff88,
+    0 6px 16px color-mix(in srgb, var(--tray-accent) 42%, transparent);
 }
 .lobby-launch .launch-symbol .icon {
   width: 23px;
   height: 23px;
-  filter: drop-shadow(0 1px 0 #ffffff55);
+  filter: drop-shadow(0 1px 2px #00000055);
 }
 .lobby-launch > div {
   flex: 1;

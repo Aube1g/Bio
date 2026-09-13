@@ -139,6 +139,41 @@ dialog[open] {
 .store-card:hover {
   border-radius: 20px 40px 18px 22px;
 }
+/* More organic silhouettes across the bio workspace. */
+.preview-window {
+  border-radius: 26px 42px 22px 20px;
+}
+.preview-window:nth-child(even) {
+  border-radius: 42px 22px 24px 38px;
+}
+.rail-brand {
+  border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+}
+.rail-brand:hover {
+  border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+}
+.rail {
+  border-radius: 30px 18px 32px 20px;
+}
+.header-clock {
+  border-radius: 14px 22px 14px 24px;
+  padding: 6px 13px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+}
+.partner-monogram {
+  display: inline-grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  margin: 26px 0 20px;
+  border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  color: var(--primary);
+  font-size: 34px;
+  letter-spacing: 0;
+}
 button:not(.rail-link):not(.rail-action):not(.dialog-close) {
   transition:
     transform 0.35s var(--spring),
@@ -156,10 +191,66 @@ button:not(.rail-link):not(.rail-action):not(.dialog-close):active {
   transition-duration: 0.09s;
 }
 
-.bio-rainbow {
+.bio-stamp {
   position: fixed;
   inset: 0;
   z-index: 89;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.bio-stamp .stamp-mark {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 130px;
+  height: 130px;
+  border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  background: linear-gradient(150deg, #8a4fff, #7000ff);
+  color: #fff;
+  font-size: 58px;
+  font-weight: 900;
+  box-shadow: 0 0 40px #7000ff88;
+  animation: bio-stamp-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+}
+.bio-stamp .stamp-ring {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 3px solid #00f0ff;
+  opacity: 0;
+  animation: bio-stamp-ring 0.9s ease-out;
+}
+.bio-stamp .stamp-ring.two {
+  border-color: #ff003c;
+  animation-delay: 0.14s;
+}
+@keyframes bio-stamp-pop {
+  0% {
+    transform: scale(0) rotate(-24deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+@keyframes bio-stamp-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+.bio-rainbow {
+  position: fixed;
+  inset: 0;
+  z-index: 88;
   pointer-events: none;
   background: linear-gradient(
     115deg,

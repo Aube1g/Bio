@@ -564,14 +564,23 @@ function selectGame(game, source) {
   tray.hidden = false;
   if (motionEnabled()) {
     tray.getAnimations().forEach((animation) => animation.cancel());
-    // Spring up from the dock, overshoot, and settle — with a slight swing.
+    // Fly up from behind the dock: rise fast, overshoot above, swing, then settle.
     tray.animate(
       [
-        { opacity: 0, transform: 'translate(-50%, 44px) scale(0.72) rotate(2.5deg)' },
-        { opacity: 1, transform: 'translate(-50%, -6px) scale(1.06) rotate(-0.6deg)', offset: 0.72 },
+        { opacity: 0, transform: 'translate(-50%, 130%) scale(0.5) rotate(-5deg)' },
+        { opacity: 1, transform: 'translate(-50%, -14px) scale(1.05) rotate(1.2deg)', offset: 0.68 },
+        { opacity: 1, transform: 'translate(-50%, 2px) scale(0.99) rotate(-0.4deg)', offset: 0.86 },
         { opacity: 1, transform: 'translate(-50%, 0) scale(1) rotate(0deg)' },
       ],
-      { duration: 620, easing: 'cubic-bezier(0.22, 1.25, 0.36, 1)' },
+      { duration: 720, easing: 'cubic-bezier(0.18, 0.9, 0.32, 1.18)' },
+    );
+    tray.animate(
+      [
+        { boxShadow: '0 0 0 0 color-mix(in srgb, var(--tray-accent, var(--lime)) 0%, transparent)' },
+        { boxShadow: '0 0 0 14px color-mix(in srgb, var(--tray-accent, var(--lime)) 26%, transparent)', offset: 0.5 },
+        { boxShadow: '0 24px 60px #0006, 0 0 0 4px color-mix(in srgb, var(--tray-accent, var(--lime)) 10%, transparent)' },
+      ],
+      { duration: 900, easing: 'ease-out' },
     );
   }
 }
@@ -1046,7 +1055,7 @@ document.addEventListener('keydown', (event) => {
 $('#play-button').addEventListener('click', play);
 $('#dock-launch-play').addEventListener('click', launchSelected);
 
-/* Atmosphere particles are tappable: sakura petals and New Year snow chime. */
+/* Atmosphere particles are tappable and shimmer under the pointer. */
 document.addEventListener('pointerdown', (event) => {
   const flake = event.target.closest('.ny-snow i, .garden-petals i');
   if (flake) {
@@ -1058,6 +1067,21 @@ document.addEventListener('pointerdown', (event) => {
     }
   }
 });
+document.addEventListener(
+  'pointerover',
+  (event) => {
+    if (event.pointerType === 'touch') return;
+    if (event.target.closest('.ny-snow i')) {
+      try {
+        sound.unlock();
+        sound.play('sparkle');
+      } catch {
+        /* Sound is optional. */
+      }
+    }
+  },
+  { passive: true },
+);
 
 /* Cards hum softly under the pointer. */
 document.addEventListener(
@@ -1350,12 +1374,22 @@ function coinRain() {
   }
   setTimeout(() => layer.remove(), 2400);
 }
+function secretStamp() {
+  if (!motionEnabled()) return;
+  const layer = document.createElement('div');
+  layer.className = 'secret-stamp';
+  layer.setAttribute('aria-hidden', 'true');
+  layer.innerHTML = `<span class="stamp-mark">${icon('mark')}</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 1500);
+}
 function unlockNebula() {
   const already = nebulaUnlocked();
   safeStorage.set(NEBULA_KEY, 'on');
   revealNebulaOption();
   confettiBurst();
   rainbowFlash();
+  secretStamp();
   if (!already) {
     try {
       sound.unlock();

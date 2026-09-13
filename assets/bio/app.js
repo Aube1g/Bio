@@ -2919,6 +2919,7 @@ import { BioSound } from './sound.js';
       index = 0;
       sound.play('secret');
       flash();
+      stamp();
       burst('.brand-mark', 16, ['✦', '❋', '✧']);
       $$('button[data-background="nebula"]').forEach((button) => (button.hidden = false));
       toast(tr('Секрет разблокирован: атмосфера «Туманность» появилась в настройках.'));
@@ -2940,6 +2941,15 @@ import { BioSound } from './sound.js';
       const layer = document.createElement('div');
       layer.className = 'bio-rainbow';
       layer.setAttribute('aria-hidden', 'true');
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 1500);
+    }
+    function stamp() {
+      if (!state.motion) return;
+      const layer = document.createElement('div');
+      layer.className = 'bio-stamp';
+      layer.setAttribute('aria-hidden', 'true');
+      layer.innerHTML = `<span class="stamp-mark">A</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
       document.body.append(layer);
       setTimeout(() => layer.remove(), 1500);
     }
