@@ -38,7 +38,9 @@ html[data-booting='true'] .app-preloader {
   backdrop-filter: blur(10px);
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
   animation: liquidMorph 8s infinite ease-in-out;
-  box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
+  box-shadow:
+    0 0 40px rgba(112, 0, 255, 0.45),
+    0 0 100px rgba(112, 0, 255, 0.18);
   overflow: hidden;
 }
 [data-theme='light'] .clock-blob {
@@ -330,6 +332,43 @@ html[data-booting='true'] .app-preloader {
 }
 [data-background='newyear'][data-theme='light'] {
   --bg: #e9eef6;
+}
+/* Frosted glass under the New Year sky so the moon, aurora, trees and snow
+   stay visible through the content instead of being hidden behind it. */
+[data-background='newyear'] .shell,
+[data-background='newyear'] .workspace-nav,
+[data-background='newyear'] .rail {
+  background-color: color-mix(in srgb, var(--shell) 58%, transparent);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
+[data-background='newyear'] .project-card,
+[data-background='newyear'] .demo-card,
+[data-background='newyear'] .store-card,
+[data-background='newyear'] .partner-card,
+[data-background='newyear'] .preview-window,
+[data-background='newyear'] .profile-card {
+  background-color: color-mix(in srgb, var(--surface) 62%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-background='newyear'] .game-card,
+[data-background='newyear'] .bet-panel,
+[data-background='newyear'] .wallet-balance-panel,
+[data-background='newyear'] .info-card,
+[data-background='newyear'] .table-card,
+[data-background='newyear'] .modal-section-card {
+  background-color: color-mix(in srgb, var(--card) 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-background='newyear'] .game-scene {
+  background-color: color-mix(in srgb, var(--card) 66%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-background='newyear'] .game-dock {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
 }
 @keyframes core-pulse {
   0%,
