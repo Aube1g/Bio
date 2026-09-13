@@ -1190,6 +1190,7 @@ $$('[data-risk]').forEach((button) =>
     if (state.busy.plinko) return;
     state.plinko.risk = button.dataset.risk;
     plinko.configure(state.plinko.rows, state.plinko.risk);
+    sound.play('softPop');
     renderControls();
   }),
 );
@@ -1197,6 +1198,7 @@ $$('[data-rows]').forEach((button) =>
   button.addEventListener('click', () => {
     if (state.busy.plinko) return;
     state.plinko.rows = Number(button.dataset.rows);
+    sound.play('tick');
     plinko.configure(state.plinko.rows, state.plinko.risk);
     renderControls();
   }),
