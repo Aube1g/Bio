@@ -47,7 +47,7 @@
   right: -36px;
   top: -45px;
   width: min(520px, 49vw);
-  opacity: 0.38;
+  opacity: 0.5;
 }
 .garden-wood {
   stroke: var(--garden-wood);
@@ -70,12 +70,13 @@
   position: absolute;
   left: var(--x);
   top: -30px;
-  width: 8px;
-  height: 12px;
-  border-radius: 70% 20% 65% 30%;
-  background: var(--garden-flower);
-  opacity: 0.35;
-  animation: sakura-drift 17s linear infinite;
+  width: var(--size, 8px);
+  height: calc(var(--size, 8px) * 1.45);
+  border-radius: 72% 18% 66% 30%;
+  background: linear-gradient(140deg, #f4c6da, var(--garden-flower) 70%);
+  box-shadow: 0 0 6px #e9a9c61c;
+  opacity: 0.5;
+  animation: sakura-drift var(--dur, 17s) linear infinite;
   animation-delay: var(--delay);
 }
 @keyframes sakura-drift {
@@ -83,12 +84,18 @@
     transform: translate3d(0, -30px, 0) rotate(0);
     opacity: 0;
   }
-  10%,
-  85% {
-    opacity: 0.35;
+  8% {
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(calc(var(--drift) * 0.32), 52vh, 0) rotate(150deg);
+    opacity: 0.42;
+  }
+  88% {
+    opacity: 0.4;
   }
   100% {
-    transform: translate3d(var(--drift), 105vh, 0) rotate(290deg);
+    transform: translate3d(var(--drift), 108vh, 0) rotate(330deg);
     opacity: 0;
   }
 }
@@ -102,7 +109,7 @@
   top: -42px;
   width: 330px;
   height: 290px;
-  opacity: 0.19;
+  opacity: 0.24;
   pointer-events: none;
 }
 [data-theme='light'] .garden-branch {
@@ -116,7 +123,9 @@
   display: none;
 }
 [data-background='plain'] .garden-scene,
-[data-background='plain'] .hero-garden {
+[data-background='plain'] .hero-garden,
+[data-background='newyear'] .garden-scene,
+[data-background='newyear'] .hero-garden {
   display: none;
 }
 [data-game-busy='true'] .garden-petals i,
@@ -128,71 +137,7 @@
   animation-play-state: paused !important;
 }
 
-/* Select first, then deliberately enter the table. There is still just one navigation dock. */
-.lobby-launch {
-  position: fixed;
-  z-index: 32;
-  left: 50%;
-  bottom: calc(105px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: min(388px, calc(100% - 32px));
-  padding: 10px 11px 10px 14px;
-  border: 1px solid #c6e39c4a;
-  border-radius: 23px;
-  background: #222b24ed;
-  box-shadow:
-    0 8px 30px #0004,
-    inset 0 1px #ffffff0b;
-  backdrop-filter: blur(var(--glass-blur));
-  color: #eef5e4;
-}
-.lobby-launch .launch-symbol {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 38px;
-  border-radius: 13px;
-  background: #c2e69614;
-  color: #d5eeb4;
-}
-.lobby-launch > div {
-  flex: 1;
-  min-width: 0;
-}
-.lobby-launch > div > span {
-  display: block;
-  color: #b4c5aa;
-  font-size: 9px;
-}
-.lobby-launch strong {
-  font-size: 17px;
-  font-weight: 900;
-}
-#launch-selected {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  min-height: 44px;
-  padding: 10px 17px;
-  border-radius: 15px;
-  color: #233818;
-  background: #c6e598;
-  font-size: 13px;
-  font-weight: 900;
-}
-#launch-selected .icon {
-  width: 13px;
-  height: 13px;
-}
-.game-card {
-  border-radius: 27px 42px 24px 27px;
-}
-.game-card:nth-child(even) {
-  border-radius: 42px 27px 27px 24px;
-}
+/* The selected card highlights before the dock tray offers Play. */
 .game-card.is-selected {
   border-color: var(--card-tone, var(--lime));
   box-shadow:
@@ -611,19 +556,7 @@
 [data-theme='light'] .game-island :is(.island-stats strong, .island-history) {
   color: #f0f6e8;
 }
-[data-theme='light'] .lobby-launch {
-  background: #fbfff3f2;
-  color: #293f28;
-  border-color: #829e5460;
-  box-shadow: 0 9px 30px #40542a23;
-}
-[data-theme='light'] .lobby-launch > div > span {
-  color: #526845;
-}
-[data-theme='light'] .launch-symbol {
-  background: #bcd79d3f;
-  color: #3e6335;
-}
+
 [data-theme='light'] .plinko-bin.cool {
   background: #dfe5d6;
   color: #34482c;
@@ -677,10 +610,6 @@
   }
   .lobby-launch strong {
     font-size: 15px;
-  }
-  #launch-selected {
-    min-height: 42px;
-    padding-inline: 17px;
   }
   .result-strip {
     min-height: 110px;
@@ -797,4 +726,365 @@
     color: CanvasText;
     border-color: CanvasText;
   }
+}
+
+/* Organic shapes. One mirrored corner language ties the whole portal together:
+   surfaces lean left (big TL+BR), controls lean right (big TR+BL), so every
+   pair of neighbours interlocks. Hover nudges shapes into a liquid morph. */
+.portal-dialog {
+  border-radius: 44px 20px 50px 24px;
+}
+.portal-dialog.wide-dialog {
+  border-radius: 30px 56px 28px 26px;
+}
+.dialog-content,
+.dialog-body {
+  border-radius: inherit;
+}
+.primary-button,
+.secondary-button,
+.telegram-button,
+.guest-button,
+.practice-login,
+#dock-launch-play {
+  border-radius: 13px 24px 13px 26px;
+}
+.game-dock {
+  border-radius: 34px 18px 42px 14px;
+}
+.game-scene {
+  border-radius: 40px 18px 52px 24px;
+}
+.bet-panel,
+.wallet-balance-panel {
+  border-radius: 30px 14px 34px 18px;
+}
+.result-strip {
+  border-radius: 24px 40px 18px 20px;
+}
+.info-card,
+.table-card,
+.modal-section-card {
+  border-radius: 20px 36px 16px 18px;
+}
+.history-item {
+  border-radius: 16px 28px 12px 30px;
+}
+.bet-input,
+.seed-input,
+.field-label + input,
+#bet-amount {
+  border-radius: 11px 22px 11px 24px;
+}
+.profile-cover {
+  border-radius: 26px 34px 52px 20px;
+}
+.rule-chip,
+.rule-facts .info-card {
+  border-radius: 15px 28px 13px 30px;
+}
+.auth-hero {
+  border-radius: 28px 16px 40px 22px;
+}
+.game-card {
+  border-radius: 38px 16px 48px 20px;
+  transition:
+    border-radius 0.7s var(--spring),
+    transform 0.45s var(--spring),
+    border-color 0.3s ease,
+    box-shadow 0.35s ease;
+}
+.game-card:nth-child(even) {
+  border-radius: 48px 24px 30px 16px;
+}
+.game-card:hover {
+  border-radius: 26px 44px 22px 22px;
+}
+.hero-play {
+  border-radius: 32px 16px 38px 20px;
+}
+.plinko-feature {
+  border-radius: 26px 44px 20px 22px;
+}
+.hero-seven {
+  border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  transition: border-radius 0.8s var(--spring);
+}
+.hero-seven:hover {
+  transform: translateY(-4px) rotate(12deg) scale(1.12);
+  border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+  box-shadow:
+    inset 0 0 0 2px #ffffff55,
+    0 14px 26px #0006;
+}
+.hero-ball {
+  border-radius: 58% 42% 54% 46%;
+}
+/* Softer, springier feel across panels. */
+.portal-dialog {
+  transition: box-shadow 0.35s ease;
+}
+.game-card,
+.plinko-feature,
+.hero-play,
+.game-island {
+  transition:
+    transform 0.45s var(--spring),
+    border-color 0.3s ease,
+    box-shadow 0.35s ease;
+}
+button:not(.text-button):not(.dialog-close):not(.favorite-button) {
+  transition:
+    transform 0.35s var(--spring),
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.3s ease,
+    border-color 0.25s ease;
+}
+/* A quick, squishy press that springs back on release. */
+button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
+  transform: scale(0.93) translateY(1px);
+  transition-duration: 0.09s;
+}
+.game-card-main:active {
+  transform: scale(0.975) translateY(2px);
+  transition-duration: 0.09s;
+}
+
+/* Selection tray springs up from the one dock; Play is a deliberate, pretty tap. */
+.lobby-launch {
+  position: fixed;
+  z-index: 34;
+  left: 50%;
+  bottom: calc(104px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: min(404px, calc(100% - 32px));
+  padding: 11px 11px 11px 15px;
+  border-radius: 24px 34px 20px 16px;
+  border: 1px solid color-mix(in srgb, var(--tray-accent, var(--lime)) 44%, var(--line));
+  background: color-mix(in srgb, var(--surface) 97%, transparent);
+  box-shadow:
+    0 24px 60px #0006,
+    inset 0 1px #ffffff14,
+    0 0 0 4px color-mix(in srgb, var(--tray-accent, var(--lime)) 10%, transparent);
+  backdrop-filter: blur(var(--glass-blur));
+  color: var(--ink);
+}
+.lobby-launch[hidden] {
+  display: none;
+}
+.lobby-launch[data-game='blackjack'] {
+  --tray-accent: #b9a2f4;
+}
+.lobby-launch[data-game='slots'] {
+  --tray-accent: #eec27e;
+}
+.lobby-launch[data-game='dice'] {
+  --tray-accent: #7fc4ea;
+}
+.lobby-launch[data-game='plinko'] {
+  --tray-accent: #c4e27e;
+}
+.lobby-launch .launch-symbol {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px 21px 16px 23px;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tray-accent) 42%, #ffffff), color-mix(in srgb, var(--tray-accent) 78%, #000));
+  color: #10121c;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px #ffffff66;
+}
+.lobby-launch .launch-symbol .icon {
+  width: 23px;
+  height: 23px;
+  filter: drop-shadow(0 1px 0 #ffffff55);
+}
+.lobby-launch > div {
+  flex: 1;
+  min-width: 0;
+}
+.lobby-launch > div > span {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lobby-launch strong {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#dock-launch-play {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 11px 19px;
+  border-radius: 16px 22px 16px 24px;
+  color: #13181a;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tray-accent, var(--lime)) 34%, #ffffff),
+    color-mix(in srgb, var(--tray-accent, var(--lime)) 72%, #000)
+  );
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px #ffffff80,
+    0 4px 14px color-mix(in srgb, var(--tray-accent, var(--lime)) 30%, transparent);
+}
+#dock-launch-play:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+#dock-launch-play:active {
+  transform: translateY(1px) scale(0.98);
+}
+#dock-launch-play .icon {
+  width: 15px;
+  height: 15px;
+  filter: drop-shadow(0 1px 0 #ffffff66);
+}
+@media (max-width: 700px) {
+  .lobby-launch {
+    bottom: calc(100px + env(safe-area-inset-bottom));
+    padding: 9px 10px;
+    gap: 10px;
+  }
+  .lobby-launch strong {
+    font-size: 15px;
+  }
+  #dock-launch-play {
+    min-height: 44px;
+    padding-inline: 15px;
+  }
+}
+
+.table-popover {
+  position: fixed;
+  right: 18px;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 42;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-width: 262px;
+  padding: 15px 16px 13px;
+  border-radius: 22px 30px 22px 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--line);
+  box-shadow:
+    0 20px 50px #0006,
+    inset 0 1px #ffffff0d;
+  backdrop-filter: blur(var(--glass-blur));
+}
+.table-popover[hidden] {
+  display: none;
+}
+.popover-eyebrow {
+  font:
+    8px ui-monospace,
+    monospace;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.table-popover .table-swatches {
+  gap: 9px;
+}
+.table-popover .table-swatches button {
+  width: 39px;
+  height: 39px;
+}
+.table-popover .table-swatches button i {
+  width: 22px;
+  height: 22px;
+}
+#popover-open-settings {
+  align-self: flex-end;
+  font-size: 11px;
+}
+
+.history-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.history-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.history-filters .segmented {
+  padding: 3px;
+  gap: 3px;
+}
+.history-filters .segmented > button {
+  min-height: 34px;
+  font-size: 10px;
+  padding: 7px 10px;
+}
+.history-sort-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.history-sort {
+  flex: 0 1 auto;
+}
+.history-sort > button {
+  min-height: 34px;
+  padding-inline: 12px;
+}
+.history-count {
+  font:
+    9px ui-monospace,
+    monospace;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.history-return.won {
+  color: var(--success);
+}
+.history-return.lost {
+  color: var(--danger);
+}
+.history-return.even {
+  color: var(--neutral);
+}
+.history-item {
+  gap: 12px;
+}
+
+.table-popover .table-swatches button i {
+  background: linear-gradient(135deg, #7c54a4, #321449);
+}
+.table-popover .table-swatches button[data-pop-table-color='green'] i {
+  background: linear-gradient(135deg, #52947b, #1b4839);
+}
+.table-popover .table-swatches button[data-pop-table-color='crimson'] i {
+  background: linear-gradient(135deg, #b26487, #4f2236);
+}
+.table-popover .table-swatches button[data-pop-table-color='midnight'] i {
+  background: linear-gradient(135deg, #587ca6, #152746);
+}
+.table-popover .table-swatches button[data-pop-table-color='gold'] i {
+  background: linear-gradient(135deg, #b3975c, #524020);
+}
+.table-popover .table-swatches button[aria-pressed='true'] {
+  border-color: var(--primary-text);
+  background: var(--panel);
+  box-shadow: 0 0 0 2px #a37aca12;
 }

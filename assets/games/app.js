@@ -281,7 +281,6 @@ function renderChrome() {
   $('#available-balance').textContent = state.user ? money(displayedBalance()) : '—';
   $('#account-button').setAttribute('aria-label', state.user ? t('profile') : t('signIn'));
   updateFavorites();
-  renderSelection();
 }
 function setPressed(button, value) {
   const next = String(value);
@@ -527,57 +526,79 @@ function updateGame() {
   plinko.resize();
   renderAll();
 }
-function renderSelection() {
-  const selected = state.selectedGame;
-  const show = state.game === 'lobby' && Boolean(selected);
-  $('#lobby-launch').hidden = !show;
-  document.documentElement.dataset.gameSelected = show ? selected : '';
-  $$('[data-card]').forEach((card) => {
-    const active = card.dataset.card === selected;
-    card.classList.toggle('is-selected', active);
-    card.querySelector('.card-launch use')?.setAttribute('href', active ? '#i-check' : '#i-arrow');
-    card.querySelector('.game-card-main')?.setAttribute('aria-pressed', String(active));
-  });
-  if (show) {
-    $('#launch-game-name').textContent = games[selected].title;
-    $('#launch-game-icon').setAttribute('href', '#i-' + games[selected].icon);
-  }
-  $('#launch-selected').disabled = state.authBusy || state.networkBusy || state.uncertain;
-}
-function requestGame(game, source = null) {
+async function requestGame(game, source = null) {
   if (game === 'lobby' || !games[game]) {
-    state.selectedGame = null;
     navigate('lobby', source);
-    renderSelection();
+    return;
+  }
+  if (state.networkBusy || state.authBusy || state.uncertain) return;
+  if (source?.closest?.('[data-go],.game-card-main')) {
+    // Card or dock tap: select first, then the dock tray offers a pretty Play.
+    selectGame(game, source);
     return;
   }
   if (state.game === game) return;
-  if (state.game !== 'lobby') navigate('lobby', source);
-  state.selectedGame = game;
-  renderSelection();
+  // Quick start (profile quick games, keyboard, deep links): launch right away.
   sound.play('select');
-  if (motionEnabled())
-    $('#lobby-launch')
-      .animate(
-        [
-          { opacity: 0, translate: '0 14px', scale: 0.96 },
-          { opacity: 1, translate: '0 0', scale: 1 },
-        ],
-        { duration: 410, easing: 'cubic-bezier(.16,1,.3,1)' },
-      )
-      .finished.catch(() => {});
-}
-async function activateSelected() {
-  const selected = state.selectedGame;
-  if (!selected || state.networkBusy || state.authBusy || state.uncertain) return;
-  if (!state.user) await startPractice(null);
-  if (!state.user) return;
+  if (!state.user) {
+    await startPractice(null);
+    if (!state.user) return;
+  }
   sound.play('launch');
-  navigate(selected, $('#launch-selected'));
+  navigate(game, source);
+}
+function selectGame(game, source) {
+  if (game === 'lobby' || !games[game]) return;
+  state.selectedGame = game;
+  sound.play('flip');
+  $$('.game-card-main').forEach((card) => {
+    const on = card.dataset.go === game;
+    card.setAttribute('aria-pressed', String(on));
+    card.closest('.game-card')?.classList.toggle('is-selected', on);
+  });
+  const tray = $('#dock-launch'),
+    symbol = $('.launch-symbol use', tray);
+  tray.dataset.game = game;
+  $('#dock-launch-title').textContent = games[game].title;
+  if (symbol) symbol.setAttribute('href', '#i-' + games[game].icon);
+  tray.hidden = false;
+  if (motionEnabled()) {
+    tray.getAnimations().forEach((animation) => animation.cancel());
+    // Spring up from the dock, overshoot, and settle — with a slight swing.
+    tray.animate(
+      [
+        { opacity: 0, transform: 'translate(-50%, 44px) scale(0.72) rotate(2.5deg)' },
+        { opacity: 1, transform: 'translate(-50%, -6px) scale(1.06) rotate(-0.6deg)', offset: 0.72 },
+        { opacity: 1, transform: 'translate(-50%, 0) scale(1) rotate(0deg)' },
+      ],
+      { duration: 620, easing: 'cubic-bezier(0.22, 1.25, 0.36, 1)' },
+    );
+  }
+}
+function hideDockLaunch() {
+  state.selectedGame = null;
+  $('#dock-launch').hidden = true;
+  $$('.game-card-main').forEach((card) => {
+    card.removeAttribute('aria-pressed');
+    card.closest('.game-card')?.classList.remove('is-selected');
+  });
+}
+async function launchSelected() {
+  const game = state.selectedGame;
+  if (!game || game === 'lobby' || state.networkBusy || state.authBusy || state.uncertain) return;
+  sound.play('launch');
+  if (!state.user) {
+    await startPractice(null);
+    if (!state.user) return;
+  }
+  hideDockLaunch();
+  navigate(game);
 }
 function navigate(game, source = null, push = true, animate = true) {
   if (game !== 'lobby' && !games[game]) game = 'lobby';
   if (game === state.game && document.documentElement.dataset.ready) return;
+  hideDockLaunch();
+  if (animate) sound.play('whoosh');
   finishVisuals();
   toggleIsland(false);
   const order = ['lobby', 'blackjack', 'slots', 'dice', 'plinko'];
@@ -585,7 +606,7 @@ function navigate(game, source = null, push = true, animate = true) {
     Math.sign(order.indexOf(game) - order.indexOf(state.game)) || 1,
   );
   state.game = game;
-  if (game === 'lobby') state.selectedGame = null;
+
   document.documentElement.dataset.game = game;
   safeStorage.set('games.lastGame', game);
   const change = () => {
@@ -615,7 +636,6 @@ function navigate(game, source = null, push = true, animate = true) {
   const heading = game === 'lobby' ? $('#lobby-title') : $('#active-game-title');
   heading.tabIndex = -1;
   heading.focus({ preventScroll: true });
-  renderSelection();
 }
 function setBet(value) {
   if (
@@ -1024,7 +1044,115 @@ document.addEventListener('keydown', (event) => {
   }
 });
 $('#play-button').addEventListener('click', play);
-$('#launch-selected').addEventListener('click', activateSelected);
+$('#dock-launch-play').addEventListener('click', launchSelected);
+
+/* Atmosphere particles are tappable: sakura petals and New Year snow chime. */
+document.addEventListener('pointerdown', (event) => {
+  const flake = event.target.closest('.ny-snow i, .garden-petals i');
+  if (flake) {
+    try {
+      sound.unlock();
+      sound.play('chime');
+    } catch {
+      /* Sound is optional. */
+    }
+  }
+});
+
+/* Cards hum softly under the pointer. */
+document.addEventListener(
+  'pointerover',
+  (event) => {
+    if (event.pointerType === 'touch') return;
+    if (event.target.closest('.game-card-main, .game-dock a, .game-dock button')) {
+      try {
+        sound.unlock();
+        sound.play('hover');
+      } catch {
+        /* Sound is optional. */
+      }
+    }
+  },
+  { passive: true },
+);
+
+/* Long-press the dock settings gear to flip the Blackjack table style fast. */
+(function quickTableStyle() {
+  const dockSettings = $('#dock-settings'),
+    popover = $('#table-popover');
+  if (!dockSettings || !popover) return;
+  let holdTimer = 0,
+    holdFired = false;
+  const openPopover = () => {
+    popover.hidden = false;
+    $$('[data-pop-table-color]').forEach((button) =>
+      button.setAttribute('aria-pressed', String(button.dataset.popTableColor === preferences.table)),
+    );
+    if (motionEnabled())
+      popover.animate(
+        [
+          { opacity: 0, transform: 'translateY(12px) scale(.95)' },
+          { opacity: 1, transform: 'translateY(0) scale(1)' },
+        ],
+        { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' },
+      );
+    sound.play('select');
+  };
+  $$('[data-pop-table-color]').forEach((button) =>
+    button.addEventListener('click', () => {
+      savePreferences({ table: button.dataset.popTableColor });
+      sound.play('select');
+      $$('[data-pop-table-color]').forEach((item) =>
+        item.setAttribute('aria-pressed', String(item === button)),
+      );
+      closePopover();
+    }),
+  );
+  const closePopover = () => {
+    popover.hidden = true;
+  };
+  dockSettings.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) return;
+    holdFired = false;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      holdFired = true;
+      openPopover();
+    }, 500);
+  });
+  for (const name of ['pointerup', 'pointercancel', 'pointerleave'])
+    dockSettings.addEventListener(name, () => clearTimeout(holdTimer));
+  dockSettings.addEventListener('click', (event) => {
+    if (holdFired) {
+      event.preventDefault();
+      event.stopPropagation();
+      holdFired = false;
+    }
+  });
+  $('#popover-open-settings').addEventListener('click', () => {
+    closePopover();
+    dialogs.open('game-settings-dialog', dockSettings);
+  });
+  document.addEventListener('pointerdown', (event) => {
+    if (!popover.hidden && !event.target.closest('#table-popover') && !event.target.closest('#dock-settings'))
+      closePopover();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !popover.hidden) closePopover();
+  });
+})();
+
+/* Dialog open/close whooshes. */
+const dialogSoundObserver = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    if (mutation.type !== 'attributes' || mutation.attributeName !== 'open') continue;
+    sound.play(mutation.target.open ? 'open' : 'close');
+  }
+});
+$$('dialog').forEach((dialog) =>
+  dialogSoundObserver.observe(dialog, { attributes: true, attributeFilter: ['open'] }),
+);
+
 $$('[data-batch]').forEach((button) =>
   button.addEventListener('click', () => {
     if (state.networkBusy || state.batchRunning || state.busy.plinko || state.uncertain) return;
@@ -1147,3 +1275,184 @@ synchronize(false)
 
 initializeTextMotion();
 finishBoot();
+
+/* --- Secrets -------------------------------------------------------------
+   Small discoverable easter eggs:
+   - Konami code (↑ ↑ ↓ ↓ ← → ← → B A) unlocks the Nebula atmosphere.
+   - Five quick clicks on the brand logo do the same.
+   The unlocked option appears in Settings → Atmosphere and persists locally.
+--------------------------------------------------------------------------- */
+const NEBULA_KEY = 'aubeig.secrets.nebula';
+const nebulaUnlocked = () => safeStorage.get(NEBULA_KEY) === 'on';
+function revealNebulaOption() {
+  $$('button[data-background="nebula"]').forEach((button) => (button.hidden = false));
+}
+function confettiBurst() {
+  if (!motionEnabled()) return;
+  const layer = document.createElement('div');
+  layer.className = 'secret-confetti';
+  layer.setAttribute('aria-hidden', 'true');
+  document.body.append(layer);
+  const colors = ['#c4e27e', '#7fc4ea', '#eec27e', '#b9a2f4', '#fc5474'];
+  const pieces = [];
+  for (let i = 0; i < 42; i++) {
+    const piece = document.createElement('i');
+    piece.style.setProperty('--c', colors[i % colors.length]);
+    piece.style.setProperty('--dx', `${(Math.random() - 0.5) * 210}px`);
+    piece.style.setProperty('--dr', `${Math.random() * 540 - 270}deg`);
+    piece.style.setProperty('--dur', `${780 + Math.random() * 560}ms`);
+    layer.append(piece);
+    pieces.push(piece);
+  }
+  const animations = pieces.map((piece, i) => {
+    const animation = piece.animate(
+      [
+        { opacity: 0, transform: 'translate3d(0, -10px, 0) rotate(0deg)' },
+        { opacity: 1, offset: 0.12 },
+        {
+          opacity: 0,
+          transform: `translate3d(var(--dx), ${-60 - i * 7}px, 0) rotate(var(--dr))`,
+        },
+      ],
+      { duration: 1300, delay: (i % 9) * 22, easing: 'cubic-bezier(.14,.6,.3,1)' },
+    );
+    animation.finished.catch(() => {});
+    return animation;
+  });
+  Promise.all(animations.map((a) => a.finished)).finally(() => layer.remove());
+}
+function rainbowFlash() {
+  if (!motionEnabled()) return;
+  const layer = document.createElement('div');
+  layer.className = 'secret-rainbow';
+  layer.setAttribute('aria-hidden', 'true');
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 1600);
+}
+function coinRain() {
+  if (!motionEnabled()) return;
+  const layer = document.createElement('div');
+  layer.className = 'secret-coins';
+  layer.setAttribute('aria-hidden', 'true');
+  document.body.append(layer);
+  const glyphs = ['7', '7', '7', '●', '●'];
+  for (let i = 0; i < 34; i++) {
+    const coin = document.createElement('i');
+    coin.textContent = glyphs[i % glyphs.length];
+    coin.style.setProperty('--x', `${Math.random() * 100}%`);
+    coin.style.setProperty('--dx', `${(Math.random() - 0.5) * 160}px`);
+    coin.style.setProperty('--dr', `${Math.random() * 720 - 360}deg`);
+    coin.style.setProperty('--dur', `${1100 + Math.random() * 800}ms`);
+    coin.style.setProperty('--delay', `${Math.random() * 320}ms`);
+    layer.append(coin);
+  }
+  setTimeout(() => layer.remove(), 2400);
+}
+function unlockNebula() {
+  const already = nebulaUnlocked();
+  safeStorage.set(NEBULA_KEY, 'on');
+  revealNebulaOption();
+  confettiBurst();
+  rainbowFlash();
+  if (!already) {
+    try {
+      sound.unlock();
+      sound.play('levelup');
+    } catch {
+      /* Sound is optional. */
+    }
+  }
+  notify(t('secretUnlocked'));
+}
+(function bindSecrets() {
+  if (nebulaUnlocked()) revealNebulaOption();
+  const sequence = [
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowLeft',
+    'ArrowRight',
+    'b',
+    'a',
+  ];
+  let step = 0,
+    konamiTimer = 0;
+  document.addEventListener('keydown', (event) => {
+    if (event.target.closest('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+      return;
+    const expected = sequence[step];
+    if (event.key === expected || event.key.toLowerCase() === expected) {
+      step++;
+      clearTimeout(konamiTimer);
+      konamiTimer = setTimeout(() => (step = 0), 2200);
+      if (step === sequence.length) {
+        step = 0;
+        unlockNebula();
+      }
+    } else {
+      step = 0;
+    }
+  });
+  let brandClicks = 0,
+    brandTimer = 0;
+  const brand = document.querySelector('.site-brand');
+  if (brand)
+    brand.addEventListener('click', () => {
+      brandClicks++;
+      clearTimeout(brandTimer);
+      brandTimer = setTimeout(() => (brandClicks = 0), 1600);
+      if (brandClicks >= 5) {
+        brandClicks = 0;
+        unlockNebula();
+      }
+    });
+  // Seven quick taps on the hero "7" chip pays out pure luck.
+  let sevenTaps = 0,
+    sevenTimer = 0;
+  document.addEventListener('pointerdown', (event) => {
+    const seven = event.target.closest('.hero-seven');
+    if (!seven) return;
+    sevenTaps++;
+    clearTimeout(sevenTimer);
+    sevenTimer = setTimeout(() => (sevenTaps = 0), 1100);
+    if (sevenTaps < 7) {
+      try {
+        sound.unlock();
+        sound.play('coin');
+      } catch {
+        /* Sound is optional. */
+      }
+      return;
+    }
+    sevenTaps = 0;
+    coinRain();
+    try {
+      sound.unlock();
+      sound.play('levelup');
+    } catch {
+      /* Sound is optional. */
+    }
+      notify(t('luckySeven'));
+  });
+  // Typing "aubeig" anywhere sends a quiet hello.
+  let typed = '';
+  document.addEventListener('keydown', (event) => {
+    if (event.target.closest('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+      return;
+    if (event.key.length !== 1) return;
+    typed = (typed + event.key.toLowerCase()).slice(-6);
+    if (typed !== 'aubeig') return;
+    typed = '';
+    confettiBurst();
+    try {
+      sound.unlock();
+      sound.play('win');
+    } catch {
+      /* Sound is optional. */
+    }
+    notify(t('secretUnlocked'));
+  });
+})();

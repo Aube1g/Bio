@@ -98,6 +98,7 @@ for (const page of ['bio', 'games']) {
     .replace('{{motion-picker}}', motionPicker)
     .replace('{{boot-screen}}', await read('templates/boot-screen.html'))
     .replace('{{garden}}', await read('templates/garden.html'))
+    .replace('{{ny-scene}}', await read('templates/ny-scene.html'))
     .replace(`{{styles:${page}}}`, `<style>\n${formattedCSS}\n</style>`)
     .replace('{{bootstrap}}', bootstrap)
     .replace(

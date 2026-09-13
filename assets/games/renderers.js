@@ -55,13 +55,25 @@ export class DiceRenderer {
     return new Promise((resolve) => {
       const animation = this.element.animate(
         [
-          { transform: this.element.style.transform || 'rotateX(0deg) rotateY(0deg)' },
-          { transform: `translateY(-34px) rotateX(${x + 480}deg) rotateY(${y + 430}deg)`, offset: 0.42 },
-          { transform: `translateY(5px) rotateX(${x + 715}deg) rotateY(${y + 716}deg)`, offset: 0.82 },
-          { transform: `translateY(-4px) rotateX(${x + 722}deg) rotateY(${y + 722}deg)`, offset: 0.93 },
-          { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)` },
+          { transform: this.element.style.transform || 'rotateX(0deg) rotateY(0deg)', filter: 'blur(0px)' },
+          {
+            transform: `translateY(-46px) rotateX(${x + 340}deg) rotateY(${y + 310}deg)`,
+            filter: 'blur(1.6px)',
+            offset: 0.18,
+          },
+          {
+            transform: `translateY(6px) rotateX(${x + 560}deg) rotateY(${y + 590}deg)`,
+            filter: 'blur(2.4px)',
+            offset: 0.6,
+          },
+          {
+            transform: `translateY(-3px) rotateX(${x + 715}deg) rotateY(${y + 718}deg)`,
+            filter: 'blur(0.8px)',
+            offset: 0.85,
+          },
+          { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)`, filter: 'blur(0px)' },
         ],
-        { duration: 2100, easing: 'cubic-bezier(.2,.55,.24,1)' },
+        { duration: 2400, easing: 'cubic-bezier(.22,.68,.24,1)' },
       );
       let done = false;
       const finish = () => {
@@ -69,6 +81,7 @@ export class DiceRenderer {
         done = true;
         animation.cancel();
         this.element.style.transform = target;
+        this.element.style.filter = '';
         this.finish = null;
         resolve();
       };

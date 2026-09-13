@@ -116,5 +116,38 @@ document.querySelectorAll('[data-profile-view]').forEach((button) =>
   }),
 );
 
+// Secret atmosphere shared with the games portal.
+const revealNebula = () =>
+  document.querySelectorAll('button[data-background="nebula"]').forEach((button) => (button.hidden = false));
+if (safeStorage.get('aubeig.secrets.nebula') === 'on') revealNebula();
+const konami = [
+  'ArrowUp',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowLeft',
+  'ArrowRight',
+  'b',
+  'a',
+];
+let konamiStep = 0,
+  konamiTimer = 0;
+document.addEventListener('keydown', (event) => {
+  if (event.target.closest('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+  const expected = konami[konamiStep];
+  if (event.key === expected || event.key.toLowerCase() === expected) {
+    konamiStep++;
+    clearTimeout(konamiTimer);
+    konamiTimer = setTimeout(() => (konamiStep = 0), 2200);
+    if (konamiStep === konami.length) {
+      konamiStep = 0;
+      safeStorage.set('aubeig.secrets.nebula', 'on');
+      revealNebula();
+    }
+  } else konamiStep = 0;
+});
+
 initializeTextMotion();
 finishBoot();

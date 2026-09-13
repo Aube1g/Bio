@@ -351,8 +351,144 @@
         background: linear-gradient(transparent, var(--bg));
       }
       [data-background="aurora"] .ambient-orb {
-        background: radial-gradient(ellipse, #842eef30, transparent 70%);
-        height: 1200px;
+        height: 135%;
+        background:
+          radial-gradient(115% 48% at 14% -6%, #35e6c324 0%, transparent 58%),
+          radial-gradient(120% 52% at 86% -2%, #8a4dff2e 0%, transparent 60%),
+          radial-gradient(150% 62% at 50% 108%, #0d4a63 0%, transparent 62%);
+        animation: ambient-drift 26s ease-in-out infinite alternate;
+      }
+      [data-background="aurora"] .ambient-orb::before,
+      [data-background="aurora"] .ambient-orb::after {
+        content: "";
+        position: absolute;
+        left: -12%;
+        width: 124%;
+        height: 38%;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      [data-background="aurora"] .ambient-orb::before {
+        top: 8%;
+        background: linear-gradient(165deg, transparent 6%, #43f0c61c 38%, #7a4bff24 64%, transparent 90%);
+        transform: rotate(-7deg);
+        animation: aurora-breathe 9s ease-in-out infinite alternate;
+      }
+      [data-background="aurora"] .ambient-orb::after {
+        top: 22%;
+        left: -24%;
+        width: 148%;
+        height: 32%;
+        background: linear-gradient(198deg, transparent 8%, #ff5fb01c 40%, #23b6e621 70%, transparent 92%);
+        transform: rotate(6deg);
+        animation: aurora-breathe 13s -4s ease-in-out infinite alternate;
+      }
+      @keyframes aurora-breathe {
+        from {
+          opacity: 0.55;
+          transform: translateX(-2.5%) rotate(-7deg) scaleY(1);
+        }
+        to {
+          opacity: 0.95;
+          transform: translateX(3.5%) rotate(6deg) scaleY(1.12);
+        }
+      }
+      /* Hidden atmosphere unlocked through the easter egg. */
+      [data-background="nebula"] .ambient-orb {
+        height: 130%;
+        background:
+          radial-gradient(110% 55% at 22% 6%, #ff4d8d1f 0%, transparent 55%),
+          radial-gradient(120% 60% at 78% 0%, #5a3cf01f 0%, transparent 58%),
+          radial-gradient(150% 70% at 50% 110%, #123c5c 0%, transparent 62%);
+        animation: ambient-drift 32s ease-in-out infinite alternate;
+      }
+      [data-background="nebula"] .ambient-dots {
+        background-image:
+          radial-gradient(#d9c8ff 1px, transparent 1.4px), radial-gradient(#8fd8ff 1px, transparent 1.4px);
+        background-size:
+          83px 97px,
+          151px 131px;
+        opacity: 0.11;
+      }
+      .secret-confetti {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .secret-confetti i {
+        position: absolute;
+        top: 42%;
+        left: 50%;
+        width: 9px;
+        height: 14px;
+        margin: -7px 0 0 -4px;
+        border-radius: 2px;
+        background: var(--c, #c4e27e);
+        opacity: 0;
+      }
+      .secret-rainbow {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        pointer-events: none;
+        background: linear-gradient(
+          115deg,
+          rgba(196, 226, 126, 0.16),
+          rgba(127, 196, 234, 0.16),
+          rgba(238, 194, 126, 0.16),
+          rgba(185, 162, 244, 0.18),
+          rgba(252, 84, 116, 0.14)
+        );
+        animation: rainbow-pulse 1.5s ease-in-out;
+      }
+      @keyframes rainbow-pulse {
+        0% {
+          opacity: 0;
+        }
+        35% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      .secret-coins {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .secret-coins i {
+        position: absolute;
+        top: -40px;
+        left: var(--x);
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 28%, #ffe9a8, #e8b84a 72%);
+        box-shadow:
+          inset 0 2px 3px #fff6,
+          0 6px 14px #0005;
+        color: #7a5208;
+        font-style: normal;
+        font-weight: 900;
+        font-size: 14px;
+        animation: coin-drop var(--dur) cubic-bezier(0.22, 0.68, 0.4, 1) var(--delay) forwards;
+      }
+      @keyframes coin-drop {
+        0% {
+          transform: translate3d(0, 0, 0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translate3d(var(--dx), 108vh, 0) rotate(var(--dr));
+          opacity: 0.7;
+        }
       }
       [data-background="plain"] .ambient {
         display: none;
@@ -672,19 +808,32 @@
       }
       .hero-card {
         position: absolute;
-        width: 91px;
-        height: 122px;
-        background: #ede6fb;
-        border: 1px solid #ffffff88;
-        border-radius: 11px;
+        width: 92px;
+        height: 124px;
+        background: linear-gradient(155deg, #f4efff, #e2d6f5 62%, #cfbcec);
+        border: 1px solid #ffffffb0;
+        border-radius: 12px;
         color: #282038;
-        box-shadow: 0 15px 30px #0004;
+        box-shadow:
+          inset 0 1px #ffffffcc,
+          inset 0 -12px 22px #ffffff24,
+          0 15px 30px #0004;
         padding: 10px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         font-size: 20px;
         font-weight: 900;
+        overflow: hidden;
+      }
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        inset: -40% -20% auto -20%;
+        height: 55%;
+        background: linear-gradient(180deg, #ffffff70, transparent);
+        transform: rotate(-8deg);
+        opacity: 0.5;
       }
       .hero-card > .icon {
         align-self: center;
@@ -707,49 +856,96 @@
       }
       .floating-chip {
         position: absolute;
-        border: 5px dashed #d6eaab;
         border-radius: 50%;
-        width: 50px;
-        height: 50px;
+        width: 52px;
+        height: 52px;
         display: grid;
         place-items: center;
-        background: #92a865;
         color: #2e3d1c;
+        background:
+          radial-gradient(circle at 50% 50%, #f6fbe6 0 30%, #b4d476 30% 38%, transparent 38%),
+          repeating-conic-gradient(#b9d87e 0 14deg, #eef8cf 14deg 28deg);
         box-shadow:
-          inset 0 0 0 3px #74864e,
-          0 9px 22px #0003;
-        font-size: 22px;
+          inset 0 0 0 2px #ffffff30,
+          0 12px 24px #0005;
+        font-size: 20px;
         font-weight: 900;
-        transform: rotate(-18deg) rotateY(-20deg);
+        transform: rotate(-18deg);
       }
       .chip-one {
-        top: 222px;
+        top: 218px;
         left: 9%;
         animation: card-float 5s 1s ease-in-out infinite alternate;
       }
       .chip-two {
-        top: 233px;
+        top: 234px;
         right: 10%;
-        width: 36px;
-        height: 36px;
-        border-width: 4px;
-        font-size: 14px;
-        transform: rotate(18deg);
+        width: 38px;
+        height: 38px;
+        font-size: 13px;
+        color: #4a3414;
+        background:
+          radial-gradient(circle at 50% 50%, #fdf3d9 0 30%, #e0b45e 30% 38%, transparent 38%),
+          repeating-conic-gradient(#e2ba63 0 16deg, #f8e8bc 16deg 32deg);
+        transform: rotate(16deg);
       }
-      .playground-star {
+      .hero-seven {
         position: absolute;
-        color: #dac9ef;
+        right: 9%;
+        top: 26px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 19px;
+        font-weight: 900;
+        color: #4a3414;
+        background:
+          radial-gradient(circle at 50% 50%, #fdf3d9 0 32%, #e8c36a 32% 42%, transparent 42%),
+          repeating-conic-gradient(#e9c269 0 18deg, #f7e8bd 18deg 36deg);
+        box-shadow:
+          inset 0 0 0 2px #ffffff40,
+          0 8px 18px #0005;
+        animation: card-float 4.4s 0.8s ease-in-out infinite alternate;
       }
-      .star-one {
-        right: 12%;
-        top: 30px;
-        font-size: 23px;
+      .hero-ball {
+        position: absolute;
+        left: 30%;
+        top: 236px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 30%, #dff3b6, #8fb45a 70%);
+        box-shadow:
+          inset 0 2px 3px #ffffff88,
+          0 4px 12px #0004;
       }
-      .star-two {
-        left: 31%;
-        top: 246px;
-        font-size: 20px;
-        color: #cce68f;
+      .hero-ball i {
+        position: absolute;
+        border-radius: 50%;
+        background: #a9c979;
+      }
+      .hero-ball i:nth-child(1) {
+        width: 7px;
+        height: 7px;
+        left: -11px;
+        top: -4px;
+        opacity: 0.55;
+      }
+      .hero-ball i:nth-child(2) {
+        width: 5px;
+        height: 5px;
+        left: -20px;
+        top: 5px;
+        opacity: 0.3;
+      }
+      .hero-ball i:nth-child(3) {
+        width: 4px;
+        height: 4px;
+        left: 19px;
+        top: 9px;
+        opacity: 0.3;
       }
       @keyframes card-float {
         to {
@@ -906,25 +1102,29 @@
         isolation: isolate;
       }
       .game-card[data-card="blackjack"] {
-        --game-accent: #c6b4eb;
+        --game-accent: #b9a2f4;
+        --game-art-tint: radial-gradient(75% 60% at 50% 42%, #8b6cf120, transparent 72%);
       }
       .game-card[data-card="slots"] {
-        --game-accent: #eec699;
+        --game-accent: #eec27e;
+        --game-art-tint: radial-gradient(75% 60% at 50% 42%, #e8a9441f, transparent 72%);
       }
       .game-card[data-card="dice"] {
-        --game-accent: #91c8e8;
+        --game-accent: #7fc4ea;
+        --game-art-tint: radial-gradient(75% 60% at 50% 42%, #55b2e61e, transparent 72%);
       }
       .game-card[data-card="plinko"] {
-        --game-accent: #d1e79c;
+        --game-accent: #c4e27e;
+        --game-art-tint: radial-gradient(75% 60% at 50% 42%, #a7cf4c1e, transparent 72%);
       }
       .game-card::before {
         content: "";
         position: absolute;
         inset: 0;
         background: radial-gradient(
-          ellipse at 67% 34%,
-          color-mix(in srgb, var(--game-accent) 12%, transparent),
-          transparent 70%
+          ellipse at 67% 28%,
+          color-mix(in srgb, var(--game-accent) 15%, transparent),
+          transparent 68%
         );
         pointer-events: none;
         z-index: -1;
@@ -948,36 +1148,63 @@
       .game-art {
         display: grid;
         place-items: center;
-        height: 130px;
+        height: 150px;
         width: 100%;
         pointer-events: none;
-        transition: transform 0.6s var(--spring);
+        position: relative;
+      }
+      .game-art::after {
+        content: "";
+        position: absolute;
+        inset: 6px 2px 0;
+        background: var(--game-art-tint, radial-gradient(70% 55% at 50% 46%, #ffffff08, transparent 72%));
+        border-radius: 50%;
+        z-index: 0;
       }
       .game-art img {
-        width: 80px;
-        height: 90px;
+        width: 96px;
+        height: 100px;
         object-fit: contain;
-        opacity: 0.9;
-        filter: drop-shadow(0 8px 25px #0002);
+        opacity: 1;
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 12px 24px #0003);
+      }
+      .art-blackjack img {
+        width: 116px;
       }
       .art-slots img {
-        width: 120px;
+        width: 156px;
+        height: 96px;
+      }
+      .art-dice img {
+        width: 106px;
+        height: 106px;
       }
       .art-plinko img {
-        width: 63px;
+        width: 92px;
+        height: 106px;
       }
       .game-card:hover .game-art {
-        transform: translateY(-7px) rotate(-5deg) scale(1.05);
+        transform: translateY(-7px) rotate(-3deg) scale(1.04);
+      }
+      .game-card:hover .game-art img {
+        transform: translateY(-4px) scale(1.06);
       }
       .game-card-meta {
+        align-self: flex-start;
         font-size: 7px;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.1em;
         color: var(--game-accent);
         font-weight: 900;
+        padding: 4px 9px;
+        border-radius: 99px;
+        border: 1px solid color-mix(in srgb, var(--game-accent) 32%, transparent);
+        background: color-mix(in srgb, var(--game-accent) 12%, transparent);
       }
       .game-card h3 {
         font-size: 27px;
-        margin-top: 9px;
+        margin-top: 10px;
         letter-spacing: -1px;
       }
       .game-card p {
@@ -992,13 +1219,14 @@
         position: absolute;
         bottom: 16px;
         right: 16px;
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        border: 1px solid var(--line);
+        border: 1px solid color-mix(in srgb, var(--game-accent) 38%, var(--line));
         display: grid;
         place-items: center;
         color: var(--game-accent);
+        background: color-mix(in srgb, var(--game-accent) 8%, transparent);
         transition:
           background 0.3s,
           color 0.3s;
@@ -1017,7 +1245,7 @@
         top: 13px;
         width: 32px;
         height: 32px;
-        z-index: 2;
+        z-index: 4;
         border-radius: 50%;
         color: var(--muted);
       }
@@ -1788,39 +2016,40 @@
       }
       /* The die has six physical faces. No logo is used as the game result. */
       .cube {
-        --cube-size: 116px;
-        --cube-half: 58px;
+        --cube-size: 152px;
+        --cube-half: 76px;
         position: relative;
         width: var(--cube-size);
         height: var(--cube-size);
         transform-style: preserve-3d;
+        filter: drop-shadow(0 26px 26px #0006);
       }
       .cube-face {
         position: absolute;
         inset: 0;
-        border-radius: 19px;
-        background: linear-gradient(135deg, #f9f4ff, #d8c9ee);
-        border: 1px solid #ffffffa0;
+        border-radius: 26px;
+        background: linear-gradient(160deg, #ffffff 0%, #efe7ff 45%, #cdb9ea 100%);
+        border: 1px solid #ffffffd0;
         box-shadow:
-          inset 2px 3px 5px #fff8,
-          inset -4px -4px 12px #77589923;
+          inset 3px 4px 8px #ffffffcc,
+          inset -6px -6px 18px #6b4f9a2e;
         backface-visibility: hidden;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-template-rows: repeat(3, 1fr);
-        padding: 20px;
-        gap: 8px;
+        padding: 26px;
+        gap: 10px;
       }
       .pip {
         border-radius: 50%;
-        background: #362249;
+        background: radial-gradient(circle at 34% 30%, #5b3a8c, #2a1446 78%);
         box-shadow:
-          inset 1px 2px 3px #10052088,
-          0 1px 1px #ffffff66;
+          inset 2px 3px 5px #0d032021,
+          0 1px 1px #ffffff80;
         align-self: center;
         justify-self: center;
-        width: 15px;
-        height: 15px;
+        width: 19px;
+        height: 19px;
       }
       .face-1 {
         transform: translateZ(var(--cube-half));
@@ -1842,15 +2071,41 @@
       .face-6 {
         transform: rotateY(180deg) translateZ(var(--cube-half));
       }
-      .dice-camera {
+      #board-dice::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 52%;
+        width: 340px;
+        height: 300px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background:
+          radial-gradient(ellipse, color-mix(in srgb, var(--primary-text) 16%, transparent) 0%, transparent 64%),
+          radial-gradient(ellipse at 50% 42%, #00000040, transparent 68%);
+        pointer-events: none;
+      }
+      #board-dice::after {
+        content: "";
         position: absolute;
         left: 50%;
         top: 46%;
-        width: 116px;
-        height: 116px;
-        transform: translate(-50%, -50%) rotateX(-18deg) rotateY(-23deg);
-        perspective: 900px;
-        perspective-origin: 50% 50%;
+        width: 224px;
+        height: 224px;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffffff14, transparent 62%);
+        pointer-events: none;
+      }
+      .dice-camera {
+        position: absolute;
+        left: 50%;
+        top: 42%;
+        width: 152px;
+        height: 152px;
+        transform: translate(-50%, -50%) rotateX(-16deg) rotateY(-22deg);
+        perspective: 980px;
+        perspective-origin: 50% 40%;
         transform-style: preserve-3d;
       }
       .dice-orbit {
@@ -2382,19 +2637,139 @@
         line-height: 1.9;
         margin-bottom: 24px;
       }
-      .dialog-symbol {
-        width: 58px;
-        height: 58px;
-        border-radius: 21px;
+      .auth-hero {
+        position: relative;
+        height: 118px;
+        margin: -8px -8px 22px;
         display: grid;
         place-items: center;
-        background: var(--panel);
-        color: var(--primary-text);
-        margin: 5px 0 23px;
+        overflow: hidden;
+        border-radius: 22px;
+        background:
+          radial-gradient(
+            90% 120% at 50% 118%,
+            color-mix(in srgb, var(--primary) 26%, transparent),
+            transparent 64%
+          ),
+          radial-gradient(120% 80% at 82% 0%, color-mix(in srgb, #4cdbea 14%, transparent), transparent 60%),
+          color-mix(in srgb, var(--panel) 55%, transparent);
       }
-      .dialog-symbol .brand-mark {
-        width: 31px;
-        height: 31px;
+      .auth-glow {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: radial-gradient(circle, color-mix(in srgb, var(--primary) 30%, transparent), transparent 70%);
+        animation: auth-glow-pulse 4s ease-in-out infinite;
+      }
+      .auth-mark {
+        position: relative;
+        z-index: 2;
+        width: 58px;
+        height: 58px;
+        border-radius: 19px;
+        display: grid;
+        place-items: center;
+        background: color-mix(in srgb, var(--surface) 82%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 36%, transparent);
+        box-shadow:
+          0 12px 30px #0003,
+          inset 0 1px #ffffff1c;
+        color: var(--primary-text);
+      }
+      .auth-mark .brand-mark {
+        width: 30px;
+        height: 30px;
+      }
+      .auth-chip {
+        position: absolute;
+        z-index: 1;
+        border-radius: 50%;
+        border: 5px dashed color-mix(in srgb, var(--lime, #c4e27e) 88%, transparent);
+        background: color-mix(in srgb, var(--lime, #a7cf4c) 78%, #5b7a33);
+        box-shadow:
+          inset 0 0 0 3px color-mix(in srgb, #3d5421 60%, transparent),
+          0 8px 18px #0004;
+        animation: card-float 5s ease-in-out infinite alternate;
+      }
+      .auth-chip.chip-a {
+        width: 44px;
+        height: 44px;
+        left: 14%;
+        top: 52px;
+        transform: rotate(-18deg);
+      }
+      .auth-chip.chip-b {
+        width: 54px;
+        height: 54px;
+        right: 15%;
+        top: 46px;
+        transform: rotate(20deg);
+        animation-delay: -1.4s;
+      }
+      .auth-chip.chip-c {
+        width: 30px;
+        height: 30px;
+        left: 34%;
+        top: 18px;
+        transform: rotate(8deg);
+        opacity: 0.9;
+        animation-delay: -2.6s;
+      }
+      .auth-chips-note {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-top: 18px;
+        padding: 13px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        background: color-mix(in srgb, var(--lime, #c4e27e) 7%, var(--panel));
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      .chips-stack {
+        position: relative;
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+      }
+      .chips-stack i {
+        position: absolute;
+        left: 2px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 4px dashed color-mix(in srgb, var(--lime, #c4e27e) 82%, transparent);
+        background: color-mix(in srgb, var(--lime, #a7cf4c) 76%, #5b7a33);
+        box-shadow:
+          inset 0 0 0 3px color-mix(in srgb, #3d5421 55%, transparent),
+          0 4px 10px #0003;
+      }
+      .chips-stack i:nth-child(1) {
+        top: 0;
+      }
+      .chips-stack i:nth-child(2) {
+        top: 2px;
+        left: 4px;
+        opacity: 0.92;
+      }
+      .chips-stack i:nth-child(3) {
+        top: 4px;
+        left: 2px;
+        opacity: 0.82;
+      }
+      @keyframes auth-glow-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.75;
+        }
+        50% {
+          transform: scale(1.14);
+          opacity: 1;
+        }
       }
       .primary-button,
       .secondary-button,
@@ -2856,6 +3231,19 @@
       }
       .bg-sample.plain {
         background: linear-gradient(145deg, #211b30, #080813);
+      }
+      .bg-sample.nebula {
+        background:
+          radial-gradient(60% 55% at 30% 28%, #ff4d8d 0%, transparent 60%),
+          radial-gradient(60% 55% at 72% 24%, #7a5af0 0%, transparent 62%),
+          linear-gradient(150deg, #101322, #080813);
+      }
+      .bg-sample.newyear {
+        background:
+          radial-gradient(circle at 20% 80%, #1d6a45 0 22%, transparent 24%),
+          radial-gradient(circle at 80% 80%, #1d6a45 0 22%, transparent 24%),
+          radial-gradient(circle at 50% 110%, #e9f2f7 0 40%, transparent 42%),
+          linear-gradient(160deg, #0d1a2b, #0a0d16);
       }
       .settings-block select {
         background: var(--panel);
@@ -4058,10 +4446,10 @@
           width: 31px;
           height: 31px;
         }
-        .dialog-symbol {
+        .auth-mark {
           width: 52px;
           height: 52px;
-          border-radius: 18px;
+          border-radius: 17px;
         }
         .telegram-button,
         .guest-button {
@@ -6245,13 +6633,18 @@
         border-radius: 18px;
         background: var(--modal-card);
       }
-      #history-dialog .dialog-lead,
-      #auth-dialog .dialog-lead {
+      #history-dialog .dialog-lead {
         padding: 15px 17px;
         border: 1px solid var(--line);
         border-radius: 17px;
         background: var(--modal-card);
         font-size: 13px;
+      }
+      #auth-dialog .dialog-lead {
+        font-size: 13px;
+        border: 0;
+        padding: 0;
+        background: none;
       }
       #auth-dialog .guest-button,
       #auth-dialog .telegram-button {
@@ -6521,104 +6914,272 @@
         display: flex;
         animation: boot-failsafe 4.5s step-end forwards;
       }
-      .loader-clock {
-        width: 140px;
-        height: 140px;
+      .loader-mark,
+      .loader-core,
+      .loader-orbit {
+        display: none;
+      }
+      /* The liquid clock returns from the original index.html: a morphing glass blob
+         with real hour/minute/second hands. */
+      .clock-container {
+        position: relative;
+        width: 148px;
+        height: 148px;
         display: grid;
         place-items: center;
-        position: relative;
-        animation: clock-appear 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
       }
-      .loader-clock-blob {
+      .clock-blob {
         position: absolute;
         inset: 0;
-        border: 1px solid #ffffff25;
-        background: linear-gradient(135deg, #ffffff0d, #ffffff03);
         border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(157, 123, 255, 0.04));
+        border: 1px solid color-mix(in srgb, var(--primary-text, #a98cff) 32%, transparent);
+        backdrop-filter: blur(12px);
         box-shadow:
-          0 0 40px #7000ff35,
-          inset 0 1px #ffffff1a;
+          0 0 42px color-mix(in srgb, var(--primary-text, #7b37f5) 34%, transparent),
+          inset 0 0 26px rgba(255, 255, 255, 0.05);
         overflow: hidden;
-        animation: loader-liquid 8s infinite ease-in-out;
+        animation: liquidMorph 9s ease-in-out infinite;
       }
-      .loader-shimmer {
+      .clock-shimmer {
         position: absolute;
-        inset: -30%;
-        background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
-        animation: loader-shimmer 2.2s ease-in-out infinite;
+        inset: -60% -30%;
+        background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.12) 50%, transparent 58%);
+        transform: translateX(-60%) rotate(8deg);
+        animation: clock-shimmer 3.4s ease-in-out infinite;
       }
-      .loader-clock-ticks {
+      .clock-center {
         position: absolute;
-        inset: 16px;
+        width: 9px;
+        height: 9px;
         border-radius: 50%;
-        border: 1px dashed color-mix(in srgb, var(--primary-text) 35%, transparent);
+        background: var(--primary-text, #a98cff);
+        box-shadow: 0 0 12px var(--primary-text, #a98cff);
+        z-index: 6;
       }
-      .loader-clock-center {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--primary-text);
-        z-index: 2;
-      }
-      .loader-clock-hand {
+      .clock-hand {
         position: absolute;
-        bottom: 50%;
         left: 50%;
-        border-radius: 4px;
-        transform-origin: 50% 100%;
+        bottom: 50%;
+        transform-origin: bottom center;
+        border-radius: 6px;
+        z-index: 5;
+        transform: rotate(0deg);
+        transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .loader-clock-hand.hour {
-        height: 35px;
-        width: 4px;
-        margin-left: -2px;
-        background: var(--ink);
+      .clock-hand.hour {
+        width: 5px;
+        height: 40px;
+        margin-left: -2.5px;
+        background: var(--ink, #e8e8ff);
       }
-      .loader-clock-hand.minute {
-        height: 50px;
-        width: 2px;
-        margin-left: -1px;
+      .clock-hand.min {
+        width: 3px;
+        height: 56px;
+        margin-left: -1.5px;
+        background: var(--primary-text, #a98cff);
+      }
+      .clock-hand.sec {
+        width: 1.5px;
+        height: 64px;
+        margin-left: -0.75px;
         background: #4cdbea;
       }
-      .loader-clock-hand.second {
-        height: 60px;
-        width: 1px;
-        background: #fc5474;
-      }
-      .loader-label {
-        margin-top: 24px;
-        letter-spacing: 0.2em;
-        font-size: 12px;
-        font-weight: 900;
-        color: var(--primary-text);
-      }
-      [data-theme="light"] .loader-clock-blob {
-        background: linear-gradient(135deg, #8a4fff15, #00c2d60c);
-        border-color: #8a4fff30;
-      }
-      @keyframes loader-liquid {
+      @keyframes liquidMorph {
         0%,
         100% {
           border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
         }
         33% {
-          border-radius: 65% 35% 35% 65% / 60% 35% 65% 40%;
+          border-radius: 60% 40% 34% 66% / 58% 36% 64% 42%;
         }
         66% {
-          border-radius: 35% 65% 55% 45% / 35% 65% 35% 65%;
+          border-radius: 34% 66% 58% 42% / 44% 60% 40% 56%;
         }
       }
-      @keyframes loader-shimmer {
-        from {
-          transform: translateX(-80%);
+      @keyframes clock-shimmer {
+        0%,
+        55% {
+          transform: translateX(-70%) rotate(8deg);
         }
+        100% {
+          transform: translateX(90%) rotate(8deg);
+        }
+      }
+      .loader-bar {
+        margin-top: 30px;
+        width: 176px;
+        height: 3px;
+        border-radius: 3px;
+        background: color-mix(in srgb, var(--primary-text, #a98cff) 16%, transparent);
+        overflow: hidden;
+      }
+      .loader-bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #7b4bff, #4cdbea);
+        box-shadow: 0 0 12px #7b4bff66;
+        transition: width 120ms linear;
+      }
+      .loader-label {
+        margin-top: 17px;
+        letter-spacing: 0.22em;
+        font-size: 11px;
+        font-weight: 900;
+        color: var(--primary-text);
+      }
+      /* New Year atmosphere: night sky, moon, aurora, garland, fir forest and snow. */
+      .ny-scene {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      [data-background="newyear"] .ny-scene {
+        display: block;
+      }
+      .ny-svg {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .ny-sky {
+        animation: ny-aurora-drift 14s ease-in-out infinite;
+      }
+      @keyframes ny-aurora-drift {
+        0%,
+        100% {
+          opacity: 0.85;
+          transform: translateY(0);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-14px);
+        }
+      }
+      .ny-stars .ny-star {
+        fill: #dfe9ff;
+        opacity: 0.75;
+        animation: ny-twinkle 3.4s ease-in-out infinite;
+      }
+      .ny-stars .ny-star:nth-of-type(3n) {
+        animation-duration: 4.4s;
+        animation-delay: 0.6s;
+      }
+      .ny-stars .ny-star:nth-of-type(3n + 1) {
+        animation-duration: 2.9s;
+        animation-delay: 1.3s;
+      }
+      @keyframes ny-twinkle {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .ny-garland circle:nth-of-type(n) {
+        animation: ny-bulb-glow 3s ease-in-out infinite;
+      }
+      .ny-garland circle:nth-of-type(2n) {
+        animation-delay: 0.9s;
+      }
+      .ny-garland circle:nth-of-type(3n) {
+        animation-delay: 1.6s;
+      }
+      @keyframes ny-bulb-glow {
+        0%,
+        100% {
+          filter: brightness(0.92);
+        }
+        50% {
+          filter: brightness(1.28);
+        }
+      }
+      .ny-trees {
+        transform-origin: bottom center;
+      }
+      .ny-snow {
+        position: absolute;
+        inset: 0;
+      }
+      .ny-snow i {
+        position: absolute;
+        left: var(--x);
+        top: -18px;
+        width: var(--size, 8px);
+        height: var(--size, 8px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #ffffff, #dceaf3 70%);
+        box-shadow: 0 0 6px #ffffff66;
+        opacity: 0;
+        pointer-events: auto;
+        cursor: pointer;
+        animation: ny-snowfall var(--dur, 14s) linear infinite;
+        animation-delay: var(--delay);
+      }
+      .ny-snow i.crystal {
+        border-radius: 2px;
+        clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
+        background: radial-gradient(circle at 35% 30%, #ffffff, #cfe2f2 70%);
+      }
+      [data-background="newyear"] .ny-snow i:hover {
+        background: radial-gradient(circle at 35% 30%, #ffffff, #bcdcf0 70%);
+        box-shadow: 0 0 12px #ffffffcc;
+      }
+      @keyframes ny-snowfall {
+        0% {
+          transform: translate3d(0, -18px, 0) rotate(0deg);
+          opacity: 0;
+        }
+        8% {
+          opacity: 0.9;
+        }
+        50% {
+          transform: translate3d(var(--drift, 40px), 52vh, 0) rotate(180deg);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translate3d(calc(var(--drift, 40px) * -0.55), 110vh, 0) rotate(360deg);
+          opacity: 0;
+        }
+      }
+      [data-motion="off"] .ny-snow,
+      [data-particles="false"] .ny-snow {
+        display: none;
+      }
+      [data-background="newyear"] {
+        --bg: #0a0d16;
+      }
+      [data-background="newyear"][data-theme="light"] {
+        --bg: #e9eef6;
+      }
+      @keyframes core-pulse {
+        0%,
+        100% {
+          transform: rotate(45deg) scale(1);
+        }
+        50% {
+          transform: rotate(45deg) scale(1.18);
+        }
+      }
+      @keyframes orbit-spin {
         to {
-          transform: translateX(80%);
+          transform: rotate(360deg);
         }
       }
       @keyframes clock-appear {
         from {
           opacity: 0;
-          transform: scale(0.76) rotate(-12deg);
+          transform: scale(0.78);
         }
         to {
           opacity: 1;
@@ -6882,8 +7443,8 @@
         border-color: #698c334a;
         background: #b9d38e24;
       }
-      [data-motion="off"] .loader-clock,
-      [data-motion="off"] .loader-clock * {
+      [data-motion="off"] .loader-mark,
+      [data-motion="off"] .loader-mark * {
         animation: none !important;
       }
       @media (max-width: 700px) {
@@ -6945,8 +7506,8 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .loader-clock,
-        .loader-clock * {
+        .loader-mark,
+        .loader-mark * {
           animation: none !important;
         }
       }
@@ -7015,7 +7576,7 @@
         right: -36px;
         top: -45px;
         width: min(520px, 49vw);
-        opacity: 0.38;
+        opacity: 0.5;
       }
       .garden-wood {
         stroke: var(--garden-wood);
@@ -7038,12 +7599,13 @@
         position: absolute;
         left: var(--x);
         top: -30px;
-        width: 8px;
-        height: 12px;
-        border-radius: 70% 20% 65% 30%;
-        background: var(--garden-flower);
-        opacity: 0.35;
-        animation: sakura-drift 17s linear infinite;
+        width: var(--size, 8px);
+        height: calc(var(--size, 8px) * 1.45);
+        border-radius: 72% 18% 66% 30%;
+        background: linear-gradient(140deg, #f4c6da, var(--garden-flower) 70%);
+        box-shadow: 0 0 6px #e9a9c61c;
+        opacity: 0.5;
+        animation: sakura-drift var(--dur, 17s) linear infinite;
         animation-delay: var(--delay);
       }
       @keyframes sakura-drift {
@@ -7051,12 +7613,18 @@
           transform: translate3d(0, -30px, 0) rotate(0);
           opacity: 0;
         }
-        10%,
-        85% {
-          opacity: 0.35;
+        8% {
+          opacity: 0.5;
+        }
+        50% {
+          transform: translate3d(calc(var(--drift) * 0.32), 52vh, 0) rotate(150deg);
+          opacity: 0.42;
+        }
+        88% {
+          opacity: 0.4;
         }
         100% {
-          transform: translate3d(var(--drift), 105vh, 0) rotate(290deg);
+          transform: translate3d(var(--drift), 108vh, 0) rotate(330deg);
           opacity: 0;
         }
       }
@@ -7070,7 +7638,7 @@
         top: -42px;
         width: 330px;
         height: 290px;
-        opacity: 0.19;
+        opacity: 0.24;
         pointer-events: none;
       }
       [data-theme="light"] .garden-branch {
@@ -7084,7 +7652,9 @@
         display: none;
       }
       [data-background="plain"] .garden-scene,
-      [data-background="plain"] .hero-garden {
+      [data-background="plain"] .hero-garden,
+      [data-background="newyear"] .garden-scene,
+      [data-background="newyear"] .hero-garden {
         display: none;
       }
       [data-game-busy="true"] .garden-petals i,
@@ -7096,71 +7666,7 @@
         animation-play-state: paused !important;
       }
 
-      /* Select first, then deliberately enter the table. There is still just one navigation dock. */
-      .lobby-launch {
-        position: fixed;
-        z-index: 32;
-        left: 50%;
-        bottom: calc(105px + env(safe-area-inset-bottom));
-        transform: translateX(-50%);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: min(388px, calc(100% - 32px));
-        padding: 10px 11px 10px 14px;
-        border: 1px solid #c6e39c4a;
-        border-radius: 23px;
-        background: #222b24ed;
-        box-shadow:
-          0 8px 30px #0004,
-          inset 0 1px #ffffff0b;
-        backdrop-filter: blur(var(--glass-blur));
-        color: #eef5e4;
-      }
-      .lobby-launch .launch-symbol {
-        display: grid;
-        place-items: center;
-        width: 36px;
-        height: 38px;
-        border-radius: 13px;
-        background: #c2e69614;
-        color: #d5eeb4;
-      }
-      .lobby-launch > div {
-        flex: 1;
-        min-width: 0;
-      }
-      .lobby-launch > div > span {
-        display: block;
-        color: #b4c5aa;
-        font-size: 9px;
-      }
-      .lobby-launch strong {
-        font-size: 17px;
-        font-weight: 900;
-      }
-      #launch-selected {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        min-height: 44px;
-        padding: 10px 17px;
-        border-radius: 15px;
-        color: #233818;
-        background: #c6e598;
-        font-size: 13px;
-        font-weight: 900;
-      }
-      #launch-selected .icon {
-        width: 13px;
-        height: 13px;
-      }
-      .game-card {
-        border-radius: 27px 42px 24px 27px;
-      }
-      .game-card:nth-child(even) {
-        border-radius: 42px 27px 27px 24px;
-      }
+      /* The selected card highlights before the dock tray offers Play. */
       .game-card.is-selected {
         border-color: var(--card-tone, var(--lime));
         box-shadow:
@@ -7579,19 +8085,7 @@
       [data-theme="light"] .game-island :is(.island-stats strong, .island-history) {
         color: #f0f6e8;
       }
-      [data-theme="light"] .lobby-launch {
-        background: #fbfff3f2;
-        color: #293f28;
-        border-color: #829e5460;
-        box-shadow: 0 9px 30px #40542a23;
-      }
-      [data-theme="light"] .lobby-launch > div > span {
-        color: #526845;
-      }
-      [data-theme="light"] .launch-symbol {
-        background: #bcd79d3f;
-        color: #3e6335;
-      }
+
       [data-theme="light"] .plinko-bin.cool {
         background: #dfe5d6;
         color: #34482c;
@@ -7645,10 +8139,6 @@
         }
         .lobby-launch strong {
           font-size: 15px;
-        }
-        #launch-selected {
-          min-height: 42px;
-          padding-inline: 17px;
         }
         .result-strip {
           min-height: 110px;
@@ -7766,6 +8256,371 @@
           border-color: CanvasText;
         }
       }
+
+      /* Organic shapes. One mirrored corner language ties the whole portal together:
+         surfaces lean left (big TL+BR), controls lean right (big TR+BL), so every
+         pair of neighbours interlocks. Hover nudges shapes into a liquid morph. */
+      .portal-dialog {
+        border-radius: 44px 20px 50px 24px;
+      }
+      .portal-dialog.wide-dialog {
+        border-radius: 30px 56px 28px 26px;
+      }
+      .dialog-content,
+      .dialog-body {
+        border-radius: inherit;
+      }
+      .primary-button,
+      .secondary-button,
+      .telegram-button,
+      .guest-button,
+      .practice-login,
+      #dock-launch-play {
+        border-radius: 13px 24px 13px 26px;
+      }
+      .game-dock {
+        border-radius: 34px 18px 42px 14px;
+      }
+      .game-scene {
+        border-radius: 40px 18px 52px 24px;
+      }
+      .bet-panel,
+      .wallet-balance-panel {
+        border-radius: 30px 14px 34px 18px;
+      }
+      .result-strip {
+        border-radius: 24px 40px 18px 20px;
+      }
+      .info-card,
+      .table-card,
+      .modal-section-card {
+        border-radius: 20px 36px 16px 18px;
+      }
+      .history-item {
+        border-radius: 16px 28px 12px 30px;
+      }
+      .bet-input,
+      .seed-input,
+      .field-label + input,
+      #bet-amount {
+        border-radius: 11px 22px 11px 24px;
+      }
+      .profile-cover {
+        border-radius: 26px 34px 52px 20px;
+      }
+      .rule-chip,
+      .rule-facts .info-card {
+        border-radius: 15px 28px 13px 30px;
+      }
+      .auth-hero {
+        border-radius: 28px 16px 40px 22px;
+      }
+      .game-card {
+        border-radius: 38px 16px 48px 20px;
+        transition:
+          border-radius 0.7s var(--spring),
+          transform 0.45s var(--spring),
+          border-color 0.3s ease,
+          box-shadow 0.35s ease;
+      }
+      .game-card:nth-child(even) {
+        border-radius: 48px 24px 30px 16px;
+      }
+      .game-card:hover {
+        border-radius: 26px 44px 22px 22px;
+      }
+      .hero-play {
+        border-radius: 32px 16px 38px 20px;
+      }
+      .plinko-feature {
+        border-radius: 26px 44px 20px 22px;
+      }
+      .hero-seven {
+        border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+        transition: border-radius 0.8s var(--spring);
+      }
+      .hero-seven:hover {
+        transform: translateY(-4px) rotate(12deg) scale(1.12);
+        border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+        box-shadow:
+          inset 0 0 0 2px #ffffff55,
+          0 14px 26px #0006;
+      }
+      .hero-ball {
+        border-radius: 58% 42% 54% 46%;
+      }
+      /* Softer, springier feel across panels. */
+      .portal-dialog {
+        transition: box-shadow 0.35s ease;
+      }
+      .game-card,
+      .plinko-feature,
+      .hero-play,
+      .game-island {
+        transition:
+          transform 0.45s var(--spring),
+          border-color 0.3s ease,
+          box-shadow 0.35s ease;
+      }
+      button:not(.text-button):not(.dialog-close):not(.favorite-button) {
+        transition:
+          transform 0.35s var(--spring),
+          background 0.25s ease,
+          color 0.25s ease,
+          box-shadow 0.3s ease,
+          border-color 0.25s ease;
+      }
+      /* A quick, squishy press that springs back on release. */
+      button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
+        transform: scale(0.93) translateY(1px);
+        transition-duration: 0.09s;
+      }
+      .game-card-main:active {
+        transform: scale(0.975) translateY(2px);
+        transition-duration: 0.09s;
+      }
+
+      /* Selection tray springs up from the one dock; Play is a deliberate, pretty tap. */
+      .lobby-launch {
+        position: fixed;
+        z-index: 34;
+        left: 50%;
+        bottom: calc(104px + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        width: min(404px, calc(100% - 32px));
+        padding: 11px 11px 11px 15px;
+        border-radius: 24px 34px 20px 16px;
+        border: 1px solid color-mix(in srgb, var(--tray-accent, var(--lime)) 44%, var(--line));
+        background: color-mix(in srgb, var(--surface) 97%, transparent);
+        box-shadow:
+          0 24px 60px #0006,
+          inset 0 1px #ffffff14,
+          0 0 0 4px color-mix(in srgb, var(--tray-accent, var(--lime)) 10%, transparent);
+        backdrop-filter: blur(var(--glass-blur));
+        color: var(--ink);
+      }
+      .lobby-launch[hidden] {
+        display: none;
+      }
+      .lobby-launch[data-game="blackjack"] {
+        --tray-accent: #b9a2f4;
+      }
+      .lobby-launch[data-game="slots"] {
+        --tray-accent: #eec27e;
+      }
+      .lobby-launch[data-game="dice"] {
+        --tray-accent: #7fc4ea;
+      }
+      .lobby-launch[data-game="plinko"] {
+        --tray-accent: #c4e27e;
+      }
+      .lobby-launch .launch-symbol {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 16px 21px 16px 23px;
+        background: linear-gradient(
+          150deg,
+          color-mix(in srgb, var(--tray-accent) 42%, #ffffff),
+          color-mix(in srgb, var(--tray-accent) 78%, #000)
+        );
+        color: #10121c;
+        flex-shrink: 0;
+        box-shadow: inset 0 1px #ffffff66;
+      }
+      .lobby-launch .launch-symbol .icon {
+        width: 23px;
+        height: 23px;
+        filter: drop-shadow(0 1px 0 #ffffff55);
+      }
+      .lobby-launch > div {
+        flex: 1;
+        min-width: 0;
+      }
+      .lobby-launch > div > span {
+        display: block;
+        color: var(--muted);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .lobby-launch strong {
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: -0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #dock-launch-play {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 46px;
+        padding: 11px 19px;
+        border-radius: 16px 22px 16px 24px;
+        color: #13181a;
+        background: linear-gradient(
+          160deg,
+          color-mix(in srgb, var(--tray-accent, var(--lime)) 34%, #ffffff),
+          color-mix(in srgb, var(--tray-accent, var(--lime)) 72%, #000)
+        );
+        font-size: 13px;
+        font-weight: 900;
+        box-shadow:
+          inset 0 1px #ffffff80,
+          0 4px 14px color-mix(in srgb, var(--tray-accent, var(--lime)) 30%, transparent);
+      }
+      #dock-launch-play:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1px);
+      }
+      #dock-launch-play:active {
+        transform: translateY(1px) scale(0.98);
+      }
+      #dock-launch-play .icon {
+        width: 15px;
+        height: 15px;
+        filter: drop-shadow(0 1px 0 #ffffff66);
+      }
+      @media (max-width: 700px) {
+        .lobby-launch {
+          bottom: calc(100px + env(safe-area-inset-bottom));
+          padding: 9px 10px;
+          gap: 10px;
+        }
+        .lobby-launch strong {
+          font-size: 15px;
+        }
+        #dock-launch-play {
+          min-height: 44px;
+          padding-inline: 15px;
+        }
+      }
+
+      .table-popover {
+        position: fixed;
+        right: 18px;
+        bottom: calc(96px + env(safe-area-inset-bottom));
+        z-index: 42;
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        min-width: 262px;
+        padding: 15px 16px 13px;
+        border-radius: 22px 30px 22px 16px;
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        border: 1px solid var(--line);
+        box-shadow:
+          0 20px 50px #0006,
+          inset 0 1px #ffffff0d;
+        backdrop-filter: blur(var(--glass-blur));
+      }
+      .table-popover[hidden] {
+        display: none;
+      }
+      .popover-eyebrow {
+        font:
+          8px ui-monospace,
+          monospace;
+        letter-spacing: 0.16em;
+        color: var(--muted);
+      }
+      .table-popover .table-swatches {
+        gap: 9px;
+      }
+      .table-popover .table-swatches button {
+        width: 39px;
+        height: 39px;
+      }
+      .table-popover .table-swatches button i {
+        width: 22px;
+        height: 22px;
+      }
+      #popover-open-settings {
+        align-self: flex-end;
+        font-size: 11px;
+      }
+
+      .history-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .history-filters {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .history-filters .segmented {
+        padding: 3px;
+        gap: 3px;
+      }
+      .history-filters .segmented > button {
+        min-height: 34px;
+        font-size: 10px;
+        padding: 7px 10px;
+      }
+      .history-sort-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .history-sort {
+        flex: 0 1 auto;
+      }
+      .history-sort > button {
+        min-height: 34px;
+        padding-inline: 12px;
+      }
+      .history-count {
+        font:
+          9px ui-monospace,
+          monospace;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .history-return.won {
+        color: var(--success);
+      }
+      .history-return.lost {
+        color: var(--danger);
+      }
+      .history-return.even {
+        color: var(--neutral);
+      }
+      .history-item {
+        gap: 12px;
+      }
+
+      .table-popover .table-swatches button i {
+        background: linear-gradient(135deg, #7c54a4, #321449);
+      }
+      .table-popover .table-swatches button[data-pop-table-color="green"] i {
+        background: linear-gradient(135deg, #52947b, #1b4839);
+      }
+      .table-popover .table-swatches button[data-pop-table-color="crimson"] i {
+        background: linear-gradient(135deg, #b26487, #4f2236);
+      }
+      .table-popover .table-swatches button[data-pop-table-color="midnight"] i {
+        background: linear-gradient(135deg, #587ca6, #152746);
+      }
+      .table-popover .table-swatches button[data-pop-table-color="gold"] i {
+        background: linear-gradient(135deg, #b3975c, #524020);
+      }
+      .table-popover .table-swatches button[aria-pressed="true"] {
+        border-color: var(--primary-text);
+        background: var(--panel);
+        box-shadow: 0 0 0 2px #a37aca12;
+      }
     </style>
     <script>
       (() => {
@@ -7839,6 +8694,11 @@
             <use href="#sakura-blossom" transform="translate(315 269) scale(.8)" />
             <use href="#sakura-blossom" transform="translate(86 226) scale(.75)" />
             <use href="#sakura-blossom" transform="translate(75 304) scale(.7)" />
+            <use href="#sakura-blossom" transform="translate(382 116) rotate(8) scale(.62)" />
+            <use href="#sakura-blossom" transform="translate(337 216) rotate(-8) scale(.6)" />
+            <use href="#sakura-blossom" transform="translate(244 158) rotate(10) scale(.55)" />
+            <use href="#sakura-blossom" transform="translate(135 186) rotate(-14) scale(.65)" />
+            <use href="#sakura-blossom" transform="translate(118 288) rotate(6) scale(.58)" />
           </g>
         </g>
       </defs>
@@ -7846,22 +8706,275 @@
     <div class="garden-scene" aria-hidden="true">
       <svg viewBox="0 0 500 360" class="garden-branch"><use href="#sakura-branch" /></svg
       ><span class="garden-petals"
-        ><i style="--x: 13%; --delay: -2s; --drift: 80px"></i
-        ><i style="--x: 33%; --delay: -7s; --drift: -60px"></i
-        ><i style="--x: 58%; --delay: -4s; --drift: 95px"></i
-        ><i style="--x: 72%; --delay: -11s; --drift: -50px"></i
-        ><i style="--x: 89%; --delay: -5s; --drift: 65px"></i
+        ><i style="--x: 7%; --delay: -2s; --drift: 70px; --size: 11px; --dur: 14s"></i
+        ><i style="--x: 19%; --delay: -9s; --drift: -46px; --size: 7px; --dur: 19s"></i
+        ><i style="--x: 28%; --delay: -5s; --drift: 88px; --size: 13px; --dur: 15s"></i
+        ><i style="--x: 37%; --delay: -12s; --drift: -64px; --size: 8px; --dur: 21s"></i
+        ><i style="--x: 46%; --delay: -3s; --drift: 58px; --size: 10px; --dur: 13s"></i
+        ><i style="--x: 55%; --delay: -8s; --drift: -80px; --size: 12px; --dur: 18s"></i
+        ><i style="--x: 63%; --delay: -6s; --drift: 92px; --size: 7px; --dur: 16s"></i
+        ><i style="--x: 71%; --delay: -14s; --drift: -52px; --size: 11px; --dur: 22s"></i
+        ><i style="--x: 79%; --delay: -4s; --drift: 66px; --size: 9px; --dur: 14s"></i
+        ><i style="--x: 86%; --delay: -10s; --drift: -70px; --size: 13px; --dur: 20s"></i
+        ><i style="--x: 93%; --delay: -7s; --drift: 50px; --size: 8px; --dur: 17s"></i
+        ><i style="--x: 49%; --delay: -1s; --drift: -34px; --size: 6px; --dur: 12s"></i
+      ></span>
+    </div>
+    <div class="ny-scene" aria-hidden="true">
+      <svg class="ny-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="ny-needle" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3f9368" />
+            <stop offset="0.55" stop-color="#256848" />
+            <stop offset="1" stop-color="#123f2a" />
+          </linearGradient>
+          <linearGradient id="ny-needle-r" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4aa376" />
+            <stop offset="1" stop-color="#1c5738" />
+          </linearGradient>
+          <linearGradient id="ny-trunk" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#7a5533" />
+            <stop offset="1" stop-color="#5d3f24" />
+          </linearGradient>
+          <radialGradient id="ny-moonglow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#f6efd8" stop-opacity="0.55" />
+            <stop offset="0.6" stop-color="#f6efd8" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#f6efd8" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="ny-aurora-a" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#3ecf9a" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#3ecf9a" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#3ecf9a" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="ny-aurora-b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a6bff" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#8a6bff" stop-opacity="0.14" />
+            <stop offset="1" stop-color="#8a6bff" stop-opacity="0" />
+          </linearGradient>
+          <g id="ny-fir">
+            <ellipse cx="0" cy="10" rx="150" ry="20" fill="#eef4f8" opacity="0.28" />
+            <rect x="-11" y="-46" width="22" height="46" rx="5" fill="url(#ny-trunk)" />
+            <path d="M0 -256 L66 -152 L-66 -152 Z" fill="url(#ny-needle)" />
+            <path d="M0 -196 L92 -88 L-92 -88 Z" fill="url(#ny-needle)" />
+            <path d="M0 -130 L112 -24 L-112 -24 Z" fill="url(#ny-needle)" />
+            <path d="M0 -60 L132 44 L-132 44 Z" fill="url(#ny-needle)" />
+            <path
+              d="M0 -256 L66 -152 M0 -256 L-66 -152"
+              stroke="#eef4f8"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -196 L92 -88 M0 -196 L-92 -88"
+              stroke="#e6eef6"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -130 L112 -24 M0 -130 L-112 -24"
+              stroke="#e6eef6"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -60 L132 44 M0 -60 L-132 44"
+              stroke="#e9f1f7"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path d="M0 -262 L34 -174 L-34 -174 Z" fill="#f4f9fb" opacity="0.5" />
+            <circle cx="0" cy="-216" r="6.4" fill="#e8546b" />
+            <circle cx="-34" cy="-188" r="6.4" fill="#f2c14e" />
+            <circle cx="40" cy="-162" r="6.4" fill="#5aa9e6" />
+            <circle cx="-52" cy="-140" r="6.4" fill="#9b6bd6" />
+            <circle cx="14" cy="-110" r="6.4" fill="#e8546b" />
+            <circle cx="-20" cy="-76" r="6.4" fill="#5aa9e6" />
+            <circle cx="46" cy="-60" r="6.4" fill="#f2c14e" />
+            <circle cx="-60" cy="-28" r="6.4" fill="#9b6bd6" />
+            <circle cx="8" cy="-16" r="6.4" fill="#f2c14e" />
+            <circle cx="66" cy="-8" r="6.4" fill="#e8546b" />
+            <path
+              d="M0 -278 l5.2 10.4 11.4 1.5 -8.4 8 2.2 11.2 -10.4 -5.6 -10.4 5.6 2.2 -11.2 -8.4 -8 11.4 -1.5 Z"
+              fill="#ffd76a"
+            />
+            <circle cx="0" cy="-270" r="14" fill="#ffd76a" opacity="0.22" />
+          </g>
+          <g id="ny-fir-r">
+            <ellipse cx="0" cy="8" rx="120" ry="16" fill="#eef4f8" opacity="0.22" />
+            <rect x="-9" y="-38" width="18" height="38" rx="4" fill="url(#ny-trunk)" />
+            <path d="M0 -210 L56 -126 L-56 -126 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -158 L78 -72 L-78 -72 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -102 L96 -16 L-96 -16 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -44 L112 36 L-112 36 Z" fill="url(#ny-needle-r)" />
+            <path
+              d="M0 -210 L56 -126 M0 -210 L-56 -126"
+              stroke="#e9f1f7"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -158 L78 -72 M0 -158 L-78 -72"
+              stroke="#e6eef6"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -102 L96 -16 M0 -102 L-96 -16"
+              stroke="#e6eef6"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -44 L112 36 M0 -44 L-112 36"
+              stroke="#eef4f8"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle cx="0" cy="-176" r="5.4" fill="#f2c14e" />
+            <circle cx="-30" cy="-150" r="5.4" fill="#5aa9e6" />
+            <circle cx="34" cy="-120" r="5.4" fill="#e8546b" />
+            <circle cx="-16" cy="-88" r="5.4" fill="#9b6bd6" />
+            <circle cx="28" cy="-58" r="5.4" fill="#f2c14e" />
+            <circle cx="-42" cy="-34" r="5.4" fill="#e8546b" />
+            <path
+              d="M0 -224 l4.6 9.4 10.2 1.3 -7.6 7.2 2 10.2 -9.2 -5 -9.2 5 2 -10.2 -7.6 -7.2 10.2 -1.3 Z"
+              fill="#ffe08a"
+            />
+          </g>
+          <g id="ny-gift-r">
+            <rect x="-17" y="-24" width="34" height="24" rx="3" fill="#b0425a" />
+            <rect x="-17" y="-9" width="34" height="6" fill="#f2e2c4" />
+            <rect x="-3" y="-24" width="6" height="24" fill="#f2e2c4" />
+          </g>
+          <g id="ny-gift-g">
+            <rect x="-17" y="-22" width="34" height="22" rx="3" fill="#2f7d55" />
+            <rect x="-17" y="-8" width="34" height="5" fill="#ffd76a" />
+            <rect x="-3" y="-22" width="5" height="22" fill="#ffd76a" />
+          </g>
+        </defs>
+        <g class="ny-sky">
+          <rect x="0" y="0" width="1440" height="560" fill="url(#ny-aurora-a)" opacity="0.9" />
+          <rect x="0" y="60" width="1440" height="420" fill="url(#ny-aurora-b)" opacity="0.9" />
+          <circle cx="1186" cy="176" r="130" fill="url(#ny-moonglow)" />
+          <circle cx="1186" cy="176" r="52" fill="#f4efdc" />
+          <circle cx="1170" cy="166" r="8" fill="#e7e0c8" opacity="0.6" />
+          <circle cx="1202" cy="192" r="6" fill="#e7e0c8" opacity="0.5" />
+          <circle cx="1188" cy="152" r="4" fill="#e7e0c8" opacity="0.5" />
+        </g>
+        <g class="ny-stars">
+          <circle class="ny-star" cx="84" cy="80" r="2.1" />
+          <circle class="ny-star" cx="206" cy="150" r="1.4" />
+          <circle class="ny-star" cx="330" cy="64" r="2.4" />
+          <circle class="ny-star" cx="452" cy="196" r="1.5" />
+          <circle class="ny-star" cx="568" cy="96" r="1.9" />
+          <circle class="ny-star" cx="700" cy="176" r="1.3" />
+          <circle class="ny-star" cx="812" cy="70" r="2.3" />
+          <circle class="ny-star" cx="930" cy="210" r="1.5" />
+          <circle class="ny-star" cx="1044" cy="110" r="2" />
+          <circle class="ny-star" cx="1360" cy="90" r="2.2" />
+          <circle class="ny-star" cx="140" cy="300" r="1.4" />
+          <circle class="ny-star" cx="290" cy="392" r="1.7" />
+          <circle class="ny-star" cx="430" cy="300" r="1.2" />
+          <circle class="ny-star" cx="640" cy="330" r="1.6" />
+          <circle class="ny-star" cx="880" cy="360" r="1.3" />
+          <circle class="ny-star" cx="1010" cy="320" r="1.8" />
+          <circle class="ny-star" cx="1150" cy="410" r="1.4" />
+          <circle class="ny-star" cx="1270" cy="300" r="1.6" />
+          <circle class="ny-star" cx="60" cy="470" r="1.5" />
+          <circle class="ny-star" cx="520" cy="470" r="1.3" />
+          <circle class="ny-star" cx="760" cy="470" r="1.8" />
+          <circle class="ny-star" cx="1340" cy="500" r="1.5" />
+        </g>
+        <g class="ny-garland">
+          <path
+            d="M0 46 Q 240 108 480 78 T 960 88 T 1440 60"
+            fill="none"
+            stroke="#1d5738"
+            stroke-width="3.6"
+            opacity="0.7"
+          />
+          <path
+            d="M0 58 Q 240 120 480 90 T 960 100 T 1440 72"
+            fill="none"
+            stroke="#123f2a"
+            stroke-width="2"
+            opacity="0.5"
+          />
+          <circle cx="96" cy="72" r="8" fill="#e8546b" />
+          <circle cx="240" cy="88" r="8" fill="#f2c14e" />
+          <circle cx="384" cy="84" r="8" fill="#5aa9e6" />
+          <circle cx="528" cy="82" r="8" fill="#9b6bd6" />
+          <circle cx="672" cy="86" r="8" fill="#e8546b" />
+          <circle cx="816" cy="90" r="8" fill="#f2c14e" />
+          <circle cx="960" cy="90" r="8" fill="#5aa9e6" />
+          <circle cx="1104" cy="84" r="8" fill="#9b6bd6" />
+          <circle cx="1248" cy="72" r="8" fill="#e8546b" />
+          <circle cx="1386" cy="62" r="8" fill="#f2c14e" />
+          <circle cx="96" cy="72" r="13" fill="#e8546b" opacity="0.2" />
+          <circle cx="528" cy="82" r="13" fill="#9b6bd6" opacity="0.2" />
+          <circle cx="960" cy="90" r="13" fill="#5aa9e6" opacity="0.2" />
+        </g>
+        <path d="M0 900 L0 812 Q 360 782 720 812 T 1440 806 L1440 900 Z" fill="#eaf2f7" opacity="0.12" />
+        <path d="M0 900 L0 854 Q 420 824 840 856 T 1440 848 L1440 900 Z" fill="#f4f9fb" opacity="0.16" />
+        <g class="ny-trees" transform="translate(0 0)">
+          <g transform="translate(140 862) scale(0.5)" opacity="0.55"><use href="#ny-fir-r" /></g>
+          <g transform="translate(500 884) scale(0.62)" opacity="0.8"><use href="#ny-fir-r" /></g>
+          <g transform="translate(1030 884) scale(0.56)" opacity="0.75"><use href="#ny-fir-r" /></g>
+          <g transform="translate(1360 878) scale(0.72)" opacity="0.95"><use href="#ny-fir-r" /></g>
+          <g transform="translate(310 880) scale(1.02)"><use href="#ny-fir" /></g>
+          <g transform="translate(880 876) scale(1.12)"><use href="#ny-fir" /></g>
+          <g transform="translate(742 886) scale(0.8)"><use href="#ny-fir" /></g>
+          <g transform="translate(1206 872) scale(0.9)"><use href="#ny-fir" /></g>
+          <use href="#ny-gift-r" transform="translate(350 894)" />
+          <use href="#ny-gift-g" transform="translate(404 894)" />
+          <use href="#ny-gift-r" transform="translate(812 898)" />
+          <use href="#ny-gift-g" transform="translate(866 896)" />
+        </g>
+      </svg>
+      <span class="ny-snow"
+        ><i style="--x: 4%; --delay: -2s; --dur: 13s; --size: 8px; --drift: 40px"></i
+        ><i class="crystal" style="--x: 11%; --delay: -9s; --dur: 17s; --size: 9px; --drift: -34px"></i
+        ><i style="--x: 17%; --delay: -5s; --dur: 14s; --size: 10px; --drift: 52px"></i
+        ><i class="crystal" style="--x: 24%; --delay: -12s; --dur: 19s; --size: 8px; --drift: -44px"></i
+        ><i style="--x: 31%; --delay: -3s; --dur: 12s; --size: 9px; --drift: 38px"></i
+        ><i class="crystal" style="--x: 38%; --delay: -8s; --dur: 16s; --size: 7px; --drift: -52px"></i
+        ><i style="--x: 45%; --delay: -6s; --dur: 13s; --size: 11px; --drift: 46px"></i
+        ><i class="crystal" style="--x: 52%; --delay: -14s; --dur: 20s; --size: 9px; --drift: -38px"></i
+        ><i style="--x: 59%; --delay: -4s; --dur: 14s; --size: 8px; --drift: 42px"></i
+        ><i class="crystal" style="--x: 66%; --delay: -10s; --dur: 18s; --size: 7px; --drift: -46px"></i
+        ><i style="--x: 73%; --delay: -7s; --dur: 15s; --size: 10px; --drift: 36px"></i
+        ><i class="crystal" style="--x: 80%; --delay: -13s; --dur: 21s; --size: 9px; --drift: -40px"></i
+        ><i style="--x: 87%; --delay: -5s; --dur: 13s; --size: 9px; --drift: 44px"></i
+        ><i class="crystal" style="--x: 93%; --delay: -11s; --dur: 17s; --size: 7px; --drift: -32px"></i
+        ><i style="--x: 50%; --delay: -1s; --dur: 12s; --size: 7px; --drift: 28px"></i
+        ><i class="crystal" style="--x: 8%; --delay: -7s; --dur: 15s; --size: 8px; --drift: 30px"></i
+        ><i style="--x: 62%; --delay: -2s; --dur: 16s; --size: 7px; --drift: -30px"></i
+        ><i class="crystal" style="--x: 90%; --delay: -8s; --dur: 14s; --size: 10px; --drift: 34px"></i
+        ><i style="--x: 21%; --delay: -15s; --dur: 22s; --size: 6px; --drift: -42px"></i
+        ><i class="crystal" style="--x: 43%; --delay: -9s; --dur: 15s; --size: 8px; --drift: 40px"></i
+        ><i style="--x: 77%; --delay: -4s; --dur: 18s; --size: 9px; --drift: -36px"></i
+        ><i class="crystal" style="--x: 55%; --delay: -12s; --dur: 17s; --size: 7px; --drift: 26px"></i
+        ><i style="--x: 33%; --delay: -6s; --dur: 20s; --size: 6px; --drift: -30px"></i
+        ><i class="crystal" style="--x: 70%; --delay: -1s; --dur: 16s; --size: 8px; --drift: 32px"></i
       ></span>
     </div>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
-      <div class="loader-clock" aria-hidden="true">
-        <div class="loader-clock-blob"><div class="loader-shimmer"></div></div>
-        <div class="loader-clock-ticks"></div>
-        <span class="loader-clock-hand hour" id="loader-hour"></span>
-        <span class="loader-clock-hand minute" id="loader-minute"></span>
-        <span class="loader-clock-hand second" id="loader-second"></span>
-        <span class="loader-clock-center"></span>
+      <div class="clock-container" aria-hidden="true">
+        <div class="clock-blob"><span class="clock-shimmer"></span></div>
+        <span class="clock-center"></span>
+        <span class="clock-hand hour" id="clock-hour"></span>
+        <span class="clock-hand min" id="clock-min"></span>
+        <span class="clock-hand sec" id="clock-sec"></span>
       </div>
+      <div class="loader-bar" aria-hidden="true"><span id="loader-progress"></span></div>
       <span class="loader-label" id="loader-label">ЗАГРУЗКА…</span>
     </div>
 
@@ -8422,8 +9535,9 @@
                 </div>
                 <div class="hero-cube-camera"><div class="cube hero-cube" id="hero-cube"></div></div>
                 <div class="floating-chip chip-one">A</div>
-                <div class="floating-chip chip-two">✦</div>
-                <span class="playground-star star-one">✦</span><span class="playground-star star-two">+</span>
+                <div class="floating-chip chip-two">7</div>
+                <span class="hero-seven">7</span>
+                <span class="hero-ball"><i></i><i></i><i></i></span>
               </div>
               <div class="hero-bottom-code">AUBEIG / AFTER HOURS</div>
             </article>
@@ -8891,16 +10005,6 @@
         </button>
       </footer>
     </div>
-    <aside class="lobby-launch" id="lobby-launch" hidden aria-label="Выбранная игра">
-      <span class="launch-symbol"
-        ><svg class="icon" aria-hidden="true"><use id="launch-game-icon" href="#i-plinko" /></svg
-      ></span>
-      <div><span data-t="selectedGame">Выбрана игра</span><strong id="launch-game-name">Plinko</strong></div>
-      <button type="button" id="launch-selected">
-        <span data-t="enterGame">Играть</span
-        ><svg class="icon" aria-hidden="true"><use href="#i-play" /></svg>
-      </button>
-    </aside>
     <nav class="game-dock" aria-label="Игровой док">
       <div class="dock-games spring-group">
         <a href="#lobby" data-go="lobby" aria-current="page" aria-label="Коллекция"
@@ -8917,10 +10021,36 @@
         >
       </div>
       <span class="dock-divider"></span
-      ><button type="button" data-open="game-settings-dialog" aria-label="Настройки">
+      ><button type="button" data-open="game-settings-dialog" aria-label="Настройки" id="dock-settings">
         <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>
       </button>
     </nav>
+    <div class="table-popover" id="table-popover" hidden role="dialog" aria-label="Быстрый стиль стола">
+      <p class="popover-eyebrow">QUICK TABLE STYLE</p>
+      <div class="table-swatches" role="group" aria-label="Цвет стола">
+        <button type="button" data-pop-table-color="royal" aria-label="Фиолетовый"><i></i></button
+        ><button type="button" data-pop-table-color="green" aria-label="Зелёный"><i></i></button
+        ><button type="button" data-pop-table-color="crimson" aria-label="Красный"><i></i></button
+        ><button type="button" data-pop-table-color="midnight" aria-label="Синий"><i></i></button
+        ><button type="button" data-pop-table-color="gold" aria-label="Золотой"><i></i></button>
+      </div>
+      <button class="text-button" type="button" id="popover-open-settings" data-t="allSettings">
+        Все настройки
+      </button>
+    </div>
+    <div class="lobby-launch" id="dock-launch" role="dialog" aria-label="Выбранная игра" hidden>
+      <span class="launch-symbol" aria-hidden="true"
+        ><svg class="icon"><use href="#i-dice" /></svg
+      ></span>
+      <div>
+        <span data-t="selectedGame">Выбрана игра</span>
+        <strong id="dock-launch-title">Dice</strong>
+      </div>
+      <button type="button" id="dock-launch-play">
+        <svg class="icon" aria-hidden="true"><use href="#i-play" /></svg
+        ><span data-t="enterGame">Играть</span>
+      </button>
+    </div>
     <div class="connection-banner" id="connection-banner" role="status" hidden>
       <svg class="icon" aria-hidden="true"><use href="#i-wifi" /></svg><span id="connection-message"></span
       ><button type="button" id="retry-connection" data-t="retry">Повторить</button
@@ -8931,9 +10061,15 @@
         <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
       </button>
       <div class="dialog-content">
-        <span class="dialog-symbol"
-          ><svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg
-        ></span>
+        <div class="auth-hero" aria-hidden="true">
+          <span class="auth-glow"></span>
+          <span class="auth-chip chip-a"></span>
+          <span class="auth-chip chip-b"></span>
+          <span class="auth-chip chip-c"></span>
+          <span class="auth-mark"
+            ><svg class="brand-mark"><use href="#i-mark" /></svg
+          ></span>
+        </div>
         <p class="eyebrow" data-t="welcome">РАД ТЕБЯ ВИДЕТЬ</p>
         <h2 id="auth-title" data-t="loginTitle">Твоя игра начинается здесь.</h2>
         <p class="dialog-lead" data-t="loginDescription">Войди через Telegram или просто загляни в гости.</p>
@@ -8949,7 +10085,10 @@
           ><span data-t="guestLogin">Продолжить гостем</span
           ><svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg>
         </button>
-        <p class="small-note" data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</p>
+        <div class="auth-chips-note">
+          <span class="chips-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</span>
+        </div>
         <button class="practice-login" id="practice-login" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg
           ><span data-t="tryWithoutServer">Попробовать без входа</span>
@@ -9046,6 +10185,52 @@
         <p class="dialog-lead" data-t="historyDescription">
           Каждая ставка, каждый результат. Нажми на партию, чтобы проверить её.
         </p>
+        <div class="history-toolbar">
+          <div class="history-filters">
+            <div class="segmented spring-group history-games" role="group" aria-label="Фильтр по игре">
+              <button type="button" data-history-game="all" aria-pressed="true" data-t="filterAll">Все</button
+              ><button
+                type="button"
+                data-history-game="blackjack"
+                aria-pressed="false"
+                data-t="gameBlackjack"
+              >
+                Блэкджек</button
+              ><button type="button" data-history-game="slots" aria-pressed="false" data-t="gameSlots">
+                Слоты</button
+              ><button type="button" data-history-game="dice" aria-pressed="false" data-t="gameDice">
+                Кубик</button
+              ><button type="button" data-history-game="plinko" aria-pressed="false" data-t="gamePlinko">
+                Плинко
+              </button>
+            </div>
+            <div
+              class="segmented spring-group history-results"
+              role="group"
+              aria-label="Фильтр по результату"
+            >
+              <button type="button" data-history-result="all" aria-pressed="true" data-t="filterAll">
+                Все</button
+              ><button type="button" data-history-result="win" aria-pressed="false" data-t="filterWins">
+                Выигрыши</button
+              ><button type="button" data-history-result="loss" aria-pressed="false" data-t="filterLosses">
+                Проигрыши</button
+              ><button type="button" data-history-result="push" aria-pressed="false" data-t="filterPushes">
+                Ничьи
+              </button>
+            </div>
+          </div>
+          <div class="history-sort-row">
+            <div class="segmented spring-group history-sort" role="group" aria-label="Сортировка истории">
+              <button type="button" data-history-sort="recent" aria-pressed="true" data-t="sortRecent">
+                Недавние</button
+              ><button type="button" data-history-sort="amount" aria-pressed="false" data-t="sortAmount">
+                Сумма
+              </button>
+            </div>
+            <span class="history-count" id="history-count" aria-live="polite"></span>
+          </div>
+        </div>
         <div id="history-list" class="history-list"></div>
         <button type="button" id="history-more" class="secondary-button" data-t="loadMore" hidden>
           Показать ещё
@@ -9266,7 +10451,11 @@
             ><button type="button" data-background="aurora" aria-pressed="false">
               <span class="bg-sample aurora"></span><span data-t="aurora">Аура</span></button
             ><button type="button" data-background="plain" aria-pressed="false">
-              <span class="bg-sample plain"></span><span data-t="plain">Тишина</span>
+              <span class="bg-sample plain"></span><span data-t="plain">Тишина</span></button
+            ><button type="button" data-background="newyear" aria-pressed="false">
+              <span class="bg-sample newyear"></span><span data-t="newyear">Новый год</span></button
+            ><button type="button" data-background="nebula" data-secret aria-pressed="false" hidden>
+              <span class="bg-sample nebula"></span><span data-t="nebula">Туманность</span>
             </button>
           </div>
         </div>
@@ -9734,7 +10923,8 @@
           }
           if (!["dark", "light"].includes(result.theme)) result.theme = "dark";
           if (!["ru", "en"].includes(result.lang)) result.lang = "ru";
-          if (!["constellation", "aurora", "plain"].includes(result.background)) result.background = "constellation";
+          if (!["constellation", "aurora", "plain", "nebula", "newyear"].includes(result.background))
+            result.background = "constellation";
           if (!["royal", "green", "crimson", "midnight", "gold"].includes(result.table)) result.table = "royal";
           result.transition = normalizeTransition(result.transition);
           result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));
@@ -10359,13 +11549,25 @@
             return new Promise((resolve) => {
               const animation = this.element.animate(
                 [
-                  { transform: this.element.style.transform || "rotateX(0deg) rotateY(0deg)" },
-                  { transform: `translateY(-34px) rotateX(${x + 480}deg) rotateY(${y + 430}deg)`, offset: 0.42 },
-                  { transform: `translateY(5px) rotateX(${x + 715}deg) rotateY(${y + 716}deg)`, offset: 0.82 },
-                  { transform: `translateY(-4px) rotateX(${x + 722}deg) rotateY(${y + 722}deg)`, offset: 0.93 },
-                  { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)` }
+                  { transform: this.element.style.transform || "rotateX(0deg) rotateY(0deg)", filter: "blur(0px)" },
+                  {
+                    transform: `translateY(-46px) rotateX(${x + 340}deg) rotateY(${y + 310}deg)`,
+                    filter: "blur(1.6px)",
+                    offset: 0.18
+                  },
+                  {
+                    transform: `translateY(6px) rotateX(${x + 560}deg) rotateY(${y + 590}deg)`,
+                    filter: "blur(2.4px)",
+                    offset: 0.6
+                  },
+                  {
+                    transform: `translateY(-3px) rotateX(${x + 715}deg) rotateY(${y + 718}deg)`,
+                    filter: "blur(0.8px)",
+                    offset: 0.85
+                  },
+                  { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)`, filter: "blur(0px)" }
                 ],
-                { duration: 2100, easing: "cubic-bezier(.2,.55,.24,1)" }
+                { duration: 2400, easing: "cubic-bezier(.22,.68,.24,1)" }
               );
               let done = false;
               const finish = () => {
@@ -10373,6 +11575,7 @@
                 done = true;
                 animation.cancel();
                 this.element.style.transform = target;
+                this.element.style.filter = "";
                 this.finish = null;
                 resolve();
               };
@@ -10624,6 +11827,9 @@
           constellation: "Созвездие",
           aurora: "Аура",
           plain: "Тишина",
+          nebula: "Туманность",
+          newyear: "Новый год",
+          secretUnlocked: "Секрет разблокирован: атмосфера «Туманность» появилась в настройках.",
           transitions: "Характер переходов",
           mix: "Микс",
           reducedNote: "Анимации ограничены системной настройкой уменьшения движения.",
@@ -10687,6 +11893,7 @@
           insufficient: "Недостаточно фишек для этой ставки.",
           loginNeeded: "Войди, чтобы начать партию.",
           noHistory: "Сыграй первую партию — она появится здесь.",
+          noHistoryMatch: "Ничего не нашлось под эти фильтры.",
           historyLogin: "Войди, чтобы увидеть свою историю.",
           favoriteAdded: "Игра добавлена в избранное",
           favoriteRemoved: "Игра убрана из избранного",
@@ -10724,6 +11931,19 @@
           genericError: "Не удалось выполнить действие. Попробуй ещё раз.",
           returnToCollection: "К коллекции",
           settings: "Настройки",
+          allSettings: "Все настройки",
+          sortRecent: "Недавние",
+          sortAmount: "Сумма",
+          roundsShown: "{count} партий",
+          filterAll: "Все",
+          filterWins: "Выигрыши",
+          filterLosses: "Проигрыши",
+          filterPushes: "Ничьи",
+          gameBlackjack: "Блэкджек",
+          gameSlots: "Слоты",
+          gameDice: "Кубик",
+          gamePlinko: "Плинко",
+          luckySeven: "Счастливая семёрка!",
           close: "Закрыть"
         };
         var en = {
@@ -10864,6 +12084,9 @@
           constellation: "Constellation",
           aurora: "Aura",
           plain: "Quiet",
+          nebula: "Nebula",
+          newyear: "New Year",
+          secretUnlocked: "Secret unlocked: the Nebula atmosphere appeared in settings.",
           transitions: "Transition character",
           mix: "Mix",
           reducedNote: "Animations are limited by your system’s reduced-motion preference.",
@@ -10927,6 +12150,7 @@
           insufficient: "Not enough chips for this stake.",
           loginNeeded: "Sign in to play a round.",
           noHistory: "Play your first round to see it here.",
+          noHistoryMatch: "Nothing matches these filters.",
           historyLogin: "Sign in to see your history.",
           favoriteAdded: "Game added to favorites",
           favoriteRemoved: "Game removed from favorites",
@@ -10964,6 +12188,19 @@
           genericError: "Could not complete the action. Please retry.",
           returnToCollection: "Back to collection",
           settings: "Settings",
+          allSettings: "All settings",
+          sortRecent: "Recent",
+          sortAmount: "Amount",
+          roundsShown: "{count} rounds",
+          filterAll: "All",
+          filterWins: "Wins",
+          filterLosses: "Losses",
+          filterPushes: "Pushes",
+          gameBlackjack: "Blackjack",
+          gameSlots: "Slots",
+          gameDice: "Dice",
+          gamePlinko: "Plinko",
+          luckySeven: "Lucky seven!",
           close: "Close"
         };
         function t(key, values = {}) {
@@ -11089,8 +12326,24 @@
         function finishBoot() {
           const root = document.documentElement, loader = document.getElementById("app-preloader");
           if (!loader) return;
+          let clockTimer = 0;
+          const tickClock = () => {
+            const hour = document.getElementById("clock-hour"), min = document.getElementById("clock-min"), sec = document.getElementById("clock-sec");
+            if (!hour || !min || !sec) return;
+            const now = /* @__PURE__ */ new Date();
+            const ms = now.getMilliseconds() / 1e3;
+            const seconds = now.getSeconds() + ms;
+            const minutes = now.getMinutes() + seconds / 60;
+            const hours = now.getHours() % 12 + minutes / 60;
+            hour.style.transform = `rotate(${hours * 30}deg)`;
+            min.style.transform = `rotate(${minutes * 6}deg)`;
+            sec.style.transform = `rotate(${seconds * 6}deg)`;
+            clockTimer = requestAnimationFrame(tickClock);
+          };
+          clockTimer = requestAnimationFrame(tickClock);
           if (!root.dataset.booting) {
             loader.hidden = true;
+            cancelAnimationFrame(clockTimer);
             return;
           }
           const started = performance.now();
@@ -11098,23 +12351,30 @@
           const english = root.lang === "en";
           loader.setAttribute("aria-label", english ? "Loading" : "Загрузка");
           document.getElementById("loader-label").textContent = english ? "LOADING…" : "ЗАГРУЗКА…";
-          let timer = 0, finished = false;
-          const tick = () => {
-            const date = /* @__PURE__ */ new Date(), seconds = date.getSeconds() + date.getMilliseconds() / 1e3, minutes = date.getMinutes() + seconds / 60;
-            document.getElementById("loader-hour").style.transform = `rotate(${date.getHours() % 12 * 30 + minutes / 2}deg)`;
-            document.getElementById("loader-minute").style.transform = `rotate(${minutes * 6}deg)`;
-            document.getElementById("loader-second").style.transform = `rotate(${seconds * 6}deg)`;
+          const progress = document.getElementById("loader-progress");
+          let finished = false;
+          const paint = (value) => {
+            if (progress) progress.style.width = `${Math.min(100, Math.max(0, value))}%`;
           };
-          tick();
-          if (enabled()) timer = setInterval(tick, 80);
+          const tick = () => {
+            if (finished) return;
+            const elapsed = performance.now() - started;
+            const t2 = Math.min(1, elapsed / 1150);
+            paint(4 + 88 * (1 - Math.pow(1 - t2, 3)));
+            if (t2 < 1) requestAnimationFrame(tick);
+          };
+          paint(0);
+          if (enabled()) requestAnimationFrame(tick);
+          else paint(92);
           const finish = () => {
             if (finished) return;
             finished = true;
-            clearInterval(timer);
             clearTimeout(deadline);
+            paint(100);
             const complete = () => {
               const announce = Boolean(root.dataset.booting);
               loader.hidden = true;
+              cancelAnimationFrame(clockTimer);
               delete root.dataset.booting;
               if (announce) window.dispatchEvent(new Event("apprevealed"));
             };
@@ -11125,12 +12385,12 @@
             const animation = loader.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-out" });
             animation.finished.then(complete).catch(complete);
           };
-          const deadline = setTimeout(finish, 2200);
+          const deadline = setTimeout(finish, 2e3);
           Promise.race([
             document.fonts?.ready || Promise.resolve(),
             new Promise((resolve) => setTimeout(resolve, 1600))
           ]).then(() => {
-            setTimeout(finish, enabled() ? Math.max(0, 620 - (performance.now() - started)) : 0);
+            setTimeout(finish, enabled() ? Math.max(0, 1400 - (performance.now() - started)) : 0);
           });
         }
 
@@ -13126,7 +14386,7 @@
             window.addEventListener("preferenceschange", () => {
               if (this.master)
                 this.master.gain.setTargetAtTime(
-                  preferences.sound ? preferences.volume * 0.65 : 0,
+                  preferences.sound ? preferences.volume * 0.5 : 0,
                   this.context.currentTime,
                   0.025
                 );
@@ -13151,7 +14411,7 @@
             if (!this.context) {
               this.context = new Audio();
               this.master = this.context.createGain();
-              this.master.gain.value = preferences.volume * 0.65;
+              this.master.gain.value = preferences.volume * 0.5;
               this.master.connect(this.context.destination);
             }
             if (this.context.state === "suspended") this.context.resume().catch(() => {
@@ -13302,6 +14562,47 @@
                 this.tone(440, 0.18, 0, 0.085);
                 this.tone(440, 0.22, 0.18, 0.065);
                 break;
+              case "open":
+                this.tone(300, 0.2, 0, 0.075, "sine", 720);
+                this.noise(0.12, 0, 0.04, 2400);
+                break;
+              case "close":
+                this.tone(560, 0.16, 0, 0.07, "sine", 250);
+                this.noise(0.09, 0, 0.03, 1800);
+                break;
+              case "coin":
+                this.tone(880, 0.07, 0, 0.05, "square", 880);
+                this.tone(1318, 0.12, 0.05, 0.045, "square", 1318);
+                break;
+              case "error":
+                this.tone(220, 0.1, 0, 0.08, "square", 180);
+                this.tone(196, 0.14, 0.09, 0.07, "square", 150);
+                break;
+              case "levelup":
+                [392, 523, 659, 784, 1046].forEach((note, i) => this.tone(note, 0.24, i * 0.08, 0.09));
+                this.noise(0.4, 0.34, 0.04, 3200);
+                break;
+              case "hover":
+                this.tone(1180, 0.03, 0, 0.016, "sine", 1320);
+                break;
+              case "chime":
+                this.tone(1568, 0.12, 0, 0.05, "sine", 1568);
+                this.tone(2093, 0.18, 0.06, 0.035, "sine", 2093);
+                break;
+              case "flip":
+                this.noise(0.07, 0, 0.05, 2600);
+                this.tone(520, 0.08, 0.02, 0.05, "triangle", 760);
+                break;
+              case "whoosh":
+                this.noise(0.3, 0, 0.05, 900);
+                this.noise(0.22, 0.08, 0.035, 1500);
+                break;
+              case "softPop":
+                this.tone(660, 0.05, 0, 0.04, "sine", 880);
+                break;
+              case "tick":
+                this.tone(1200, 0.025, 0, 0.02, "sine", 1180);
+                break;
             }
           }
         };
@@ -13445,6 +14746,9 @@
             this.rounds = /* @__PURE__ */ new Map();
             this.proofRound = null;
             this.historyCursor = null;
+            this.historySort = "recent";
+            this.historyGame = "all";
+            this.historyResult = "all";
             document.addEventListener("click", (event) => {
               const trigger = event.target.closest("[data-open]");
               if (trigger) this.open(trigger.dataset.open, trigger);
@@ -13466,6 +14770,33 @@
               }
             });
             $("#history-more").addEventListener("click", () => this.history(true));
+            $$("[data-history-sort]").forEach(
+              (button) => button.addEventListener("click", () => {
+                this.historySort = button.dataset.historySort;
+                $$("[data-history-sort]").forEach(
+                  (item) => item.setAttribute("aria-pressed", String(item === button))
+                );
+                this.renderHistory();
+              })
+            );
+            $$("[data-history-game]").forEach(
+              (button) => button.addEventListener("click", () => {
+                this.historyGame = button.dataset.historyGame;
+                $$("[data-history-game]").forEach(
+                  (item) => item.setAttribute("aria-pressed", String(item === button))
+                );
+                this.renderHistory();
+              })
+            );
+            $$("[data-history-result]").forEach(
+              (button) => button.addEventListener("click", () => {
+                this.historyResult = button.dataset.historyResult;
+                $$("[data-history-result]").forEach(
+                  (item) => item.setAttribute("aria-pressed", String(item === button))
+                );
+                this.renderHistory();
+              })
+            );
             $("#rules-button").addEventListener("click", (event) => this.rules(event.currentTarget));
             $("#plinko-table-button").addEventListener("click", (event) => this.rules(event.currentTarget));
             $("#slot-table-button").addEventListener("click", (event) => this.rules(event.currentTarget));
@@ -13542,8 +14873,8 @@
             if (!append) {
               this.historyCursor = null;
               this.rounds.clear();
-              $("#history-list").innerHTML = `<div class="empty-state">${icon("history")}<p>${t("noHistory")}</p></div>`;
               $("#history-more").hidden = true;
+              this.renderHistory();
             }
             $("#history-more").disabled = true;
             try {
@@ -13554,21 +14885,49 @@
               for (const round of data.rounds) this.rounds.set(round.id, round);
               this.historyCursor = data.nextCursor;
               $("#history-more").hidden = !data.nextCursor;
-              if (!this.rounds.size) return;
-              $("#history-list").innerHTML = [...this.rounds.values()].map((round) => {
-                const date = new Intl.DateTimeFormat(preferences.lang, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  day: "2-digit",
-                  month: "short"
-                }).format(round.createdAt);
-                return `<button type="button" class="history-item ${round.netMinor > 0 ? "win" : ""}" data-round-id="${round.id}">${icon(gameIcon[round.game])}<span><strong>${title(round.game)}</strong><small>${date} · ${t("bet")} ${money(round.betMinor)}</small></span><span class="history-return">${round.status === "active" ? t("active") : signedMoney(round.netMinor)}<small>${round.status === "settled" ? `${t("paid")} ${money(round.payoutMinor)}` : ""}</small></span>${icon("arrow")}</button>`;
-              }).join("");
+              this.renderHistory();
             } catch (error) {
               this.onError(error);
             } finally {
               $("#history-more").disabled = false;
             }
+          }
+          renderHistory() {
+            const resultRank = (round) => round.status !== "settled" ? 3 : round.netMinor > 0 ? 0 : round.netMinor < 0 ? 2 : 1;
+            const matches = (round) => {
+              if (this.historyGame !== "all" && round.game !== this.historyGame) return false;
+              if (this.historyResult !== "all") {
+                if (this.historyResult === "win") return round.status === "settled" && round.netMinor > 0;
+                if (this.historyResult === "loss") return round.status === "settled" && round.netMinor < 0;
+                if (this.historyResult === "push")
+                  return round.status === "settled" && round.netMinor === 0 && round.game === "blackjack";
+              }
+              return true;
+            };
+            const all = [...this.rounds.values()];
+            const rounds = all.filter(matches);
+            const count = $("#history-count");
+            if (count)
+              count.textContent = this.historyGame === "all" && this.historyResult === "all" ? t("roundsShown", { count: all.length }) : `${rounds.length} / ${t("roundsShown", { count: all.length })}`;
+            if (!all.length) {
+              $("#history-list").innerHTML = `<div class="empty-state">${icon("history")}<p>${t("noHistory")}</p></div>`;
+              return;
+            }
+            if (!rounds.length) {
+              $("#history-list").innerHTML = `<div class="empty-state">${icon("history")}<p>${t("noHistoryMatch")}</p></div>`;
+              return;
+            }
+            if (this.historySort === "amount") rounds.sort((a, b) => b.betMinor - a.betMinor);
+            $("#history-list").innerHTML = rounds.map((round) => {
+              const date = new Intl.DateTimeFormat(preferences.lang, {
+                hour: "2-digit",
+                minute: "2-digit",
+                day: "2-digit",
+                month: "short"
+              }).format(round.createdAt);
+              const result = round.status === "active" ? `<span class="history-return">${t("active")}</span>` : `<span class="history-return ${round.netMinor > 0 ? "won" : round.netMinor < 0 ? "lost" : "even"}">${signedMoney(round.netMinor)}<small>${t("paid")} ${money(round.payoutMinor)}</small></span>`;
+              return `<button type="button" class="history-item" data-round-id="${round.id}">${icon(gameIcon[round.game])}<span><strong>${title(round.game)}</strong><small>${date} · ${t("bet")} ${money(round.betMinor)}</small></span>${result}${icon("arrow")}</button>`;
+            }).join("");
           }
           rules(opener) {
             const state2 = this.state(), game = state2.game;
@@ -13993,7 +15352,6 @@
           $("#available-balance").textContent = state.user ? money(displayedBalance()) : "—";
           $("#account-button").setAttribute("aria-label", state.user ? t("profile") : t("signIn"));
           updateFavorites();
-          renderSelection();
         }
         function setPressed(button, value) {
           const next = String(value);
@@ -14178,56 +15536,75 @@
           plinko.resize();
           renderAll();
         }
-        function renderSelection() {
-          const selected = state.selectedGame;
-          const show = state.game === "lobby" && Boolean(selected);
-          $("#lobby-launch").hidden = !show;
-          document.documentElement.dataset.gameSelected = show ? selected : "";
-          $$("[data-card]").forEach((card) => {
-            const active2 = card.dataset.card === selected;
-            card.classList.toggle("is-selected", active2);
-            card.querySelector(".card-launch use")?.setAttribute("href", active2 ? "#i-check" : "#i-arrow");
-            card.querySelector(".game-card-main")?.setAttribute("aria-pressed", String(active2));
-          });
-          if (show) {
-            $("#launch-game-name").textContent = games[selected].title;
-            $("#launch-game-icon").setAttribute("href", "#i-" + games[selected].icon);
-          }
-          $("#launch-selected").disabled = state.authBusy || state.networkBusy || state.uncertain;
-        }
-        function requestGame(game, source = null) {
+        async function requestGame(game, source = null) {
           if (game === "lobby" || !games[game]) {
-            state.selectedGame = null;
             navigate("lobby", source);
-            renderSelection();
+            return;
+          }
+          if (state.networkBusy || state.authBusy || state.uncertain) return;
+          if (source?.closest?.("[data-go],.game-card-main")) {
+            selectGame(game, source);
             return;
           }
           if (state.game === game) return;
-          if (state.game !== "lobby") navigate("lobby", source);
-          state.selectedGame = game;
-          renderSelection();
           sound.play("select");
-          if (motionEnabled())
-            $("#lobby-launch").animate(
-              [
-                { opacity: 0, translate: "0 14px", scale: 0.96 },
-                { opacity: 1, translate: "0 0", scale: 1 }
-              ],
-              { duration: 410, easing: "cubic-bezier(.16,1,.3,1)" }
-            ).finished.catch(() => {
-            });
-        }
-        async function activateSelected() {
-          const selected = state.selectedGame;
-          if (!selected || state.networkBusy || state.authBusy || state.uncertain) return;
-          if (!state.user) await startPractice(null);
-          if (!state.user) return;
+          if (!state.user) {
+            await startPractice(null);
+            if (!state.user) return;
+          }
           sound.play("launch");
-          navigate(selected, $("#launch-selected"));
+          navigate(game, source);
+        }
+        function selectGame(game, source) {
+          if (game === "lobby" || !games[game]) return;
+          state.selectedGame = game;
+          sound.play("flip");
+          $$(".game-card-main").forEach((card) => {
+            const on = card.dataset.go === game;
+            card.setAttribute("aria-pressed", String(on));
+            card.closest(".game-card")?.classList.toggle("is-selected", on);
+          });
+          const tray = $("#dock-launch"), symbol = $(".launch-symbol use", tray);
+          tray.dataset.game = game;
+          $("#dock-launch-title").textContent = games[game].title;
+          if (symbol) symbol.setAttribute("href", "#i-" + games[game].icon);
+          tray.hidden = false;
+          if (motionEnabled()) {
+            tray.getAnimations().forEach((animation) => animation.cancel());
+            tray.animate(
+              [
+                { opacity: 0, transform: "translate(-50%, 44px) scale(0.72) rotate(2.5deg)" },
+                { opacity: 1, transform: "translate(-50%, -6px) scale(1.06) rotate(-0.6deg)", offset: 0.72 },
+                { opacity: 1, transform: "translate(-50%, 0) scale(1) rotate(0deg)" }
+              ],
+              { duration: 620, easing: "cubic-bezier(0.22, 1.25, 0.36, 1)" }
+            );
+          }
+        }
+        function hideDockLaunch() {
+          state.selectedGame = null;
+          $("#dock-launch").hidden = true;
+          $$(".game-card-main").forEach((card) => {
+            card.removeAttribute("aria-pressed");
+            card.closest(".game-card")?.classList.remove("is-selected");
+          });
+        }
+        async function launchSelected() {
+          const game = state.selectedGame;
+          if (!game || game === "lobby" || state.networkBusy || state.authBusy || state.uncertain) return;
+          sound.play("launch");
+          if (!state.user) {
+            await startPractice(null);
+            if (!state.user) return;
+          }
+          hideDockLaunch();
+          navigate(game);
         }
         function navigate(game, source = null, push = true, animate = true) {
           if (game !== "lobby" && !games[game]) game = "lobby";
           if (game === state.game && document.documentElement.dataset.ready) return;
+          hideDockLaunch();
+          if (animate) sound.play("whoosh");
           finishVisuals();
           toggleIsland(false);
           const order = ["lobby", "blackjack", "slots", "dice", "plinko"];
@@ -14235,7 +15612,6 @@
             Math.sign(order.indexOf(game) - order.indexOf(state.game)) || 1
           );
           state.game = game;
-          if (game === "lobby") state.selectedGame = null;
           document.documentElement.dataset.game = game;
           safeStorage.set("games.lastGame", game);
           const change = () => {
@@ -14264,7 +15640,6 @@
           const heading = game === "lobby" ? $("#lobby-title") : $("#active-game-title");
           heading.tabIndex = -1;
           heading.focus({ preventScroll: true });
-          renderSelection();
         }
         function setBet(value) {
           if (state.networkBusy || state.batchRunning || state.uncertain || (state.game === "plinko" ? state.busy.plinko : state.busy[state.game]) || state.game === "blackjack" && state.activeBlackjack)
@@ -14642,7 +16017,102 @@
           }
         });
         $("#play-button").addEventListener("click", play);
-        $("#launch-selected").addEventListener("click", activateSelected);
+        $("#dock-launch-play").addEventListener("click", launchSelected);
+        document.addEventListener("pointerdown", (event) => {
+          const flake = event.target.closest(".ny-snow i, .garden-petals i");
+          if (flake) {
+            try {
+              sound.unlock();
+              sound.play("chime");
+            } catch {
+            }
+          }
+        });
+        document.addEventListener(
+          "pointerover",
+          (event) => {
+            if (event.pointerType === "touch") return;
+            if (event.target.closest(".game-card-main, .game-dock a, .game-dock button")) {
+              try {
+                sound.unlock();
+                sound.play("hover");
+              } catch {
+              }
+            }
+          },
+          { passive: true }
+        );
+        (function quickTableStyle() {
+          const dockSettings = $("#dock-settings"), popover = $("#table-popover");
+          if (!dockSettings || !popover) return;
+          let holdTimer = 0, holdFired = false;
+          const openPopover = () => {
+            popover.hidden = false;
+            $$("[data-pop-table-color]").forEach(
+              (button) => button.setAttribute("aria-pressed", String(button.dataset.popTableColor === preferences.table))
+            );
+            if (motionEnabled())
+              popover.animate(
+                [
+                  { opacity: 0, transform: "translateY(12px) scale(.95)" },
+                  { opacity: 1, transform: "translateY(0) scale(1)" }
+                ],
+                { duration: 320, easing: "cubic-bezier(.22,1,.36,1)" }
+              );
+            sound.play("select");
+          };
+          $$("[data-pop-table-color]").forEach(
+            (button) => button.addEventListener("click", () => {
+              savePreferences({ table: button.dataset.popTableColor });
+              sound.play("select");
+              $$("[data-pop-table-color]").forEach(
+                (item) => item.setAttribute("aria-pressed", String(item === button))
+              );
+              closePopover();
+            })
+          );
+          const closePopover = () => {
+            popover.hidden = true;
+          };
+          dockSettings.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) return;
+            holdFired = false;
+            clearTimeout(holdTimer);
+            holdTimer = setTimeout(() => {
+              holdFired = true;
+              openPopover();
+            }, 500);
+          });
+          for (const name of ["pointerup", "pointercancel", "pointerleave"])
+            dockSettings.addEventListener(name, () => clearTimeout(holdTimer));
+          dockSettings.addEventListener("click", (event) => {
+            if (holdFired) {
+              event.preventDefault();
+              event.stopPropagation();
+              holdFired = false;
+            }
+          });
+          $("#popover-open-settings").addEventListener("click", () => {
+            closePopover();
+            dialogs.open("game-settings-dialog", dockSettings);
+          });
+          document.addEventListener("pointerdown", (event) => {
+            if (!popover.hidden && !event.target.closest("#table-popover") && !event.target.closest("#dock-settings"))
+              closePopover();
+          });
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !popover.hidden) closePopover();
+          });
+        })();
+        var dialogSoundObserver = new MutationObserver((mutations) => {
+          for (const mutation of mutations) {
+            if (mutation.type !== "attributes" || mutation.attributeName !== "open") continue;
+            sound.play(mutation.target.open ? "open" : "close");
+          }
+        });
+        $$("dialog").forEach(
+          (dialog) => dialogSoundObserver.observe(dialog, { attributes: true, attributeFilter: ["open"] })
+        );
         $$("[data-batch]").forEach(
           (button) => button.addEventListener("click", () => {
             if (state.networkBusy || state.batchRunning || state.busy.plinko || state.uncertain) return;
@@ -14758,6 +16228,172 @@
         }).catch(onError);
         initializeTextMotion();
         finishBoot();
+        var NEBULA_KEY = "aubeig.secrets.nebula";
+        var nebulaUnlocked = () => safeStorage.get(NEBULA_KEY) === "on";
+        function revealNebulaOption() {
+          $$('button[data-background="nebula"]').forEach((button) => button.hidden = false);
+        }
+        function confettiBurst() {
+          if (!motionEnabled()) return;
+          const layer = document.createElement("div");
+          layer.className = "secret-confetti";
+          layer.setAttribute("aria-hidden", "true");
+          document.body.append(layer);
+          const colors = ["#c4e27e", "#7fc4ea", "#eec27e", "#b9a2f4", "#fc5474"];
+          const pieces = [];
+          for (let i = 0; i < 42; i++) {
+            const piece = document.createElement("i");
+            piece.style.setProperty("--c", colors[i % colors.length]);
+            piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 210}px`);
+            piece.style.setProperty("--dr", `${Math.random() * 540 - 270}deg`);
+            piece.style.setProperty("--dur", `${780 + Math.random() * 560}ms`);
+            layer.append(piece);
+            pieces.push(piece);
+          }
+          const animations2 = pieces.map((piece, i) => {
+            const animation = piece.animate(
+              [
+                { opacity: 0, transform: "translate3d(0, -10px, 0) rotate(0deg)" },
+                { opacity: 1, offset: 0.12 },
+                {
+                  opacity: 0,
+                  transform: `translate3d(var(--dx), ${-60 - i * 7}px, 0) rotate(var(--dr))`
+                }
+              ],
+              { duration: 1300, delay: i % 9 * 22, easing: "cubic-bezier(.14,.6,.3,1)" }
+            );
+            animation.finished.catch(() => {
+            });
+            return animation;
+          });
+          Promise.all(animations2.map((a) => a.finished)).finally(() => layer.remove());
+        }
+        function rainbowFlash() {
+          if (!motionEnabled()) return;
+          const layer = document.createElement("div");
+          layer.className = "secret-rainbow";
+          layer.setAttribute("aria-hidden", "true");
+          document.body.append(layer);
+          setTimeout(() => layer.remove(), 1600);
+        }
+        function coinRain() {
+          if (!motionEnabled()) return;
+          const layer = document.createElement("div");
+          layer.className = "secret-coins";
+          layer.setAttribute("aria-hidden", "true");
+          document.body.append(layer);
+          const glyphs = ["7", "7", "7", "●", "●"];
+          for (let i = 0; i < 34; i++) {
+            const coin = document.createElement("i");
+            coin.textContent = glyphs[i % glyphs.length];
+            coin.style.setProperty("--x", `${Math.random() * 100}%`);
+            coin.style.setProperty("--dx", `${(Math.random() - 0.5) * 160}px`);
+            coin.style.setProperty("--dr", `${Math.random() * 720 - 360}deg`);
+            coin.style.setProperty("--dur", `${1100 + Math.random() * 800}ms`);
+            coin.style.setProperty("--delay", `${Math.random() * 320}ms`);
+            layer.append(coin);
+          }
+          setTimeout(() => layer.remove(), 2400);
+        }
+        function unlockNebula() {
+          const already = nebulaUnlocked();
+          safeStorage.set(NEBULA_KEY, "on");
+          revealNebulaOption();
+          confettiBurst();
+          rainbowFlash();
+          if (!already) {
+            try {
+              sound.unlock();
+              sound.play("levelup");
+            } catch {
+            }
+          }
+          notify(t("secretUnlocked"));
+        }
+        (function bindSecrets() {
+          if (nebulaUnlocked()) revealNebulaOption();
+          const sequence2 = [
+            "ArrowUp",
+            "ArrowUp",
+            "ArrowDown",
+            "ArrowDown",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowLeft",
+            "ArrowRight",
+            "b",
+            "a"
+          ];
+          let step = 0, konamiTimer = 0;
+          document.addEventListener("keydown", (event) => {
+            if (event.target.closest("input,textarea,select") || event.altKey || event.ctrlKey || event.metaKey)
+              return;
+            const expected = sequence2[step];
+            if (event.key === expected || event.key.toLowerCase() === expected) {
+              step++;
+              clearTimeout(konamiTimer);
+              konamiTimer = setTimeout(() => step = 0, 2200);
+              if (step === sequence2.length) {
+                step = 0;
+                unlockNebula();
+              }
+            } else {
+              step = 0;
+            }
+          });
+          let brandClicks = 0, brandTimer = 0;
+          const brand = document.querySelector(".site-brand");
+          if (brand)
+            brand.addEventListener("click", () => {
+              brandClicks++;
+              clearTimeout(brandTimer);
+              brandTimer = setTimeout(() => brandClicks = 0, 1600);
+              if (brandClicks >= 5) {
+                brandClicks = 0;
+                unlockNebula();
+              }
+            });
+          let sevenTaps = 0, sevenTimer = 0;
+          document.addEventListener("pointerdown", (event) => {
+            const seven = event.target.closest(".hero-seven");
+            if (!seven) return;
+            sevenTaps++;
+            clearTimeout(sevenTimer);
+            sevenTimer = setTimeout(() => sevenTaps = 0, 1100);
+            if (sevenTaps < 7) {
+              try {
+                sound.unlock();
+                sound.play("coin");
+              } catch {
+              }
+              return;
+            }
+            sevenTaps = 0;
+            coinRain();
+            try {
+              sound.unlock();
+              sound.play("levelup");
+            } catch {
+            }
+            notify(t("luckySeven"));
+          });
+          let typed = "";
+          document.addEventListener("keydown", (event) => {
+            if (event.target.closest("input,textarea,select") || event.altKey || event.ctrlKey || event.metaKey)
+              return;
+            if (event.key.length !== 1) return;
+            typed = (typed + event.key.toLowerCase()).slice(-6);
+            if (typed !== "aubeig") return;
+            typed = "";
+            confettiBurst();
+            try {
+              sound.unlock();
+              sound.play("win");
+            } catch {
+            }
+            notify(t("secretUnlocked"));
+          });
+        })();
       })();
 
       }));

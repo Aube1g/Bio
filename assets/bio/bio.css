@@ -6280,6 +6280,14 @@ summary:focus-visible {
 [data-background='aurora'] .atmosphere::before {
   opacity: 0.1;
 }
+[data-background='nebula'] .atmosphere-glow {
+  opacity: 0.85;
+  background: linear-gradient(150deg, #ff4d8d22, #5a3cf022, #123c5c33);
+  animation: aurora-drift 34s ease-in-out infinite alternate;
+}
+[data-background='newyear'] .atmosphere-glow {
+  opacity: 0;
+}
 [data-background='plain'] .atmosphere {
   background: none;
 }
@@ -7094,11 +7102,15 @@ summary:focus-visible {
   left: 0;
   top: 0;
   pointer-events: none;
-  background: var(--button-primary);
-  border: 1px solid #ffffff14;
+  background: linear-gradient(130deg, #a683ff, #6a3cf0 55%, #4b21b4);
+  border: 1px solid #ffffff2a;
   border-radius: 15px;
   z-index: 0;
-  box-shadow: 0 3px 12px #7000ff1a;
+  box-shadow:
+    inset 0 1px 2px #ffffff5c,
+    inset 0 -1px 3px #20074040,
+    0 4px 16px #7b37f53d,
+    0 0 0 1px #24173314;
   will-change: transform, width, height;
 }
 .spring-group > button[aria-pressed='true'],
@@ -8229,6 +8241,19 @@ dialog.is-morphing {
 }
 .sample-plain {
   background: linear-gradient(145deg, #202035, #080815);
+}
+.sample-nebula {
+  background:
+    radial-gradient(60% 55% at 30% 28%, #ff4d8d 0%, transparent 60%),
+    radial-gradient(60% 55% at 72% 24%, #7a5af0 0%, transparent 62%),
+    linear-gradient(150deg, #101322, #080815);
+}
+.sample-newyear {
+  background:
+    radial-gradient(circle at 20% 82%, #1d6a45 0 24%, transparent 26%),
+    radial-gradient(circle at 80% 82%, #1d6a45 0 24%, transparent 26%),
+    radial-gradient(circle at 50% 112%, #e9f2f7 0 42%, transparent 44%),
+    linear-gradient(160deg, #0d1a2b, #0a0d16);
 }
 .motion-setting-controls {
   display: flex;
