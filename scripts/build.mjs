@@ -99,6 +99,7 @@ for (const page of ['bio', 'games']) {
     .replace('{{boot-screen}}', await read('templates/boot-screen.html'))
     .replace('{{garden}}', await read('templates/garden.html'))
     .replace('{{ny-scene}}', await read('templates/ny-scene.html'))
+    .replace('{{nebula-scene}}', await read('templates/nebula-scene.html'))
     .replace(`{{styles:${page}}}`, `<style>\n${formattedCSS}\n</style>`)
     .replace('{{bootstrap}}', bootstrap)
     .replace(

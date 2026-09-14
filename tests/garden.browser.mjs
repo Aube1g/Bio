@@ -118,6 +118,7 @@ try {
   await enterGame(page, 'plinko');
   await page.locator('#bet-amount').fill('10');
   await page.locator('#bet-amount').dispatchEvent('change');
+  await page.locator('#plinko-options .plinko-tune summary').click();
   await page.locator('[data-batch="3"]').click();
   assert.equal(await page.locator('#batch-cost').textContent(), '30');
   const before = await saved();

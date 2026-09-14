@@ -16,7 +16,7 @@
     {{styles:games}} {{bootstrap}}
   </head>
   <body class="games-page">
-    {{garden}} {{ny-scene}} {{boot-screen}}
+    {{garden}} {{ny-scene}} {{nebula-scene}} {{boot-screen}}
     <a class="skip-link" href="#portal-stage" data-t="skip">Перейти к играм</a>
     {{icons}}
     <div class="ambient" aria-hidden="true">
@@ -451,35 +451,44 @@
                 ><button type="button" data-bet-factor="max">MAX</button>
               </div>
               <div class="game-options" id="plinko-options">
-                <label class="field-label" data-t="risk">Риск</label>
-                <div class="segmented spring-group risk-control" role="group" aria-label="Риск">
-                  <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
-                  ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
-                    Средний</button
-                  ><button type="button" data-risk="high" aria-pressed="false" data-t="high">Высокий</button>
-                </div>
-                <label class="field-label" data-t="rowCount">Количество рядов</label>
-                <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
-                  <button type="button" data-rows="8" aria-pressed="false">8</button
-                  ><button type="button" data-rows="12" aria-pressed="true">12</button
-                  ><button type="button" data-rows="16" aria-pressed="false">16</button>
-                </div>
-                <div class="potential">
-                  <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
-                </div>
-                <label class="field-label" data-t="ballCount">За один запуск</label>
-                <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
-                  <button type="button" data-batch="1" aria-pressed="true">1</button
-                  ><button type="button" data-batch="3" aria-pressed="false">3</button
-                  ><button type="button" data-batch="5" aria-pressed="false">5</button
-                  ><button type="button" data-batch="8" aria-pressed="false">8</button>
-                </div>
-                <div class="batch-price">
-                  <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
-                </div>
-                <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
-                  Ряды и риск фиксируются, пока летят шары.
-                </p>
+                <details class="plinko-tune">
+                  <summary>
+                    <svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg
+                    ><span data-t="tune">Тонкая настройка</span
+                    ><svg class="icon tune-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                  </summary>
+                  <div class="plinko-tune-body">
+                    <label class="field-label" data-t="risk">Риск</label>
+                    <div class="segmented spring-group risk-control" role="group" aria-label="Риск">
+                      <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
+                      ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
+                        Средний</button
+                      ><button type="button" data-risk="high" aria-pressed="false" data-t="high">Высокий</button>
+                    </div>
+                    <label class="field-label" data-t="rowCount">Количество рядов</label>
+                    <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
+                      <button type="button" data-rows="8" aria-pressed="false">8</button
+                      ><button type="button" data-rows="12" aria-pressed="true">12</button
+                      ><button type="button" data-rows="16" aria-pressed="false">16</button>
+                    </div>
+                    <div class="potential">
+                      <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
+                    </div>
+                    <label class="field-label" data-t="ballCount">За один запуск</label>
+                    <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
+                      <button type="button" data-batch="1" aria-pressed="true">1</button
+                      ><button type="button" data-batch="3" aria-pressed="false">3</button
+                      ><button type="button" data-batch="5" aria-pressed="false">5</button
+                      ><button type="button" data-batch="8" aria-pressed="false">8</button>
+                    </div>
+                    <div class="batch-price">
+                      <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
+                    </div>
+                    <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
+                      Ряды и риск фиксируются, пока летят шары.
+                    </p>
+                  </div>
+                </details>
               </div>
               <div class="game-options" id="dice-options" hidden>
                 <label class="field-label" data-t="prediction">Твой прогноз</label>

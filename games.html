@@ -590,9 +590,9 @@
         position: absolute;
         left: 0;
         transform: translateX(-50%);
-        width: 54px;
+        width: 248px;
         border: 1px solid #c0a7ff24;
-        border-radius: 999px;
+        border-radius: 25px;
         background: #12111e;
         box-shadow: 0 8px 24px #0002;
         color: #ece6fb;
@@ -602,16 +602,15 @@
           border-radius 0.55s var(--spring),
           box-shadow 0.3s;
       }
-      /* Dynamic island: idle is a bare Viola circle; it swells into a pill on hover,
-         focus or when open, and into the full panel when expanded. */
-      .game-island:hover,
-      .game-island:focus-within,
-      .game-island[data-open="true"] {
-        width: 248px;
-        border-radius: 25px;
+      /* The balance is always visible. It only collapses into the bare Viola circle
+         while a dynamic-island notification plays (see [data-notifying]). */
+      .game-island[data-notifying="true"] {
+        width: 54px;
+        border-radius: 999px;
       }
       .game-island[data-open="true"] {
         width: 330px;
+        border-radius: 25px;
         box-shadow: 0 22px 60px #0005;
       }
       .island-trigger {
@@ -622,22 +621,16 @@
         width: 100%;
         height: 53px;
         text-align: left;
-        transition:
-          padding 0.4s var(--spring),
-          gap 0.4s var(--spring);
-      }
-      .game-island:not(:hover):not(:focus-within):not([data-open="true"]) .island-trigger {
-        gap: 0;
-        padding: 9px 11px;
+        transition: gap 0.4s var(--spring);
       }
       .island-copy,
       .island-dot,
       .island-chevron {
-        transition: opacity 0.25s ease;
+        transition: opacity 0.22s ease;
       }
-      .game-island:not(:hover):not(:focus-within):not([data-open="true"]) .island-copy,
-      .game-island:not(:hover):not(:focus-within):not([data-open="true"]) .island-dot,
-      .game-island:not(:hover):not(:focus-within):not([data-open="true"]) .island-chevron {
+      .game-island[data-notifying="true"] .island-copy,
+      .game-island[data-notifying="true"] .island-dot,
+      .game-island[data-notifying="true"] .island-chevron {
         opacity: 0;
       }
       .island-coin {
@@ -664,6 +657,8 @@
         font-size: 13px;
         white-space: nowrap;
         font-weight: 900;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .island-copy small {
         font-size: 8px;
@@ -685,11 +680,6 @@
         height: 10px;
         color: #a296bd;
         transition: transform 0.45s var(--spring);
-      }
-      .game-island[data-open="true"] {
-        width: 330px;
-        border-radius: 25px;
-        box-shadow: 0 22px 60px #0005;
       }
       .game-island[data-open="true"] .island-chevron {
         transform: rotate(180deg);
@@ -886,6 +876,34 @@
         width: 48%;
         height: 310px;
         pointer-events: none;
+      }
+      .hero-playground::before {
+        content: "";
+        position: absolute;
+        left: 12%;
+        top: 8px;
+        width: 300px;
+        height: 244px;
+        background:
+          radial-gradient(circle at 30% 30%, #b9a2f438, transparent 60%),
+          radial-gradient(circle at 72% 66%, #7fc4ea2a, transparent 56%),
+          radial-gradient(circle at 52% 44%, #c4e27e22, transparent 60%);
+        border-radius: 58% 42% 33% 67% / 55% 38% 62% 45%;
+        filter: blur(3px);
+        animation: hero-blob 13s ease-in-out infinite alternate;
+      }
+      @keyframes hero-blob {
+        0% {
+          border-radius: 58% 42% 33% 67% / 55% 38% 62% 45%;
+          transform: rotate(0deg) scale(1);
+        }
+        50% {
+          border-radius: 38% 62% 57% 43% / 42% 55% 45% 58%;
+        }
+        100% {
+          border-radius: 45% 55% 62% 38% / 58% 42% 55% 45%;
+          transform: rotate(7deg) scale(1.07);
+        }
       }
       .hero-bottom-code {
         position: absolute;
@@ -1202,7 +1220,7 @@
       }
       .game-card {
         position: relative;
-        border-radius: 24px;
+        border-radius: 32px 22px 30px 20px / 22px 32px 20px 30px;
         min-width: 0;
         border: 1px solid var(--line);
         background: var(--card);
@@ -1213,18 +1231,22 @@
       .game-card[data-card="blackjack"] {
         --game-accent: #b9a2f4;
         --game-art-tint: radial-gradient(75% 60% at 50% 42%, #8b6cf120, transparent 72%);
+        border-radius: 38px 20px 34px 22px / 22px 36px 20px 32px;
       }
       .game-card[data-card="slots"] {
         --game-accent: #eec27e;
         --game-art-tint: radial-gradient(75% 60% at 50% 42%, #e8a9441f, transparent 72%);
+        border-radius: 20px 38px 22px 34px / 32px 20px 36px 22px;
       }
       .game-card[data-card="dice"] {
         --game-accent: #7fc4ea;
         --game-art-tint: radial-gradient(75% 60% at 50% 42%, #55b2e61e, transparent 72%);
+        border-radius: 34px 24px 38px 18px / 20px 34px 22px 38px;
       }
       .game-card[data-card="plinko"] {
         --game-accent: #c4e27e;
         --game-art-tint: radial-gradient(75% 60% at 50% 42%, #a7cf4c1e, transparent 72%);
+        border-radius: 20px 36px 24px 38px / 38px 20px 34px 22px;
       }
       .game-card::before {
         content: "";
@@ -1267,8 +1289,20 @@
         position: absolute;
         inset: 6px 2px 0;
         background: var(--game-art-tint, radial-gradient(70% 55% at 50% 46%, #ffffff08, transparent 72%));
-        border-radius: 50%;
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
         z-index: 0;
+        animation: art-blob 9s ease-in-out infinite alternate;
+      }
+      @keyframes art-blob {
+        0% {
+          border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        50% {
+          border-radius: 40% 60% 70% 30% / 30% 60% 40% 70%;
+        }
+        100% {
+          border-radius: 30% 70% 55% 45% / 65% 40% 60% 35%;
+        }
       }
       .game-art img {
         width: 96px;
@@ -1711,24 +1745,36 @@
         display: grid;
         place-items: center;
         min-height: 27px;
-        border-radius: 6px 6px 10px 10px;
+        border-radius: 7px 7px 12px 12px;
         font:
           800 clamp(8px, 1vw, 11px) Nunito,
           sans-serif;
         white-space: nowrap;
         border-bottom: 3px solid #0002;
+        transition:
+          transform 0.2s var(--spring),
+          box-shadow 0.2s ease;
       }
       .plinko-bin.hot {
-        background: #d79b83;
-        color: #301914;
+        background: linear-gradient(160deg, #ffb28c 0%, #e07a4f 55%, #c65a38 100%);
+        color: #2a0f0a;
+        box-shadow:
+          0 6px 14px #ff8a5a2e,
+          inset 0 1px #ffd8c2;
       }
       .plinko-bin.warm {
-        background: #cab878;
-        color: #312610;
+        background: linear-gradient(160deg, #f4d98a 0%, #d3ab52 55%, #b98a3c 100%);
+        color: #2c2108;
+        box-shadow: inset 0 1px #fff3cd;
       }
       .plinko-bin.cool {
-        background: #494153;
-        color: #eae3f6;
+        background: linear-gradient(160deg, #6a5a86 0%, #4a3d63 55%, #352c4c 100%);
+        color: #efe8fb;
+        box-shadow: inset 0 1px #ffffff2a;
+      }
+      .plinko-bin.is-inspected {
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 0 8px 18px #0006;
       }
       .board-caption {
         display: flex;
@@ -1914,6 +1960,47 @@
       .game-options .field-label:first-child {
         margin-top: 0;
       }
+      /* Plinko fine-tuning folds away so the panel stays a clean stake + Play. */
+      .plinko-tune {
+        margin-top: 6px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--surface) 55%, transparent);
+      }
+      .plinko-tune summary {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 11px 13px;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--muted);
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+      }
+      .plinko-tune summary::-webkit-details-marker {
+        display: none;
+      }
+      .plinko-tune summary .icon {
+        width: 13px;
+        height: 13px;
+      }
+      .plinko-tune summary .tune-chevron {
+        margin-left: auto;
+        transition: transform 0.35s var(--spring);
+      }
+      .plinko-tune[open] summary .tune-chevron {
+        transform: rotate(180deg);
+      }
+      .plinko-tune summary:hover {
+        color: var(--ink);
+      }
+      .plinko-tune-body {
+        padding: 2px 14px 14px;
+        border-top: 1px solid var(--line);
+      }
       .risk-control > button {
         font-size: 10px;
         padding-inline: 6px;
@@ -1944,24 +2031,56 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
-        min-height: 54px;
-        padding: 13px;
-        margin-top: 23px;
-        border-radius: 17px;
-        background: var(--lime);
-        color: var(--lime-ink);
-        font-size: 13px;
+        min-height: 60px;
+        padding: 14px;
+        margin-top: 21px;
+        border-radius: 30px 22px 30px 22px / 22px 30px 22px 30px;
+        background:
+          radial-gradient(120% 140% at 22% 0%, #eaffc2 0%, transparent 46%),
+          linear-gradient(140deg, #d4ef8e 0%, #a9d95f 52%, #8bc34a 100%);
+        color: #17240a;
+        font-size: 14px;
         font-weight: 900;
-        box-shadow: 0 5px 18px #bfdf7712;
+        letter-spacing: 0.3px;
+        box-shadow:
+          0 10px 28px #a9d95f33,
+          0 2px 8px #0003,
+          inset 0 1px #ffffff66;
         overflow: hidden;
+        position: relative;
+      }
+      .play-button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -40%;
+        width: 36%;
+        height: 100%;
+        background: linear-gradient(100deg, transparent, #ffffff80, transparent);
+        transform: skewX(-20deg);
+        animation: play-shine 3.2s ease-in-out infinite;
+      }
+      @keyframes play-shine {
+        0%,
+        55% {
+          left: -40%;
+        }
+        85%,
+        100% {
+          left: 130%;
+        }
       }
       .play-button-icon {
         display: grid;
         place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 12px 8px 12px 8px;
+        background: #17240a14;
       }
       .play-button-icon .icon {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
       }
       .play-key {
         font:
@@ -1973,7 +2092,11 @@
         margin-left: auto;
       }
       .play-button:hover:not(:disabled) {
-        filter: brightness(1.06);
+        filter: brightness(1.05);
+        transform: translateY(-1px);
+      }
+      .play-button:active:not(:disabled) {
+        transform: translateY(1px);
       }
       .play-button[data-busy="true"] .play-button-icon {
         animation: busy-spin 1.4s linear infinite;
@@ -3932,8 +4055,10 @@
           top: 18px;
           left: 50%;
         }
-        /* Dynamic island: keep the idle Viola circle at every width; hover/focus/open
-           still swell it via the base rules above. */
+        .game-island {
+          width: 181px;
+          border-radius: 22px;
+        }
         .island-trigger {
           height: 48px;
           gap: 8px;
@@ -4892,6 +5017,9 @@
         }
         .island-copy strong {
           font-size: 10px;
+        }
+        .game-island {
+          width: 172px;
         }
       }
       [data-motion="off"] *,
@@ -7052,76 +7180,12 @@
          a morphing glass blob with a purple glow and three thin, real-time hands. */
       .clock-container {
         position: relative;
-        width: 172px;
-        height: 172px;
+        width: 140px;
+        height: 140px;
         display: flex;
         justify-content: center;
         align-items: center;
         animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-      }
-      /* A faint dial of twelve tick marks so the blob reads as a real clock. */
-      .clock-dial {
-        position: absolute;
-        inset: -16px;
-        animation: clock-dial-spin 120s linear infinite;
-      }
-      .clock-dial i {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
-        height: 12px;
-        margin-left: -1px;
-        border-radius: 2px;
-        background: color-mix(in srgb, var(--primary-text, #a98cff) 55%, transparent);
-        transform-origin: 50% 86px;
-      }
-      .clock-dial i:nth-child(3n) {
-        width: 3px;
-        margin-left: -1.5px;
-        height: 18px;
-        background: color-mix(in srgb, var(--primary-text, #a98cff) 85%, transparent);
-      }
-      .clock-dial i:nth-child(1) {
-        transform: rotate(0deg);
-      }
-      .clock-dial i:nth-child(2) {
-        transform: rotate(30deg);
-      }
-      .clock-dial i:nth-child(3) {
-        transform: rotate(60deg);
-      }
-      .clock-dial i:nth-child(4) {
-        transform: rotate(90deg);
-      }
-      .clock-dial i:nth-child(5) {
-        transform: rotate(120deg);
-      }
-      .clock-dial i:nth-child(6) {
-        transform: rotate(150deg);
-      }
-      .clock-dial i:nth-child(7) {
-        transform: rotate(180deg);
-      }
-      .clock-dial i:nth-child(8) {
-        transform: rotate(210deg);
-      }
-      .clock-dial i:nth-child(9) {
-        transform: rotate(240deg);
-      }
-      .clock-dial i:nth-child(10) {
-        transform: rotate(270deg);
-      }
-      .clock-dial i:nth-child(11) {
-        transform: rotate(300deg);
-      }
-      .clock-dial i:nth-child(12) {
-        transform: rotate(330deg);
-      }
-      @keyframes clock-dial-spin {
-        to {
-          transform: rotate(360deg);
-        }
       }
       .clock-blob {
         position: absolute;
@@ -7176,11 +7240,11 @@
       }
       .clock-center {
         position: absolute;
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
         background: var(--primary, #7000ff);
-        box-shadow: 0 0 12px var(--primary, #7000ff);
+        box-shadow: 0 0 10px var(--primary, #7000ff);
         z-index: 10;
       }
       .clock-hand {
@@ -7193,19 +7257,19 @@
         transform: rotate(0deg);
       }
       .clock-hand.hour {
-        height: 44px;
+        height: 35px;
         width: 4px;
         margin-left: -2px;
         background: var(--text, #e8e8ff);
       }
       .clock-hand.min {
-        height: 62px;
+        height: 50px;
         width: 2px;
         margin-left: -1px;
         background: var(--accent, #00f0ff);
       }
       .clock-hand.sec {
-        height: 72px;
+        height: 60px;
         width: 1px;
         margin-left: -0.5px;
         background: var(--hydra, #ff003c);
@@ -7413,6 +7477,43 @@
         background: radial-gradient(circle at 35% 30%, #ffffff, #bcdcf0 70%);
         box-shadow: 0 0 12px #ffffffcc;
       }
+      .ny-fireworks .fw-burst {
+        opacity: 0;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(1) {
+        animation: fw-pop 7s ease-out infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(2) {
+        animation: fw-pop 7s ease-out 2.1s infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(3) {
+        animation: fw-pop 7s ease-out 4.2s infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(4) {
+        animation: fw-pop 7s ease-out 1.1s infinite;
+      }
+      @keyframes fw-pop {
+        0%,
+        9% {
+          opacity: 0;
+          transform: scale(0.2);
+        }
+        13% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        24% {
+          opacity: 0.85;
+          transform: scale(1.18);
+        }
+        42%,
+        100% {
+          opacity: 0;
+          transform: scale(1.35);
+        }
+      }
       @keyframes ny-snowfall {
         0% {
           transform: translate3d(0, -18px, 0) rotate(0deg);
@@ -7476,6 +7577,154 @@
       }
       [data-background="newyear"] .game-dock {
         background: color-mix(in srgb, var(--surface) 62%, transparent);
+      }
+      /* Living nebula: a full deep-space scene with drifting gas clouds, twinkling
+         stars, meteors and a ringed planet, unlocked through the easter egg. */
+      .nebula-scene {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      [data-background="nebula"] .nebula-scene {
+        display: block;
+      }
+      .nebula-svg {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .nebula-clouds {
+        animation: nebula-clouds-drift 46s ease-in-out infinite alternate;
+        transform-origin: 50% 50%;
+      }
+      @keyframes nebula-clouds-drift {
+        0% {
+          transform: translate(-1.5%, -1%) scale(1) rotate(0deg);
+          opacity: 0.85;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate(1.5%, 1%) scale(1.08) rotate(1.2deg);
+          opacity: 0.92;
+        }
+      }
+      .nebula-stars .nb-star {
+        animation: nb-twinkle 3.2s ease-in-out infinite;
+      }
+      .nebula-stars .nb-star:nth-of-type(2n) {
+        animation-duration: 4.1s;
+        animation-delay: 0.7s;
+      }
+      .nebula-stars .nb-star:nth-of-type(3n) {
+        animation-duration: 2.6s;
+        animation-delay: 1.2s;
+      }
+      .nebula-stars .nb-star-bright {
+        animation: nb-bright 2.4s ease-in-out infinite;
+      }
+      @keyframes nb-twinkle {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes nb-bright {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .nebula-shooting .nb-meteor {
+        stroke: #ffffff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: nb-shoot 7.5s ease-in-out infinite;
+      }
+      .nebula-shooting .nb-meteor-two {
+        animation-delay: 3.4s;
+        animation-duration: 9s;
+      }
+      @keyframes nb-shoot {
+        0%,
+        70% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        74% {
+          opacity: 1;
+        }
+        88% {
+          opacity: 0;
+          transform: translate(190px, 130px);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(190px, 130px);
+        }
+      }
+      .nebula-planet {
+        transform-origin: 1240px 700px;
+        animation: nb-planet-float 16s ease-in-out infinite alternate;
+      }
+      @keyframes nb-planet-float {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(-14px);
+        }
+      }
+      [data-background="nebula"] {
+        --bg: #0a0816;
+      }
+      [data-background="nebula"][data-theme="light"] {
+        --bg: #eceaf6;
+      }
+      [data-background="nebula"] .shell,
+      [data-background="nebula"] .workspace-nav,
+      [data-background="nebula"] .rail {
+        background-color: color-mix(in srgb, var(--shell) 56%, transparent);
+        backdrop-filter: blur(18px) saturate(1.2);
+        -webkit-backdrop-filter: blur(18px) saturate(1.2);
+      }
+      [data-background="nebula"] .project-card,
+      [data-background="nebula"] .demo-card,
+      [data-background="nebula"] .store-card,
+      [data-background="nebula"] .partner-card,
+      [data-background="nebula"] .preview-window,
+      [data-background="nebula"] .profile-card {
+        background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      [data-background="nebula"] .game-card,
+      [data-background="nebula"] .bet-panel,
+      [data-background="nebula"] .wallet-balance-panel,
+      [data-background="nebula"] .info-card,
+      [data-background="nebula"] .table-card,
+      [data-background="nebula"] .modal-section-card {
+        background-color: color-mix(in srgb, var(--card) 54%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      [data-background="nebula"] .game-scene {
+        background-color: color-mix(in srgb, var(--card) 64%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
       }
       @keyframes core-pulse {
         0%,
@@ -9331,6 +9580,48 @@
           <use href="#ny-gift-r" transform="translate(812 898)" />
           <use href="#ny-gift-g" transform="translate(866 896)" />
         </g>
+        <g class="ny-fireworks">
+          <g class="fw-burst" transform="translate(238 190)">
+            <path
+              d="M0 0 L0 -52 M0 0 L37 -37 M0 0 L52 0 M0 0 L37 37 M0 0 L0 52 M0 0 L-37 37 M0 0 L-52 0 M0 0 L-37 -37"
+              stroke="#ffd166"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="5.4" fill="#fff6de" />
+          </g>
+          <g class="fw-burst" transform="translate(952 132)">
+            <path
+              d="M0 0 L0 -44 M0 0 L31 -31 M0 0 L44 0 M0 0 L31 31 M0 0 L0 44 M0 0 L-31 31 M0 0 L-44 0 M0 0 L-31 -31"
+              stroke="#8a6bff"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="4.6" fill="#e9e1ff" />
+          </g>
+          <g class="fw-burst" transform="translate(640 92)">
+            <path
+              d="M0 0 L0 -38 M0 0 L27 -27 M0 0 L38 0 M0 0 L27 27 M0 0 L0 38 M0 0 L-27 27 M0 0 L-38 0 M0 0 L-27 -27"
+              stroke="#ff6b84"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="4" fill="#ffe2e8" />
+          </g>
+          <g class="fw-burst" transform="translate(1204 176)">
+            <path
+              d="M0 0 L0 -34 M0 0 L24 -24 M0 0 L34 0 M0 0 L24 24 M0 0 L0 34 M0 0 L-24 24 M0 0 L-34 0 M0 0 L-24 -24"
+              stroke="#6fc3ff"
+              stroke-width="2"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="3.6" fill="#e2f3ff" />
+          </g>
+        </g>
       </svg>
       <span class="ny-snow ny-snow-back"
         ><i style="--x: 4%; --delay: -2s; --dur: 16s; --size: 5px; --drift: 30px"></i
@@ -9370,11 +9661,129 @@
         ><i class="crystal" style="--x: 70%; --delay: -1s; --dur: 16s; --size: 8px; --drift: 32px"></i
       ></span>
     </div>
+    <div class="nebula-scene" aria-hidden="true">
+      <svg class="nebula-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="nb-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#07060f" />
+            <stop offset="0.5" stop-color="#0d0a1e" />
+            <stop offset="1" stop-color="#120a26" />
+          </linearGradient>
+          <radialGradient id="nb-cloud-magenta" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff4f9a" stop-opacity="0.42" />
+            <stop offset="0.45" stop-color="#b23bff" stop-opacity="0.24" />
+            <stop offset="1" stop-color="#b23bff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-violet" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8b5cff" stop-opacity="0.38" />
+            <stop offset="0.5" stop-color="#5a3cf0" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#5a3cf0" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-teal" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#1fd1c9" stop-opacity="0.3" />
+            <stop offset="0.5" stop-color="#0f7ea6" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#0f7ea6" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-blue" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#3d6bff" stop-opacity="0.34" />
+            <stop offset="0.55" stop-color="#1e3a8a" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#1e3a8a" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-ember" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff9a5c" stop-opacity="0.26" />
+            <stop offset="0.5" stop-color="#c2553d" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#c2553d" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-star-glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.9" />
+            <stop offset="0.4" stop-color="#cdd6ff" stop-opacity="0.35" />
+            <stop offset="1" stop-color="#cdd6ff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-planet" cx="0.35" cy="0.3" r="0.75">
+            <stop offset="0" stop-color="#e9c9ff" />
+            <stop offset="0.4" stop-color="#7a5bd6" />
+            <stop offset="0.78" stop-color="#2c1a63" />
+            <stop offset="1" stop-color="#150a38" />
+          </radialGradient>
+          <linearGradient id="nb-planet-ring" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffd7ef" stop-opacity="0" />
+            <stop offset="0.2" stop-color="#ffd7ef" stop-opacity="0.75" />
+            <stop offset="0.5" stop-color="#c9a8ff" stop-opacity="0.9" />
+            <stop offset="0.8" stop-color="#ffd7ef" stop-opacity="0.7" />
+            <stop offset="1" stop-color="#ffd7ef" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="1440" height="900" fill="url(#nb-sky)" />
+        <g class="nebula-clouds">
+          <ellipse cx="300" cy="240" rx="560" ry="340" fill="url(#nb-cloud-magenta)" />
+          <ellipse cx="1130" cy="200" rx="600" ry="360" fill="url(#nb-cloud-violet)" />
+          <ellipse cx="720" cy="150" rx="520" ry="300" fill="url(#nb-cloud-teal)" />
+          <ellipse cx="180" cy="600" rx="520" ry="300" fill="url(#nb-cloud-blue)" />
+          <ellipse cx="1260" cy="580" rx="540" ry="320" fill="url(#nb-cloud-teal)" />
+          <ellipse cx="760" cy="700" rx="620" ry="360" fill="url(#nb-cloud-violet)" />
+          <ellipse cx="430" cy="430" rx="300" ry="200" fill="url(#nb-cloud-ember)" />
+        </g>
+        <g class="nebula-stars">
+          <circle class="nb-star" cx="120" cy="90" r="2.4" fill="#ffffff" />
+          <circle class="nb-star" cx="262" cy="180" r="1.3" fill="#cfe0ff" />
+          <circle class="nb-star" cx="360" cy="70" r="1.8" fill="#ffffff" />
+          <circle class="nb-star" cx="452" cy="240" r="1.2" fill="#e7d6ff" />
+          <circle class="nb-star" cx="580" cy="120" r="2.2" fill="#ffffff" />
+          <circle class="nb-star" cx="690" cy="250" r="1.4" fill="#d7ffef" />
+          <circle class="nb-star" cx="830" cy="80" r="1.9" fill="#ffffff" />
+          <circle class="nb-star" cx="960" cy="260" r="1.3" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1070" cy="120" r="2.1" fill="#ffffff" />
+          <circle class="nb-star" cx="1200" cy="210" r="1.5" fill="#e0ecff" />
+          <circle class="nb-star" cx="1330" cy="90" r="2.3" fill="#ffffff" />
+          <circle class="nb-star" cx="90" cy="420" r="1.4" fill="#e7d6ff" />
+          <circle class="nb-star" cx="300" cy="470" r="1.7" fill="#ffffff" />
+          <circle class="nb-star" cx="520" cy="520" r="1.2" fill="#d7ffef" />
+          <circle class="nb-star" cx="740" cy="430" r="1.6" fill="#ffffff" />
+          <circle class="nb-star" cx="900" cy="540" r="1.3" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1120" cy="470" r="1.8" fill="#ffffff" />
+          <circle class="nb-star" cx="1300" cy="430" r="1.4" fill="#cfe0ff" />
+          <circle class="nb-star" cx="140" cy="700" r="1.5" fill="#ffffff" />
+          <circle class="nb-star" cx="420" cy="760" r="1.3" fill="#e0ecff" />
+          <circle class="nb-star" cx="660" cy="690" r="1.7" fill="#ffffff" />
+          <circle class="nb-star" cx="980" cy="730" r="1.4" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1220" cy="700" r="1.6" fill="#ffffff" />
+          <circle class="nb-star" cx="1380" cy="600" r="1.3" fill="#e7d6ff" />
+          <circle class="nb-star nb-star-bright" cx="620" cy="330" r="2.6" fill="#ffffff" />
+          <circle class="nb-star nb-star-bright" cx="1180" cy="330" r="2.4" fill="#ffffff" />
+          <circle class="nb-star nb-star-bright" cx="230" cy="300" r="2" fill="#fff3d6" />
+        </g>
+        <g class="nebula-shooting">
+          <line class="nb-meteor" x1="180" y1="60" x2="330" y2="150" />
+          <line class="nb-meteor nb-meteor-two" x1="920" y1="20" x2="1030" y2="90" />
+        </g>
+        <g class="nebula-planet">
+          <circle cx="1240" cy="700" r="86" fill="url(#nb-planet)" />
+          <ellipse
+            cx="1240"
+            cy="700"
+            rx="150"
+            ry="30"
+            fill="none"
+            stroke="url(#nb-planet-ring)"
+            stroke-width="11"
+            transform="rotate(-18 1240 700)"
+          />
+          <ellipse
+            cx="1240"
+            cy="700"
+            rx="132"
+            ry="24"
+            fill="none"
+            stroke="url(#nb-planet-ring)"
+            stroke-width="5"
+            transform="rotate(-18 1240 700)"
+          />
+          <circle cx="1216" cy="672" r="16" fill="#ffffff" opacity="0.14" />
+        </g>
+      </svg>
+    </div>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
       <div class="clock-container" aria-hidden="true">
-        <div class="clock-dial">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-        </div>
         <div class="clock-blob"><span class="clock-shimmer"></span></div>
         <span class="clock-center"></span>
         <span class="clock-hand hour" id="clock-hour"></span>
@@ -10285,35 +10694,50 @@
                 ><button type="button" data-bet-factor="max">MAX</button>
               </div>
               <div class="game-options" id="plinko-options">
-                <label class="field-label" data-t="risk">Риск</label>
-                <div class="segmented spring-group risk-control" role="group" aria-label="Риск">
-                  <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
-                  ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
-                    Средний</button
-                  ><button type="button" data-risk="high" aria-pressed="false" data-t="high">Высокий</button>
-                </div>
-                <label class="field-label" data-t="rowCount">Количество рядов</label>
-                <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
-                  <button type="button" data-rows="8" aria-pressed="false">8</button
-                  ><button type="button" data-rows="12" aria-pressed="true">12</button
-                  ><button type="button" data-rows="16" aria-pressed="false">16</button>
-                </div>
-                <div class="potential">
-                  <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
-                </div>
-                <label class="field-label" data-t="ballCount">За один запуск</label>
-                <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
-                  <button type="button" data-batch="1" aria-pressed="true">1</button
-                  ><button type="button" data-batch="3" aria-pressed="false">3</button
-                  ><button type="button" data-batch="5" aria-pressed="false">5</button
-                  ><button type="button" data-batch="8" aria-pressed="false">8</button>
-                </div>
-                <div class="batch-price">
-                  <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
-                </div>
-                <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
-                  Ряды и риск фиксируются, пока летят шары.
-                </p>
+                <details class="plinko-tune">
+                  <summary>
+                    <svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg
+                    ><span data-t="tune">Тонкая настройка</span
+                    ><svg class="icon tune-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                  </summary>
+                  <div class="plinko-tune-body">
+                    <label class="field-label" data-t="risk">Риск</label>
+                    <div class="segmented spring-group risk-control" role="group" aria-label="Риск">
+                      <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
+                      ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
+                        Средний</button
+                      ><button type="button" data-risk="high" aria-pressed="false" data-t="high">
+                        Высокий
+                      </button>
+                    </div>
+                    <label class="field-label" data-t="rowCount">Количество рядов</label>
+                    <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
+                      <button type="button" data-rows="8" aria-pressed="false">8</button
+                      ><button type="button" data-rows="12" aria-pressed="true">12</button
+                      ><button type="button" data-rows="16" aria-pressed="false">16</button>
+                    </div>
+                    <div class="potential">
+                      <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
+                    </div>
+                    <label class="field-label" data-t="ballCount">За один запуск</label>
+                    <div
+                      class="segmented spring-group batch-control"
+                      role="group"
+                      aria-label="Количество шаров"
+                    >
+                      <button type="button" data-batch="1" aria-pressed="true">1</button
+                      ><button type="button" data-batch="3" aria-pressed="false">3</button
+                      ><button type="button" data-batch="5" aria-pressed="false">5</button
+                      ><button type="button" data-batch="8" aria-pressed="false">8</button>
+                    </div>
+                    <div class="batch-price">
+                      <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
+                    </div>
+                    <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
+                      Ряды и риск фиксируются, пока летят шары.
+                    </p>
+                  </div>
+                </details>
               </div>
               <div class="game-options" id="dice-options" hidden>
                 <label class="field-label" data-t="prediction">Твой прогноз</label>
@@ -11963,23 +12387,20 @@
             return new Promise((resolve) => {
               const animation = this.element.animate(
                 [
-                  { transform: this.element.style.transform || "rotateX(0deg) rotateY(0deg)", filter: "blur(0px)" },
+                  { transform: this.element.style.transform || "rotateX(0deg) rotateY(0deg)" },
                   {
                     transform: `translateY(-46px) rotateX(${x + 340}deg) rotateY(${y + 310}deg)`,
-                    filter: "blur(1.6px)",
                     offset: 0.18
                   },
                   {
                     transform: `translateY(6px) rotateX(${x + 560}deg) rotateY(${y + 590}deg)`,
-                    filter: "blur(2.4px)",
                     offset: 0.6
                   },
                   {
                     transform: `translateY(-3px) rotateX(${x + 715}deg) rotateY(${y + 718}deg)`,
-                    filter: "blur(0.8px)",
                     offset: 0.85
                   },
-                  { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)`, filter: "blur(0px)" }
+                  { transform: `translateY(0) rotateX(${x + 720}deg) rotateY(${y + 720}deg)` }
                 ],
                 { duration: 2400, easing: "cubic-bezier(.22,.68,.24,1)" }
               );
@@ -11989,7 +12410,6 @@
                 done = true;
                 animation.cancel();
                 this.element.style.transform = target;
-                this.element.style.filter = "";
                 this.finish = null;
                 resolve();
               };
@@ -12186,6 +12606,7 @@
           bet: "Ставка",
           chips: "фишки",
           risk: "Риск",
+          tune: "Тонкая настройка",
           low: "Низкий",
           medium: "Средний",
           high: "Высокий",
@@ -12443,6 +12864,7 @@
           bet: "Stake",
           chips: "chips",
           risk: "Risk",
+          tune: "Fine tuning",
           low: "Low",
           medium: "Medium",
           high: "High",
@@ -15638,10 +16060,41 @@
         });
         var syncIndicators = springGroups();
         var toastTimer;
+        var islandNotifyReset = null;
         var actionEpoch = 0;
         var gameIsland = new ExpandingIsland($("#game-island"), $("#island-trigger"), $("#island-panel"));
         var shownRounds = /* @__PURE__ */ new Set();
-        function notify(message) {
+        function islandNotify(message) {
+          const island = $("#game-island");
+          const strong = $("#island-value");
+          const small = $("#island-subtitle");
+          clearTimeout(toastTimer);
+          islandNotifyReset?.();
+          if (!island || !strong) return;
+          const prevStrong = strong.textContent;
+          const prevSmall = small.textContent;
+          let settled = false;
+          const restore = () => {
+            if (settled) return;
+            settled = true;
+            delete island.dataset.notifying;
+            strong.textContent = prevStrong;
+            small.textContent = prevSmall;
+            islandNotifyReset = null;
+          };
+          islandNotifyReset = restore;
+          const collapse = () => island.dataset.notifying = "true";
+          const expand = () => delete island.dataset.notifying;
+          strong.textContent = message;
+          small.textContent = "";
+          collapse();
+          toastTimer = setTimeout(expand, 340);
+          toastTimer = setTimeout(() => {
+            collapse();
+            toastTimer = setTimeout(restore, 320);
+          }, 2600);
+        }
+        function toastNotify(message) {
           const toast = $("#portal-toast");
           $("#toast-msg").textContent = message;
           clearTimeout(toastTimer);
@@ -15673,6 +16126,14 @@
               toast.classList.remove("visible");
             }
           }, 3400);
+        }
+        function notify(message) {
+          const island = $("#game-island");
+          if (island?.dataset.open === "true") {
+            toastNotify(message);
+            return;
+          }
+          islandNotify(message);
         }
         function displayedBalance() {
           return Math.max(

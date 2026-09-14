@@ -102,18 +102,52 @@ const launchQueue = new LaunchQueue((queue) => {
 });
 const syncIndicators = springGroups();
 let toastTimer;
+let islandNotifyReset = null;
 let actionEpoch = 0;
 const gameIsland = new ExpandingIsland($('#game-island'), $('#island-trigger'), $('#island-panel'));
 const shownRounds = new Set();
 
-function notify(message) {
+/* Dynamic-island notification: the balance pill collapses into the bare Viola
+   circle, grows back showing the message, then returns to the balance. */
+function islandNotify(message) {
+  const island = $('#game-island');
+  const strong = $('#island-value');
+  const small = $('#island-subtitle');
+  clearTimeout(toastTimer);
+  islandNotifyReset?.();
+  if (!island || !strong) return;
+  const prevStrong = strong.textContent;
+  const prevSmall = small.textContent;
+  let settled = false;
+  const restore = () => {
+    if (settled) return;
+    settled = true;
+    delete island.dataset.notifying;
+    strong.textContent = prevStrong;
+    small.textContent = prevSmall;
+    islandNotifyReset = null;
+  };
+  islandNotifyReset = restore;
+  const collapse = () => (island.dataset.notifying = 'true');
+  const expand = () => delete island.dataset.notifying;
+  strong.textContent = message;
+  small.textContent = '';
+  collapse();
+  toastTimer = setTimeout(expand, 340);
+  toastTimer = setTimeout(() => {
+    collapse();
+    toastTimer = setTimeout(restore, 320);
+  }, 2600);
+}
+
+/* Fallback toast used when the island panel is open and must not be disturbed. */
+function toastNotify(message) {
   const toast = $('#portal-toast');
   $('#toast-msg').textContent = message;
   clearTimeout(toastTimer);
   toast.classList.add('visible');
   if (motionEnabled()) {
     toast.getAnimations().forEach((animation) => animation.cancel());
-    // Dynamic-island morph: a small Viola circle swells into the message pill.
     toast.animate(
       [
         { opacity: 0, transform: 'translateX(-50%) scale(0.4) translateY(-12px)', borderRadius: '999px' },
@@ -138,6 +172,15 @@ function notify(message) {
       toast.classList.remove('visible');
     }
   }, 3400);
+}
+
+function notify(message) {
+  const island = $('#game-island');
+  if (island?.dataset.open === 'true') {
+    toastNotify(message);
+    return;
+  }
+  islandNotify(message);
 }
 function displayedBalance() {
   return Math.max(

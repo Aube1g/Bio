@@ -544,9 +544,9 @@ h3 {
   position: absolute;
   left: 0;
   transform: translateX(-50%);
-  width: 54px;
+  width: 248px;
   border: 1px solid #c0a7ff24;
-  border-radius: 999px;
+  border-radius: 25px;
   background: #12111e;
   box-shadow: 0 8px 24px #0002;
   color: #ece6fb;
@@ -556,16 +556,15 @@ h3 {
     border-radius 0.55s var(--spring),
     box-shadow 0.3s;
 }
-/* Dynamic island: idle is a bare Viola circle; it swells into a pill on hover,
-   focus or when open, and into the full panel when expanded. */
-.game-island:hover,
-.game-island:focus-within,
-.game-island[data-open='true'] {
-  width: 248px;
-  border-radius: 25px;
+/* The balance is always visible. It only collapses into the bare Viola circle
+   while a dynamic-island notification plays (see [data-notifying]). */
+.game-island[data-notifying='true'] {
+  width: 54px;
+  border-radius: 999px;
 }
 .game-island[data-open='true'] {
   width: 330px;
+  border-radius: 25px;
   box-shadow: 0 22px 60px #0005;
 }
 .island-trigger {
@@ -576,20 +575,16 @@ h3 {
   width: 100%;
   height: 53px;
   text-align: left;
-  transition: padding 0.4s var(--spring), gap 0.4s var(--spring);
-}
-.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-trigger {
-  gap: 0;
-  padding: 9px 11px;
+  transition: gap 0.4s var(--spring);
 }
 .island-copy,
 .island-dot,
 .island-chevron {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.22s ease;
 }
-.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-copy,
-.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-dot,
-.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-chevron {
+.game-island[data-notifying='true'] .island-copy,
+.game-island[data-notifying='true'] .island-dot,
+.game-island[data-notifying='true'] .island-chevron {
   opacity: 0;
 }
 .island-coin {
@@ -616,6 +611,8 @@ h3 {
   font-size: 13px;
   white-space: nowrap;
   font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .island-copy small {
   font-size: 8px;
@@ -637,11 +634,6 @@ h3 {
   height: 10px;
   color: #a296bd;
   transition: transform 0.45s var(--spring);
-}
-.game-island[data-open='true'] {
-  width: 330px;
-  border-radius: 25px;
-  box-shadow: 0 22px 60px #0005;
 }
 .game-island[data-open='true'] .island-chevron {
   transform: rotate(180deg);
@@ -838,6 +830,34 @@ h3 {
   width: 48%;
   height: 310px;
   pointer-events: none;
+}
+.hero-playground::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  top: 8px;
+  width: 300px;
+  height: 244px;
+  background:
+    radial-gradient(circle at 30% 30%, #b9a2f438, transparent 60%),
+    radial-gradient(circle at 72% 66%, #7fc4ea2a, transparent 56%),
+    radial-gradient(circle at 52% 44%, #c4e27e22, transparent 60%);
+  border-radius: 58% 42% 33% 67% / 55% 38% 62% 45%;
+  filter: blur(3px);
+  animation: hero-blob 13s ease-in-out infinite alternate;
+}
+@keyframes hero-blob {
+  0% {
+    border-radius: 58% 42% 33% 67% / 55% 38% 62% 45%;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    border-radius: 38% 62% 57% 43% / 42% 55% 45% 58%;
+  }
+  100% {
+    border-radius: 45% 55% 62% 38% / 58% 42% 55% 45%;
+    transform: rotate(7deg) scale(1.07);
+  }
 }
 .hero-bottom-code {
   position: absolute;
@@ -1154,7 +1174,7 @@ h3 {
 }
 .game-card {
   position: relative;
-  border-radius: 24px;
+  border-radius: 32px 22px 30px 20px / 22px 32px 20px 30px;
   min-width: 0;
   border: 1px solid var(--line);
   background: var(--card);
@@ -1165,18 +1185,22 @@ h3 {
 .game-card[data-card='blackjack'] {
   --game-accent: #b9a2f4;
   --game-art-tint: radial-gradient(75% 60% at 50% 42%, #8b6cf120, transparent 72%);
+  border-radius: 38px 20px 34px 22px / 22px 36px 20px 32px;
 }
 .game-card[data-card='slots'] {
   --game-accent: #eec27e;
   --game-art-tint: radial-gradient(75% 60% at 50% 42%, #e8a9441f, transparent 72%);
+  border-radius: 20px 38px 22px 34px / 32px 20px 36px 22px;
 }
 .game-card[data-card='dice'] {
   --game-accent: #7fc4ea;
   --game-art-tint: radial-gradient(75% 60% at 50% 42%, #55b2e61e, transparent 72%);
+  border-radius: 34px 24px 38px 18px / 20px 34px 22px 38px;
 }
 .game-card[data-card='plinko'] {
   --game-accent: #c4e27e;
   --game-art-tint: radial-gradient(75% 60% at 50% 42%, #a7cf4c1e, transparent 72%);
+  border-radius: 20px 36px 24px 38px / 38px 20px 34px 22px;
 }
 .game-card::before {
   content: '';
@@ -1219,8 +1243,20 @@ h3 {
   position: absolute;
   inset: 6px 2px 0;
   background: var(--game-art-tint, radial-gradient(70% 55% at 50% 46%, #ffffff08, transparent 72%));
-  border-radius: 50%;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
   z-index: 0;
+  animation: art-blob 9s ease-in-out infinite alternate;
+}
+@keyframes art-blob {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 40% 60% 70% 30% / 30% 60% 40% 70%;
+  }
+  100% {
+    border-radius: 30% 70% 55% 45% / 65% 40% 60% 35%;
+  }
 }
 .game-art img {
   width: 96px;
@@ -1663,24 +1699,32 @@ h3 {
   display: grid;
   place-items: center;
   min-height: 27px;
-  border-radius: 6px 6px 10px 10px;
+  border-radius: 7px 7px 12px 12px;
   font:
     800 clamp(8px, 1vw, 11px) Nunito,
     sans-serif;
   white-space: nowrap;
   border-bottom: 3px solid #0002;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s ease;
 }
 .plinko-bin.hot {
-  background: #d79b83;
-  color: #301914;
+  background: linear-gradient(160deg, #ffb28c 0%, #e07a4f 55%, #c65a38 100%);
+  color: #2a0f0a;
+  box-shadow: 0 6px 14px #ff8a5a2e, inset 0 1px #ffd8c2;
 }
 .plinko-bin.warm {
-  background: #cab878;
-  color: #312610;
+  background: linear-gradient(160deg, #f4d98a 0%, #d3ab52 55%, #b98a3c 100%);
+  color: #2c2108;
+  box-shadow: inset 0 1px #fff3cd;
 }
 .plinko-bin.cool {
-  background: #494153;
-  color: #eae3f6;
+  background: linear-gradient(160deg, #6a5a86 0%, #4a3d63 55%, #352c4c 100%);
+  color: #efe8fb;
+  box-shadow: inset 0 1px #ffffff2a;
+}
+.plinko-bin.is-inspected {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 8px 18px #0006;
 }
 .board-caption {
   display: flex;
@@ -1866,6 +1910,47 @@ h3 {
 .game-options .field-label:first-child {
   margin-top: 0;
 }
+/* Plinko fine-tuning folds away so the panel stays a clean stake + Play. */
+.plinko-tune {
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+.plinko-tune summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 13px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.plinko-tune summary::-webkit-details-marker {
+  display: none;
+}
+.plinko-tune summary .icon {
+  width: 13px;
+  height: 13px;
+}
+.plinko-tune summary .tune-chevron {
+  margin-left: auto;
+  transition: transform 0.35s var(--spring);
+}
+.plinko-tune[open] summary .tune-chevron {
+  transform: rotate(180deg);
+}
+.plinko-tune summary:hover {
+  color: var(--ink);
+}
+.plinko-tune-body {
+  padding: 2px 14px 14px;
+  border-top: 1px solid var(--line);
+}
 .risk-control > button {
   font-size: 10px;
   padding-inline: 6px;
@@ -1896,24 +1981,56 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 54px;
-  padding: 13px;
-  margin-top: 23px;
-  border-radius: 17px;
-  background: var(--lime);
-  color: var(--lime-ink);
-  font-size: 13px;
+  min-height: 60px;
+  padding: 14px;
+  margin-top: 21px;
+  border-radius: 30px 22px 30px 22px / 22px 30px 22px 30px;
+  background:
+    radial-gradient(120% 140% at 22% 0%, #eaffc2 0%, transparent 46%),
+    linear-gradient(140deg, #d4ef8e 0%, #a9d95f 52%, #8bc34a 100%);
+  color: #17240a;
+  font-size: 14px;
   font-weight: 900;
-  box-shadow: 0 5px 18px #bfdf7712;
+  letter-spacing: 0.3px;
+  box-shadow:
+    0 10px 28px #a9d95f33,
+    0 2px 8px #0003,
+    inset 0 1px #ffffff66;
   overflow: hidden;
+  position: relative;
+}
+.play-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 36%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, #ffffff80, transparent);
+  transform: skewX(-20deg);
+  animation: play-shine 3.2s ease-in-out infinite;
+}
+@keyframes play-shine {
+  0%,
+  55% {
+    left: -40%;
+  }
+  85%,
+  100% {
+    left: 130%;
+  }
 }
 .play-button-icon {
   display: grid;
   place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px 8px 12px 8px;
+  background: #17240a14;
 }
 .play-button-icon .icon {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 .play-key {
   font:
@@ -1925,7 +2042,11 @@ h3 {
   margin-left: auto;
 }
 .play-button:hover:not(:disabled) {
-  filter: brightness(1.06);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+.play-button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .play-button[data-busy='true'] .play-button-icon {
   animation: busy-spin 1.4s linear infinite;
@@ -3885,8 +4006,10 @@ body:has(dialog[open]) .site-wrap * {
     top: 18px;
     left: 50%;
   }
-  /* Dynamic island: keep the idle Viola circle at every width; hover/focus/open
-     still swell it via the base rules above. */
+  .game-island {
+    width: 181px;
+    border-radius: 22px;
+  }
   .island-trigger {
     height: 48px;
     gap: 8px;
@@ -4845,6 +4968,9 @@ body:has(dialog[open]) .site-wrap * {
   }
   .island-copy strong {
     font-size: 10px;
+  }
+  .game-island {
+    width: 172px;
   }
 }
 [data-motion='off'] *,
