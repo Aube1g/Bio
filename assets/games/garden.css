@@ -728,14 +728,15 @@
   }
 }
 
-/* Organic shapes. One mirrored corner language ties the whole portal together:
+/* Organic shapes. A mirrored "leaf" language ties the whole portal together:
    surfaces lean left (big TL+BR), controls lean right (big TR+BL), so every
-   pair of neighbours interlocks. Hover nudges shapes into a liquid morph. */
+   pair of neighbours interlocks. Chips and faces are true blobs that slowly
+   morph. Hover nudges cards into a liquid morph. */
 .portal-dialog {
-  border-radius: 44px 20px 50px 24px;
+  border-radius: 46px 22px 54px 26px / 34px 50px 36px 46px;
 }
 .portal-dialog.wide-dialog {
-  border-radius: 30px 56px 28px 26px;
+  border-radius: 34px 58px 30px 28px / 40px 36px 52px 32px;
 }
 .dialog-content,
 .dialog-body {
@@ -747,25 +748,25 @@
 .guest-button,
 .practice-login,
 #dock-launch-play {
-  border-radius: 13px 24px 13px 26px;
+  border-radius: 14px 26px 14px 28px;
 }
 .game-dock {
   border-radius: 34px 18px 42px 14px;
 }
 .game-scene {
-  border-radius: 40px 18px 52px 24px;
+  border-radius: 42px 20px 54px 26px / 30px 48px 34px 44px;
 }
 .bet-panel,
 .wallet-balance-panel {
-  border-radius: 30px 14px 34px 18px;
+  border-radius: 32px 16px 36px 20px / 26px 42px 30px 40px;
 }
 .result-strip {
-  border-radius: 24px 40px 18px 20px;
+  border-radius: 26px 42px 20px 22px;
 }
 .info-card,
 .table-card,
 .modal-section-card {
-  border-radius: 20px 36px 16px 18px;
+  border-radius: 22px 38px 18px 20px;
 }
 .history-item {
   border-radius: 16px 28px 12px 30px;
@@ -774,7 +775,7 @@
 .seed-input,
 .field-label + input,
 #bet-amount {
-  border-radius: 11px 22px 11px 24px;
+  border-radius: 12px 22px 12px 24px;
 }
 .profile-cover {
   border-radius: 26px 34px 52px 20px;
@@ -787,7 +788,7 @@
   border-radius: 28px 16px 40px 22px;
 }
 .game-card {
-  border-radius: 38px 16px 48px 20px;
+  border-radius: 42px 18px 52px 22px / 30px 46px 34px 44px;
   transition:
     border-radius 0.7s var(--spring),
     transform 0.45s var(--spring),
@@ -795,10 +796,10 @@
     box-shadow 0.35s ease;
 }
 .game-card:nth-child(even) {
-  border-radius: 48px 24px 30px 16px;
+  border-radius: 52px 22px 34px 18px / 46px 30px 44px 34px;
 }
 .game-card:hover {
-  border-radius: 26px 44px 22px 22px;
+  border-radius: 26px 46px 24px 24px / 40px 32px 44px 34px;
 }
 .hero-play {
   border-radius: 32px 16px 38px 20px;
@@ -835,9 +836,15 @@
 .hero-ball {
   border-radius: 58% 42% 54% 46%;
 }
-/* Blobs for faces and glyph chips so nothing in the portal is a plain box. */
-.profile-avatar {
+/* Blobs for faces, coins and glyph chips so nothing in the portal is a plain box. */
+.profile-avatar,
+.player-avatar {
   border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+  animation: blob-morph 9s ease-in-out infinite;
+}
+.island-coin,
+.toast-coin {
+  border-radius: 52% 48% 58% 42% / 46% 56% 44% 58%;
 }
 .profile-game {
   border-radius: 16px 26px 16px 28px;
@@ -847,6 +854,18 @@
 }
 .profile-cover {
   border-radius: 34px 18px 44px 20px;
+}
+@keyframes blob-morph {
+  0%,
+  100% {
+    border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+  }
+  33% {
+    border-radius: 58% 42% 44% 56% / 42% 60% 44% 54%;
+  }
+  66% {
+    border-radius: 40% 60% 58% 42% / 54% 42% 56% 44%;
+  }
 }
 /* Softer, springier feel across panels. */
 .portal-dialog {

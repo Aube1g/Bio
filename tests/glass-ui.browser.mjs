@@ -153,10 +153,9 @@ try {
   await audit('motion-gallery-dark');
   await close('motion-picker-dialog');
   await close('game-settings-dialog');
+  // Preview builds sign in as a guest automatically on load.
   await page.locator('#account-button').click();
-  await page.locator('#guest-login').click();
-  await page.waitForFunction(() => !document.querySelector('#auth-dialog').open);
-  await page.locator('#account-button').click();
+  await page.waitForFunction(() => document.querySelector('#account-dialog').open);
   assert.equal(await page.locator('#account-stats .profile-stat').count(), 4);
   assert.equal(await page.locator('#profile-games button').count(), 4);
   assert.equal(await page.locator('#account-dialog .viola-icon').count(), 2);

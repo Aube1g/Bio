@@ -38,13 +38,18 @@ export class ExpandingIsland {
     // Keep the closing content painted while removing it from focus and hit testing.
     panel.hidden = false;
     element.dataset.resizing = 'true';
-    const animation = element.animate(
-      [
-        { width: `${before.width}px`, height: `${before.height}px` },
-        { width: `${after.width}px`, height: `${after.height}px` },
-      ],
-      { duration: open ? 460 : 320, easing: 'cubic-bezier(.22,1.18,.36,1)', fill: 'both' },
-    );
+    const dx = after.width - before.width,
+      dy = after.height - before.height;
+    const animation =
+      Math.abs(dx) < 1 && Math.abs(dy) < 1
+        ? null
+        : element.animate(
+            [
+              { width: `${before.width}px`, height: `${before.height}px` },
+              { width: `${after.width}px`, height: `${after.height}px` },
+            ],
+            { duration: open ? 460 : 320, easing: 'cubic-bezier(.22,1.18,.36,1)', fill: 'both' },
+          );
     const content = panel.animate(
       [
         { opacity: open ? 0 : 1, transform: open ? 'translateY(9px)' : 'none' },
@@ -58,11 +63,11 @@ export class ExpandingIsland {
       settled = true;
       panel.hidden = !open;
       delete element.dataset.resizing;
-      animation.cancel();
+      animation?.cancel();
       content.cancel();
       if (this.finish === finish) this.finish = null;
     };
     this.finish = finish;
-    animation.finished.then(finish).catch(() => {});
+    (animation?.finished || Promise.resolve()).then(finish).catch(() => {});
   }
 }

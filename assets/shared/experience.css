@@ -23,12 +23,52 @@ html[data-booting='true'] .app-preloader {
    a morphing glass blob with a purple glow and three thin, real-time hands. */
 .clock-container {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 172px;
+  height: 172px;
   display: flex;
   justify-content: center;
   align-items: center;
   animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* A faint dial of twelve tick marks so the blob reads as a real clock. */
+.clock-dial {
+  position: absolute;
+  inset: -16px;
+  animation: clock-dial-spin 120s linear infinite;
+}
+.clock-dial i {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 12px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--primary-text, #a98cff) 55%, transparent);
+  transform-origin: 50% 86px;
+}
+.clock-dial i:nth-child(3n) {
+  width: 3px;
+  margin-left: -1.5px;
+  height: 18px;
+  background: color-mix(in srgb, var(--primary-text, #a98cff) 85%, transparent);
+}
+.clock-dial i:nth-child(1) { transform: rotate(0deg); }
+.clock-dial i:nth-child(2) { transform: rotate(30deg); }
+.clock-dial i:nth-child(3) { transform: rotate(60deg); }
+.clock-dial i:nth-child(4) { transform: rotate(90deg); }
+.clock-dial i:nth-child(5) { transform: rotate(120deg); }
+.clock-dial i:nth-child(6) { transform: rotate(150deg); }
+.clock-dial i:nth-child(7) { transform: rotate(180deg); }
+.clock-dial i:nth-child(8) { transform: rotate(210deg); }
+.clock-dial i:nth-child(9) { transform: rotate(240deg); }
+.clock-dial i:nth-child(10) { transform: rotate(270deg); }
+.clock-dial i:nth-child(11) { transform: rotate(300deg); }
+.clock-dial i:nth-child(12) { transform: rotate(330deg); }
+@keyframes clock-dial-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .clock-blob {
   position: absolute;
@@ -83,11 +123,11 @@ html[data-booting='true'] .app-preloader {
 }
 .clock-center {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--primary, #7000ff);
-  box-shadow: 0 0 10px var(--primary, #7000ff);
+  box-shadow: 0 0 12px var(--primary, #7000ff);
   z-index: 10;
 }
 .clock-hand {
@@ -100,19 +140,19 @@ html[data-booting='true'] .app-preloader {
   transform: rotate(0deg);
 }
 .clock-hand.hour {
-  height: 35px;
+  height: 44px;
   width: 4px;
   margin-left: -2px;
   background: var(--text, #e8e8ff);
 }
 .clock-hand.min {
-  height: 50px;
+  height: 62px;
   width: 2px;
   margin-left: -1px;
   background: var(--accent, #00f0ff);
 }
 .clock-hand.sec {
-  height: 60px;
+  height: 72px;
   width: 1px;
   margin-left: -0.5px;
   background: var(--hydra, #ff003c);
@@ -195,6 +235,9 @@ html[data-booting='true'] .app-preloader {
 .ny-aurora {
   animation: ny-aurora-drift 14s ease-in-out infinite;
 }
+.ny-aurora rect:nth-of-type(2) {
+  animation: ny-aurora-shimmer 7s ease-in-out infinite;
+}
 @keyframes ny-aurora-drift {
   0%,
   100% {
@@ -204,6 +247,17 @@ html[data-booting='true'] .app-preloader {
   50% {
     opacity: 1;
     transform: translateY(-14px);
+  }
+}
+@keyframes ny-aurora-shimmer {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(24px);
   }
 }
 .ny-stars .ny-star {

@@ -108,10 +108,36 @@ const shownRounds = new Set();
 
 function notify(message) {
   const toast = $('#portal-toast');
-  toast.textContent = message;
-  toast.classList.add('visible');
+  $('#toast-msg').textContent = message;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('visible'), 3500);
+  toast.classList.add('visible');
+  if (motionEnabled()) {
+    toast.getAnimations().forEach((animation) => animation.cancel());
+    // Dynamic-island morph: a small Viola circle swells into the message pill.
+    toast.animate(
+      [
+        { opacity: 0, transform: 'translateX(-50%) scale(0.4) translateY(-12px)', borderRadius: '999px' },
+        { opacity: 1, transform: 'translateX(-50%) scale(1.05) translateY(0)', borderRadius: '20px', offset: 0.6 },
+        { opacity: 1, transform: 'translateX(-50%) scale(1) translateY(0)', borderRadius: '999px' },
+      ],
+      { duration: 640, easing: 'cubic-bezier(0.22, 1.24, 0.36, 1)' },
+    );
+  }
+  toastTimer = setTimeout(() => {
+    if (!toast.classList.contains('visible')) return;
+    if (motionEnabled()) {
+      const hide = toast.animate(
+        [
+          { opacity: 1, transform: 'translateX(-50%) scale(1)', borderRadius: '999px' },
+          { opacity: 0, transform: 'translateX(-50%) scale(0.45) translateY(-12px)', borderRadius: '999px' },
+        ],
+        { duration: 380, easing: 'cubic-bezier(0.4, 0, 0.7, 0.4)' },
+      );
+      hide.finished.then(() => toast.classList.remove('visible')).catch(() => {});
+    } else {
+      toast.classList.remove('visible');
+    }
+  }, 3400);
 }
 function displayedBalance() {
   return Math.max(
@@ -222,6 +248,7 @@ const dialogs = new PortalDialogs({
   api,
   state: () => state,
   notify,
+  sound,
   onError,
   onData: ingest,
   onSession: setSession,
@@ -562,6 +589,12 @@ function selectGame(game, source) {
   $('#dock-launch-title').textContent = games[game].title;
   if (symbol) symbol.setAttribute('href', '#i-' + games[game].icon);
   tray.hidden = false;
+  try {
+    sound.unlock();
+    sound.play('glide');
+  } catch {
+    /* Sound is optional. */
+  }
   if (motionEnabled()) {
     tray.getAnimations().forEach((animation) => animation.cancel());
     // Fly up from behind the dock: rise fast, overshoot above, swing, then settle.
@@ -1289,6 +1322,17 @@ if (new URLSearchParams(location.search).get('auth') === 'failed') {
 }
 synchronize(false)
   .then(async () => {
+    // Preview builds sign in as a guest automatically so history, wallet and
+    // profile work right away instead of showing a login wall.
+    if (state.config?.preview && !state.user && !api.isPractice) {
+      try {
+        await api.call('/api/auth/guest', {});
+        const session = await api.call('/api/session');
+        if (session.user) setSession(session);
+      } catch {
+        /* The explicit sign-in flow stays available. */
+      }
+    }
     // Signing in is always an explicit action, including when initData is supplied by Telegram.
     if (state.user && api.pending()) {
       state.uncertain = true;

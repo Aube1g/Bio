@@ -346,22 +346,44 @@ h3 {
     transform: translateX(3.5%) rotate(6deg) scaleY(1.12);
   }
 }
-/* Hidden atmosphere unlocked through the easter egg. */
+/* Hidden atmosphere unlocked through the easter egg: a living nebula. */
 [data-background='nebula'] .ambient-orb {
-  height: 130%;
+  height: 135%;
   background:
-    radial-gradient(110% 55% at 22% 6%, #ff4d8d1f 0%, transparent 55%),
-    radial-gradient(120% 60% at 78% 0%, #5a3cf01f 0%, transparent 58%),
-    radial-gradient(150% 70% at 50% 110%, #123c5c 0%, transparent 62%);
-  animation: ambient-drift 32s ease-in-out infinite alternate;
+    radial-gradient(120% 60% at 18% 4%, #ff4d8d38 0%, transparent 55%),
+    radial-gradient(130% 65% at 82% 2%, #5a3cf038 0%, transparent 58%),
+    radial-gradient(140% 55% at 50% 16%, #1fd1c92e 0%, transparent 60%),
+    radial-gradient(160% 75% at 50% 112%, #0b2a4a 0%, transparent 64%);
+  animation: nebula-drift 38s ease-in-out infinite alternate;
+}
+@keyframes nebula-drift {
+  from {
+    transform: translate(-2%, -1%) scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(2%, 1.5%) scale(1.07);
+    opacity: 1;
+  }
 }
 [data-background='nebula'] .ambient-dots {
   background-image:
-    radial-gradient(#d9c8ff 1px, transparent 1.4px), radial-gradient(#8fd8ff 1px, transparent 1.4px);
+    radial-gradient(#d9c8ff 1.2px, transparent 1.6px),
+    radial-gradient(#8fd8ff 1px, transparent 1.5px),
+    radial-gradient(#ff9ad2 1px, transparent 1.5px);
   background-size:
     83px 97px,
-    151px 131px;
-  opacity: 0.11;
+    151px 131px,
+    199px 173px;
+  animation: nebula-stars 5s ease-in-out infinite alternate;
+}
+@keyframes nebula-stars {
+  from {
+    opacity: 0.12;
+  }
+  to {
+    opacity: 0.24;
+  }
 }
 .secret-confetti {
   position: fixed;
@@ -522,14 +544,29 @@ h3 {
   position: absolute;
   left: 0;
   transform: translateX(-50%);
-  width: 248px;
+  width: 54px;
   border: 1px solid #c0a7ff24;
-  border-radius: 25px;
+  border-radius: 999px;
   background: #12111e;
   box-shadow: 0 8px 24px #0002;
   color: #ece6fb;
   overflow: hidden;
-  transition: box-shadow 0.3s;
+  transition:
+    width 0.55s var(--spring),
+    border-radius 0.55s var(--spring),
+    box-shadow 0.3s;
+}
+/* Dynamic island: idle is a bare Viola circle; it swells into a pill on hover,
+   focus or when open, and into the full panel when expanded. */
+.game-island:hover,
+.game-island:focus-within,
+.game-island[data-open='true'] {
+  width: 248px;
+  border-radius: 25px;
+}
+.game-island[data-open='true'] {
+  width: 330px;
+  box-shadow: 0 22px 60px #0005;
 }
 .island-trigger {
   display: flex;
@@ -539,6 +576,21 @@ h3 {
   width: 100%;
   height: 53px;
   text-align: left;
+  transition: padding 0.4s var(--spring), gap 0.4s var(--spring);
+}
+.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-trigger {
+  gap: 0;
+  padding: 9px 11px;
+}
+.island-copy,
+.island-dot,
+.island-chevron {
+  transition: opacity 0.25s ease;
+}
+.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-copy,
+.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-dot,
+.game-island:not(:hover):not(:focus-within):not([data-open='true']) .island-chevron {
+  opacity: 0;
 }
 .island-coin {
   width: 32px;
@@ -2031,7 +2083,6 @@ h3 {
   width: var(--cube-size);
   height: var(--cube-size);
   transform-style: preserve-3d;
-  filter: drop-shadow(0 26px 26px #0006);
 }
 .cube-face {
   position: absolute;
@@ -2066,20 +2117,23 @@ h3 {
 }
 .face-2 {
   transform: rotateX(90deg) translateZ(var(--cube-half));
-  background: linear-gradient(135deg, #fff, #e6d9f7);
+  background: linear-gradient(135deg, #ffffff, #e9ddfa);
 }
 .face-3 {
   transform: rotateY(90deg) translateZ(var(--cube-half));
-  background: linear-gradient(120deg, #c8b5e4, #ac91d1);
+  background: linear-gradient(120deg, #d6c4ec, #b79adf);
 }
 .face-4 {
   transform: rotateY(-90deg) translateZ(var(--cube-half));
+  background: linear-gradient(120deg, #e3d5f6, #cbb3e8);
 }
 .face-5 {
   transform: rotateX(-90deg) translateZ(var(--cube-half));
+  background: linear-gradient(120deg, #c3aedd, #a489cd);
 }
 .face-6 {
   transform: rotateY(180deg) translateZ(var(--cube-half));
+  background: linear-gradient(120deg, #b69bdd, #9679c2);
 }
 #board-dice::before {
   content: '';
@@ -3308,25 +3362,49 @@ body:has(dialog[open]) .site-wrap * {
 .portal-toast {
   position: fixed;
   left: 50%;
-  bottom: 110px;
+  top: 96px;
   z-index: 100;
-  transform: translate(-50%, 8px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 28px);
+  padding: 9px 18px 9px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 30%, var(--line));
+  box-shadow:
+    0 18px 46px #0006,
+    inset 0 1px #ffffff14;
+  backdrop-filter: blur(var(--glass-blur));
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
   opacity: 0;
   pointer-events: none;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 45px #0004;
-  border-radius: 15px;
-  padding: 12px 20px;
-  max-width: calc(100% - 30px);
-  font-size: 12px;
-  transition:
-    opacity 0.25s,
-    transform 0.4s var(--spring);
 }
 .portal-toast.visible {
   opacity: 1;
-  transform: translate(-50%, 0);
+}
+.toast-coin {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lime) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lime) 38%, transparent);
+}
+.toast-coin .viola-icon {
+  width: 17px;
+  height: 17px;
+}
+.toast-msg {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .noscript-message {
   position: fixed;
@@ -3807,10 +3885,8 @@ body:has(dialog[open]) .site-wrap * {
     top: 18px;
     left: 50%;
   }
-  .game-island {
-    width: 181px;
-    border-radius: 22px;
-  }
+  /* Dynamic island: keep the idle Viola circle at every width; hover/focus/open
+     still swell it via the base rules above. */
   .island-trigger {
     height: 48px;
     gap: 8px;
@@ -4578,7 +4654,6 @@ body:has(dialog[open]) .site-wrap * {
     font-size: 9px;
   }
   .portal-toast {
-    bottom: 97px;
     font-size: 11px;
     min-width: 180px;
     text-align: center;
@@ -4770,9 +4845,6 @@ body:has(dialog[open]) .site-wrap * {
   }
   .island-copy strong {
     font-size: 10px;
-  }
-  .game-island {
-    width: 172px;
   }
 }
 [data-motion='off'] *,

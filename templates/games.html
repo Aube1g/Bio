@@ -754,7 +754,11 @@
       </div>
     </dialog>
     {{game-settings}}
-    <div class="portal-toast" id="portal-toast" role="status" aria-live="polite"></div>
+    <div class="portal-toast" id="portal-toast" role="status" aria-live="polite">
+      <span class="toast-coin"
+        ><img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /></span
+      ><span class="toast-msg" id="toast-msg"></span>
+    </div>
     <noscript
       ><div class="noscript-message">
         Для игр нужен JavaScript. <a href="bio.html">Перейти к био Aubeig</a>.

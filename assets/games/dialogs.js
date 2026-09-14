@@ -23,6 +23,7 @@ export class PortalDialogs {
     api,
     state,
     notify,
+    sound,
     onError,
     onData,
     onSession,
@@ -35,6 +36,7 @@ export class PortalDialogs {
       api,
       state,
       notify,
+      sound,
       onError,
       onData,
       onSession,
@@ -84,6 +86,7 @@ export class PortalDialogs {
         $$('[data-history-game]').forEach((item) =>
           item.setAttribute('aria-pressed', String(item === button)),
         );
+        try { this.sound?.unlock(); this.sound?.play('ping'); } catch {} 
         this.renderHistory();
       }),
     );
@@ -93,6 +96,7 @@ export class PortalDialogs {
         $$('[data-history-result]').forEach((item) =>
           item.setAttribute('aria-pressed', String(item === button)),
         );
+        try { this.sound?.unlock(); this.sound?.play('ping'); } catch {} 
         this.renderHistory();
       }),
     );

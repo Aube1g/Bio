@@ -32,6 +32,8 @@ export const SOUND_EVENTS = [
   'tick',
   'deal',
   'sparkle',
+  'glide',
+  'ping',
 ];
 
 export class GameSound {
@@ -272,6 +274,14 @@ export class GameSound {
       case 'sparkle':
         this.tone(1568, 0.06, 0, 0.022, 'sine', 1760);
         this.tone(2093, 0.08, 0.05, 0.018, 'sine', 2217);
+        break;
+      case 'glide':
+        this.tone(520, 0.14, 0, 0.03, 'sine', 940);
+        this.noise(0.12, 0, 0.03, 1200);
+        break;
+      case 'ping':
+        this.tone(1320, 0.05, 0, 0.03, 'sine', 1320);
+        this.tone(1760, 0.06, 0.045, 0.02, 'sine', 1760);
         break;
     }
   }

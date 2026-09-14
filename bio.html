@@ -6334,9 +6334,24 @@
         opacity: 0.1;
       }
       [data-background="nebula"] .atmosphere-glow {
-        opacity: 0.85;
-        background: linear-gradient(150deg, #ff4d8d22, #5a3cf022, #123c5c33);
+        opacity: 0.9;
+        background:
+          radial-gradient(120% 70% at 20% 8%, #ff4d8d33 0%, transparent 58%),
+          radial-gradient(130% 70% at 82% 4%, #5a3cf033 0%, transparent 60%),
+          radial-gradient(150% 70% at 50% 20%, #1fd1c926 0%, transparent 62%),
+          radial-gradient(170% 80% at 50% 115%, #0b2a4a 0%, transparent 64%);
+        filter: blur(60px);
         animation: aurora-drift 34s ease-in-out infinite alternate;
+      }
+      [data-background="nebula"] .atmosphere::before {
+        opacity: 0.16;
+        background-image:
+          radial-gradient(#d9c8ff 1.2px, transparent 1.6px), radial-gradient(#8fd8ff 1px, transparent 1.5px),
+          radial-gradient(#ff9ad2 1px, transparent 1.5px);
+        background-size:
+          83px 97px,
+          151px 131px,
+          199px 173px;
       }
       [data-background="newyear"] .atmosphere-glow {
         opacity: 0;
@@ -11990,12 +12005,76 @@
          a morphing glass blob with a purple glow and three thin, real-time hands. */
       .clock-container {
         position: relative;
-        width: 140px;
-        height: 140px;
+        width: 172px;
+        height: 172px;
         display: flex;
         justify-content: center;
         align-items: center;
         animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      /* A faint dial of twelve tick marks so the blob reads as a real clock. */
+      .clock-dial {
+        position: absolute;
+        inset: -16px;
+        animation: clock-dial-spin 120s linear infinite;
+      }
+      .clock-dial i {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 2px;
+        height: 12px;
+        margin-left: -1px;
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--primary-text, #a98cff) 55%, transparent);
+        transform-origin: 50% 86px;
+      }
+      .clock-dial i:nth-child(3n) {
+        width: 3px;
+        margin-left: -1.5px;
+        height: 18px;
+        background: color-mix(in srgb, var(--primary-text, #a98cff) 85%, transparent);
+      }
+      .clock-dial i:nth-child(1) {
+        transform: rotate(0deg);
+      }
+      .clock-dial i:nth-child(2) {
+        transform: rotate(30deg);
+      }
+      .clock-dial i:nth-child(3) {
+        transform: rotate(60deg);
+      }
+      .clock-dial i:nth-child(4) {
+        transform: rotate(90deg);
+      }
+      .clock-dial i:nth-child(5) {
+        transform: rotate(120deg);
+      }
+      .clock-dial i:nth-child(6) {
+        transform: rotate(150deg);
+      }
+      .clock-dial i:nth-child(7) {
+        transform: rotate(180deg);
+      }
+      .clock-dial i:nth-child(8) {
+        transform: rotate(210deg);
+      }
+      .clock-dial i:nth-child(9) {
+        transform: rotate(240deg);
+      }
+      .clock-dial i:nth-child(10) {
+        transform: rotate(270deg);
+      }
+      .clock-dial i:nth-child(11) {
+        transform: rotate(300deg);
+      }
+      .clock-dial i:nth-child(12) {
+        transform: rotate(330deg);
+      }
+      @keyframes clock-dial-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
       .clock-blob {
         position: absolute;
@@ -12050,11 +12129,11 @@
       }
       .clock-center {
         position: absolute;
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: var(--primary, #7000ff);
-        box-shadow: 0 0 10px var(--primary, #7000ff);
+        box-shadow: 0 0 12px var(--primary, #7000ff);
         z-index: 10;
       }
       .clock-hand {
@@ -12067,19 +12146,19 @@
         transform: rotate(0deg);
       }
       .clock-hand.hour {
-        height: 35px;
+        height: 44px;
         width: 4px;
         margin-left: -2px;
         background: var(--text, #e8e8ff);
       }
       .clock-hand.min {
-        height: 50px;
+        height: 62px;
         width: 2px;
         margin-left: -1px;
         background: var(--accent, #00f0ff);
       }
       .clock-hand.sec {
-        height: 60px;
+        height: 72px;
         width: 1px;
         margin-left: -0.5px;
         background: var(--hydra, #ff003c);
@@ -12162,6 +12241,9 @@
       .ny-aurora {
         animation: ny-aurora-drift 14s ease-in-out infinite;
       }
+      .ny-aurora rect:nth-of-type(2) {
+        animation: ny-aurora-shimmer 7s ease-in-out infinite;
+      }
       @keyframes ny-aurora-drift {
         0%,
         100% {
@@ -12171,6 +12253,17 @@
         50% {
           opacity: 1;
           transform: translateY(-14px);
+        }
+      }
+      @keyframes ny-aurora-shimmer {
+        0%,
+        100% {
+          opacity: 0.8;
+          transform: translateX(0);
+        }
+        50% {
+          opacity: 1;
+          transform: translateX(24px);
         }
       }
       .ny-stars .ny-star {
@@ -12705,11 +12798,18 @@
       .partner-inactive {
         background: var(--panel);
         border-style: dashed;
+        border-color: color-mix(in srgb, var(--line) 130%, var(--muted));
         box-shadow: none;
-        cursor: default;
+        cursor: not-allowed;
+        opacity: 0.72;
+        filter: grayscale(0.35) saturate(0.6);
+        transform: none !important;
+      }
+      .partner-inactive:hover {
+        transform: none !important;
       }
       .partner-inactive .partner-monogram {
-        opacity: 0.28;
+        opacity: 0.25;
         filter: grayscale(1);
       }
       .partner-inactive h3,
@@ -12725,10 +12825,10 @@
         min-height: 42px;
         padding: 10px 15px;
         margin-top: auto;
-        border: 1px solid var(--line);
-        border-radius: 14px;
+        border: 1px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+        border-radius: 14px 22px 14px 24px;
         color: var(--muted);
-        background: var(--surface);
+        background: color-mix(in srgb, var(--surface) 60%, transparent);
         font-size: 12px;
         font-weight: 800;
       }
@@ -12833,11 +12933,20 @@
         border-radius: 18px 26px 18px 28px;
       }
       .project-card {
-        border-radius: 38px 18px 46px 20px;
+        border-radius: 42px 18px 52px 22px / 30px 46px 34px 44px;
         transition: border-radius 0.7s var(--spring);
       }
+      .project-card:nth-child(even) {
+        border-radius: 52px 22px 34px 18px / 46px 30px 44px 34px;
+      }
       .project-card:hover {
-        border-radius: 24px 44px 22px 22px;
+        border-radius: 26px 46px 24px 24px / 40px 32px 44px 34px;
+      }
+      .demo-card {
+        border-radius: 28px 44px 22px 22px / 34px 30px 46px 36px;
+      }
+      .demo-card:nth-child(even) {
+        border-radius: 44px 22px 28px 40px / 30px 46px 32px 42px;
       }
       .demo-card:hover,
       .store-card:hover {
@@ -12852,6 +12961,7 @@
       }
       .rail-brand {
         border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+        animation: bio-blob-morph 8s ease-in-out infinite;
       }
       .rail-brand:hover {
         border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
@@ -12877,6 +12987,19 @@
         color: var(--primary);
         font-size: 34px;
         letter-spacing: 0;
+        animation: bio-blob-morph 10s ease-in-out infinite;
+      }
+      @keyframes bio-blob-morph {
+        0%,
+        100% {
+          border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+        }
+        33% {
+          border-radius: 58% 42% 44% 56% / 42% 60% 44% 54%;
+        }
+        66% {
+          border-radius: 40% 60% 58% 42% / 54% 42% 56% 44%;
+        }
       }
       button:not(.rail-link):not(.rail-action):not(.dialog-close) {
         transition:
@@ -13038,6 +13161,9 @@
   <body>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
       <div class="clock-container" aria-hidden="true">
+        <div class="clock-dial">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
         <div class="clock-blob"><span class="clock-shimmer"></span></div>
         <span class="clock-center"></span>
         <span class="clock-hand hour" id="clock-hour"></span>
@@ -21867,7 +21993,8 @@
             if (document.documentElement.dataset.motion === "off") return;
             panel.hidden = false;
             element2.dataset.resizing = "true";
-            const animation = element2.animate(
+            const dx = after.width - before.width, dy = after.height - before.height;
+            const animation = Math.abs(dx) < 1 && Math.abs(dy) < 1 ? null : element2.animate(
               [
                 { width: `${before.width}px`, height: `${before.height}px` },
                 { width: `${after.width}px`, height: `${after.height}px` }
@@ -21887,12 +22014,12 @@
               settled = true;
               panel.hidden = !open;
               delete element2.dataset.resizing;
-              animation.cancel();
+              animation?.cancel();
               content.cancel();
               if (this.finish === finish) this.finish = null;
             };
             this.finish = finish;
-            animation.finished.then(finish).catch(() => {
+            (animation?.finished || Promise.resolve()).then(finish).catch(() => {
             });
           }
         };

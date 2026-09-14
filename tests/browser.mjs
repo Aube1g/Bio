@@ -81,6 +81,17 @@ try {
   );
   assert.deepEqual(missing, []);
   await audit('lobby-dark');
+  // Preview builds sign in as a guest automatically on load.
+  await page.waitForFunction(() => /Гость|Guest/.test(document.querySelector('#account-label')?.textContent || ''));
+  let first = await session();
+  assert.equal(first.user.kind, 'guest');
+  assert.equal(first.wallet.balanceMinor, 100000);
+  // Sign out and verify the manual auth flow (Telegram unavailable, then guest).
+  await page.locator('#account-button').click();
+  await page.locator('#logout-button').click();
+  await page.locator('#logout-button').click();
+  await page.waitForFunction(() => !document.querySelector('#account-dialog').open);
+  assert.equal((await session()).user, null);
   await page.locator('#account-button').click();
   await audit('auth');
   await page.locator('#telegram-login').click();
@@ -90,7 +101,7 @@ try {
   assert.equal((await session()).user, null);
   await page.locator('#guest-login').click();
   await page.waitForFunction(() => !document.querySelector('#auth-dialog').open);
-  const first = await session();
+  first = await session();
   assert.equal(first.user.kind, 'guest');
   assert.equal(first.wallet.balanceMinor, 100000);
   pass('Real guest session; unavailable Telegram does not impersonate an account');
