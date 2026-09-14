@@ -51,7 +51,8 @@ export function readPreferences() {
   }
   if (!['dark', 'light'].includes(result.theme)) result.theme = 'dark';
   if (!['ru', 'en'].includes(result.lang)) result.lang = 'ru';
-  if (!['constellation', 'aurora', 'plain'].includes(result.background)) result.background = 'constellation';
+  if (!['constellation', 'aurora', 'plain', 'nebula', 'newyear'].includes(result.background))
+    result.background = 'constellation';
   if (!['royal', 'green', 'crimson', 'midnight', 'gold'].includes(result.table)) result.table = 'royal';
   result.transition = normalizeTransition(result.transition);
   result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));

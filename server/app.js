@@ -180,6 +180,7 @@ export function createApp(config, root = resolve('.')) {
         if (path === '/api/health' && request.method === 'GET') return send(response, 200, { ok: true });
         if (path === '/api/config' && request.method === 'GET')
           return send(response, 200, {
+            preview: config.embeddedPreview,
             telegram: {
               enabled: Boolean(config.telegramToken && config.telegramUsername),
               miniApp: Boolean(config.telegramToken),

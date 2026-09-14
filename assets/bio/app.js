@@ -11,6 +11,7 @@ import art2 from '../../assets/bio/bio-image-2.webp';
 import art1 from '../../assets/bio/bio-image-1.webp';
 import translations from './translations.json';
 import demos from './demos.json';
+import { BioSound } from './sound.js';
 
 (() => {
   'use strict';
@@ -44,13 +45,14 @@ import demos from './demos.json';
   const state = { view: 'home', motion: !reduced.matches && storage.get('motion', 'on') !== 'off' };
   const preferences = {
     lang: storage.get('lang', 'ru') === 'en' ? 'en' : 'ru',
-    background: ['constellation', 'aurora', 'plain'].includes(storage.get('background'))
+    background: ['constellation', 'aurora', 'plain', 'nebula', 'newyear'].includes(storage.get('background'))
       ? storage.get('background')
       : 'constellation',
     transition: normalizeTransition(storage.get('transition', 'star')),
   };
-  for (const key of ['ripple', 'particles', 'liquid', 'glass'])
+  for (const key of ['ripple', 'particles', 'liquid', 'glass', 'sound'])
     preferences[key] = !['off', 'false', false].includes(storage.get(key, 'on'));
+  const sound = new BioSound(preferences.sound);
   let renderer = null;
   const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
   const escapeHTML = (text) =>
@@ -1589,7 +1591,11 @@ import demos from './demos.json';
     pillObserver = new ResizeObserver((entries) => entries.forEach((entry) => syncPill(entry.target, false)));
   function syncPill(group, animate = state.motion) {
     if (!group?.isConnected || !group.getClientRects().length || group.closest('[hidden]')) return;
-    const selected = $(':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"]', group);
+    const selected =
+      $(
+        ':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"],:scope>[aria-current]:not([aria-current="false"]),:scope>button[aria-checked="true"],:scope>.is-active',
+        group,
+      ) || $(':scope>button, :scope>a', group);
     if (!selected) return;
     let thumb = $(':scope>.spring-thumb', group);
     if (!thumb) {
@@ -1999,11 +2005,12 @@ import demos from './demos.json';
   }
 
   function applyPreferences(animate = false) {
-    for (const key of ['ripple', 'particles', 'liquid', 'glass']) {
+    for (const key of ['ripple', 'particles', 'liquid', 'glass', 'sound']) {
       root.dataset[key] = String(preferences[key]);
       const input = $('[data-preference="' + key + '"]');
       if (input) input.checked = preferences[key];
     }
+    sound.setEnabled(preferences.sound);
     root.dataset.background = preferences.background;
     $$('[data-background]')
       .filter((e) => e.tagName === 'BUTTON')
@@ -2063,6 +2070,7 @@ import demos from './demos.json';
         storage.set(input.dataset.preference, input.checked ? 'on' : 'off');
         if (input.dataset.preference === 'liquid' && !input.checked)
           $$('svg.icon').forEach((icon) => icon.getAnimations().forEach((a) => a.cancel()));
+        sound.play('toggle');
         applyPreferences();
       }),
     );
@@ -2070,6 +2078,7 @@ import demos from './demos.json';
       button.addEventListener('click', () => {
         preferences.background = button.dataset.background;
         storage.set('background', preferences.background);
+        sound.play('pop');
         applyPreferences(true);
       }),
     );
@@ -2103,6 +2112,7 @@ import demos from './demos.json';
         particles: true,
         liquid: true,
         glass: true,
+        sound: true,
         background: 'constellation',
         transition: 'star',
       });
@@ -2290,6 +2300,7 @@ import demos from './demos.json';
   }
   function switchView(view, { history = true, focus = false, animate = true, source = null } = {}) {
     if (!validViews.has(view) || view === pendingView) return;
+    sound.play('swoosh');
     windowMotion?.finish();
     pendingView = view;
     const version = ++navigationVersion;
@@ -2707,6 +2718,7 @@ import demos from './demos.json';
   }
   function openDialog(dialog, opener = document.activeElement) {
     if (!dialog || dialog.open) return;
+    sound.play('open');
     const source = sourceForWindow(opener);
     dialogOpeners.set(dialog, opener);
     dialogSources.set(dialog, source);
@@ -2734,6 +2746,7 @@ import demos from './demos.json';
   }
   async function closeDialog(dialog) {
     if (!dialog?.open) return;
+    sound.play('close');
     if (dialog.classList.contains('is-closing')) return dialog._closingPromise;
     const opener = dialogOpeners.get(dialog),
       source = sourceForWindow(dialogSources.get(dialog) || opener);
@@ -2872,6 +2885,110 @@ import demos from './demos.json';
     }, 3000);
   });
 
+  document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
+  document.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.ny-snow i')) {
+      sound.play('chime');
+      return;
+    }
+    const tappable = event.target.closest(
+      '[data-project], .demo-card, .store-card, .partner-card, [data-reaction], [data-chat-scenario], [data-chat-action], [data-theme-toggle], .rail-action, .rail-link',
+    );
+    if (tappable) sound.play('tap');
+  });
+
+  function initializeSecrets() {
+    const code = [
+      'ArrowUp',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowLeft',
+      'ArrowRight',
+      'b',
+      'a',
+    ];
+    let index = 0;
+    document.addEventListener('keydown', (event) => {
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      index = key === code[index] ? index + 1 : key === code[0] ? 1 : 0;
+      if (index < code.length) return;
+      index = 0;
+      sound.play('secret');
+      flash();
+      stamp();
+      burst('.brand-mark', 16, ['✦', '❋', '✧']);
+      $$('button[data-background="nebula"]').forEach((button) => (button.hidden = false));
+      toast(tr('Секрет разблокирован: атмосфера «Туманность» появилась в настройках.'));
+    });
+    // Typing "aubeig" quietly greets you back.
+    let typed = '';
+    document.addEventListener('keydown', (event) => {
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key.length !== 1) return;
+      typed = (typed + event.key.toLowerCase()).slice(-6);
+      if (typed !== 'aubeig') return;
+      typed = '';
+      sound.play('secret');
+      burst('.brand-mark', 12, ['♡', '✦']);
+      toast(tr('Aubeig — код с характером. Ты нашёл пасхалку.'));
+    });
+    function flash() {
+      if (!state.motion) return;
+      const layer = document.createElement('div');
+      layer.className = 'bio-rainbow';
+      layer.setAttribute('aria-hidden', 'true');
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 1500);
+    }
+    function stamp() {
+      if (!state.motion) return;
+      const layer = document.createElement('div');
+      layer.className = 'bio-stamp';
+      layer.setAttribute('aria-hidden', 'true');
+      layer.innerHTML = `<span class="stamp-mark">A</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 1500);
+    }
+    let taps = 0,
+      tapTimer = 0;
+    $('.brand')?.addEventListener('click', () => {
+      taps += 1;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => (taps = 0), 1100);
+      if (taps < 3) return;
+      taps = 0;
+      sound.play('secret');
+      burst('.brand', 18, ['♥', '✦']);
+      toast(tr('Aubeig передаёт привет'));
+    });
+    function burst(originSelector, count, glyphs) {
+      if (!state.motion) return;
+      const origin = $(originSelector);
+      if (!origin) return;
+      const rect = origin.getBoundingClientRect(),
+        cx = rect.left + rect.width / 2,
+        cy = rect.top + rect.height / 2;
+      for (let i = 0; i < count; i++) {
+        const chip = document.createElement('span');
+        chip.className = 'secret-chip';
+        chip.textContent = glyphs[i % glyphs.length];
+        const angle = (Math.PI * 2 * i) / count + 0.4,
+          distance = 38 + (i % 4) * 18;
+        chip.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+        chip.style.setProperty('--dy', Math.sin(angle) * distance - 20 + 'px');
+        chip.style.setProperty('--rot', (i % 2 ? 1 : -1) * (120 + (i % 5) * 60) + 'deg');
+        chip.style.left = cx + 'px';
+        chip.style.top = cy + 'px';
+        document.body.append(chip);
+        setTimeout(() => chip.remove(), 1200);
+      }
+    }
+  }
+
   root.dataset.initialized = 'true';
   initializeLab();
   initializePills();
@@ -2879,6 +2996,7 @@ import demos from './demos.json';
   initializeKinetics();
   initializePreferences();
   initializeLanguage();
+  initializeSecrets();
   try {
     renderer = createAtmosphere();
   } catch (_) {

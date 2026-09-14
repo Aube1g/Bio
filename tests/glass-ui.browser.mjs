@@ -153,10 +153,9 @@ try {
   await audit('motion-gallery-dark');
   await close('motion-picker-dialog');
   await close('game-settings-dialog');
+  // Preview builds sign in as a guest automatically on load.
   await page.locator('#account-button').click();
-  await page.locator('#guest-login').click();
-  await page.waitForFunction(() => !document.querySelector('#auth-dialog').open);
-  await page.locator('#account-button').click();
+  await page.waitForFunction(() => document.querySelector('#account-dialog').open);
   assert.equal(await page.locator('#account-stats .profile-stat').count(), 4);
   assert.equal(await page.locator('#profile-games button').count(), 4);
   assert.equal(await page.locator('#account-dialog .viola-icon').count(), 2);
@@ -166,8 +165,6 @@ try {
   await audit('wallet-dark');
   await close('wallet-dialog');
   await page.locator('[data-profile-game="dice"]').click();
-  await page.locator('#lobby-launch').waitFor({ state: 'visible' });
-  await page.locator('#launch-selected').click();
   await page.waitForFunction(
     () => document.documentElement.dataset.game === 'dice' && !document.querySelector('#account-dialog').open,
   );

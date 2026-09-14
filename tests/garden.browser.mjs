@@ -67,18 +67,13 @@ async function audit(name) {
 try {
   await page.goto(pathToFileURL(resolve('games.html')).href);
   await ready();
-  assert(await page.locator('#lobby-launch').isHidden());
   await page.locator('.game-card-main[data-go="dice"]').click();
-  assert.equal(await page.locator('html').getAttribute('data-game'), 'lobby');
-  assert.equal(await saved(), null);
-  const launch = await page.locator('#lobby-launch').boundingBox(),
-    dock = await page.locator('.game-dock').boundingBox();
-  assert(launch.y + launch.height < dock.y, JSON.stringify({ launch, dock }));
-  assert.equal(await page.locator('.game-card-main[data-go="dice"]').getAttribute('aria-pressed'), 'true');
-  await page.locator('#launch-selected').click();
+  assert.equal(await page.locator('#dock-launch').isHidden(), false);
+  assert.equal(await page.locator('.game-card[data-card="dice"]').getAttribute('class').then((c) => c.includes('is-selected')), true);
+  await page.locator('#dock-launch-play').click();
   await page.waitForFunction(() => document.documentElement.dataset.game === 'dice');
   assert.equal((await saved()).rounds.length, 0);
-  pass('Card selection does not launch or wager; the Play tray appears above the one dock');
+  pass('A card tap selects and floats the dock Play tray; Play enters the table without waging');
 
   await page.locator('.game-dock [data-open="game-settings-dialog"]').click();
   await rest('game-settings-dialog');
@@ -111,7 +106,7 @@ try {
   const durations = await page
     .locator('#dice-cube')
     .evaluate((e) => e.getAnimations().map((a) => a.effect.getTiming().duration));
-  assert(durations.includes(2100));
+  assert(durations.includes(2400));
   await page.waitForFunction(() => !document.querySelector('#result-proof').hidden);
   assert(await page.locator('#result-amount').isVisible());
   assert(['win', 'loss', 'push'].includes(await page.locator('#result-strip').getAttribute('data-result')));
@@ -123,6 +118,7 @@ try {
   await enterGame(page, 'plinko');
   await page.locator('#bet-amount').fill('10');
   await page.locator('#bet-amount').dispatchEvent('change');
+  await page.locator('#plinko-options .plinko-tune summary').click();
   await page.locator('[data-batch="3"]').click();
   assert.equal(await page.locator('#batch-cost').textContent(), '30');
   const before = await saved();
@@ -188,10 +184,10 @@ try {
   await audit('garden-blackjack-light');
   await enterGame(page, 'lobby');
   await page.locator('.game-card-main[data-go="slots"]').click();
-  await audit('selection-light');
-  await page.screenshot({ path: `${output}/selection-light.png` });
-  await page.locator('#launch-selected').click();
+  await page.locator('#dock-launch-play').click();
   await page.waitForFunction(() => document.documentElement.dataset.game === 'slots');
+  await audit('slots-light');
+  await page.screenshot({ path: `${output}/slots-light.png` });
   await page.locator('#play-button').click();
   await page.waitForFunction(() => !document.querySelector('#result-proof').hidden);
   await audit('slots-result-light');

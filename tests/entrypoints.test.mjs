@@ -22,7 +22,7 @@ test('Both downloadable portal entrypoints contain exactly the same current impl
     'glass-switch-lens',
     'motion-preview-progress',
     'data-motion-style="star"',
-    'loader-clock-hand',
+    'loader-progress',
     'initializeTextMotion',
     'inline-pill',
   ]) {

@@ -6333,6 +6333,29 @@
       [data-background="aurora"] .atmosphere::before {
         opacity: 0.1;
       }
+      [data-background="nebula"] .atmosphere-glow {
+        opacity: 0.9;
+        background:
+          radial-gradient(120% 70% at 20% 8%, #ff4d8d33 0%, transparent 58%),
+          radial-gradient(130% 70% at 82% 4%, #5a3cf033 0%, transparent 60%),
+          radial-gradient(150% 70% at 50% 20%, #1fd1c926 0%, transparent 62%),
+          radial-gradient(170% 80% at 50% 115%, #0b2a4a 0%, transparent 64%);
+        filter: blur(60px);
+        animation: aurora-drift 34s ease-in-out infinite alternate;
+      }
+      [data-background="nebula"] .atmosphere::before {
+        opacity: 0.16;
+        background-image:
+          radial-gradient(#d9c8ff 1.2px, transparent 1.6px), radial-gradient(#8fd8ff 1px, transparent 1.5px),
+          radial-gradient(#ff9ad2 1px, transparent 1.5px);
+        background-size:
+          83px 97px,
+          151px 131px,
+          199px 173px;
+      }
+      [data-background="newyear"] .atmosphere-glow {
+        opacity: 0;
+      }
       [data-background="plain"] .atmosphere {
         background: none;
       }
@@ -7147,11 +7170,15 @@
         left: 0;
         top: 0;
         pointer-events: none;
-        background: var(--button-primary);
-        border: 1px solid #ffffff14;
+        background: linear-gradient(130deg, #a683ff, #6a3cf0 55%, #4b21b4);
+        border: 1px solid #ffffff2a;
         border-radius: 15px;
         z-index: 0;
-        box-shadow: 0 3px 12px #7000ff1a;
+        box-shadow:
+          inset 0 1px 2px #ffffff5c,
+          inset 0 -1px 3px #20074040,
+          0 4px 16px #7b37f53d,
+          0 0 0 1px #24173314;
         will-change: transform, width, height;
       }
       .spring-group > button[aria-pressed="true"],
@@ -8282,6 +8309,19 @@
       }
       .sample-plain {
         background: linear-gradient(145deg, #202035, #080815);
+      }
+      .sample-nebula {
+        background:
+          radial-gradient(60% 55% at 30% 28%, #ff4d8d 0%, transparent 60%),
+          radial-gradient(60% 55% at 72% 24%, #7a5af0 0%, transparent 62%),
+          linear-gradient(150deg, #101322, #080815);
+      }
+      .sample-newyear {
+        background:
+          radial-gradient(circle at 20% 82%, #1d6a45 0 24%, transparent 26%),
+          radial-gradient(circle at 80% 82%, #1d6a45 0 24%, transparent 26%),
+          radial-gradient(circle at 50% 112%, #e9f2f7 0 42%, transparent 44%),
+          linear-gradient(160deg, #0d1a2b, #0a0d16);
       }
       .motion-setting-controls {
         display: flex;
@@ -11675,13 +11715,18 @@
         border-radius: 18px;
         background: var(--modal-card);
       }
-      #history-dialog .dialog-lead,
-      #auth-dialog .dialog-lead {
+      #history-dialog .dialog-lead {
         padding: 15px 17px;
         border: 1px solid var(--line);
         border-radius: 17px;
         background: var(--modal-card);
         font-size: 13px;
+      }
+      #auth-dialog .dialog-lead {
+        font-size: 13px;
+        border: 0;
+        padding: 0;
+        background: none;
       }
       #auth-dialog .guest-button,
       #auth-dialog .telegram-button {
@@ -11951,104 +11996,579 @@
         display: flex;
         animation: boot-failsafe 4.5s step-end forwards;
       }
-      .loader-clock {
+      .loader-mark,
+      .loader-core,
+      .loader-orbit {
+        display: none;
+      }
+      /* The liquid clock — the exact preloader from the original index.html:
+         a morphing glass blob with a purple glow and three thin, real-time hands. */
+      .clock-container {
+        position: relative;
         width: 140px;
         height: 140px;
-        display: grid;
-        place-items: center;
-        position: relative;
-        animation: clock-appear 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
       }
-      .loader-clock-blob {
+      .clock-blob {
         position: absolute;
         inset: 0;
-        border: 1px solid #ffffff25;
-        background: linear-gradient(135deg, #ffffff0d, #ffffff03);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        animation: liquidMorph 8s infinite ease-in-out;
         box-shadow:
-          0 0 40px #7000ff35,
-          inset 0 1px #ffffff1a;
+          0 0 40px rgba(112, 0, 255, 0.45),
+          0 0 100px rgba(112, 0, 255, 0.18);
         overflow: hidden;
-        animation: loader-liquid 8s infinite ease-in-out;
       }
-      .loader-shimmer {
+      [data-theme="light"] .clock-blob {
+        background: linear-gradient(135deg, rgba(138, 79, 255, 0.1), rgba(0, 194, 214, 0.05));
+        border: 1px solid rgba(138, 79, 255, 0.2);
+        box-shadow: 0 0 40px rgba(138, 79, 255, 0.2);
+      }
+      .clock-shimmer {
         position: absolute;
-        inset: -30%;
-        background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
-        animation: loader-shimmer 2.2s ease-in-out infinite;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
       }
-      .loader-clock-ticks {
+      .clock-shimmer::before {
+        content: "";
         position: absolute;
-        inset: 16px;
-        border-radius: 50%;
-        border: 1px dashed color-mix(in srgb, var(--primary-text) 35%, transparent);
+        top: 0;
+        left: 0;
+        width: 45%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0) 20%,
+          rgba(255, 255, 255, 0.35) 50%,
+          rgba(255, 255, 255, 0) 80%,
+          transparent 100%
+        );
+        animation: shimmerSweep 2.4s ease-in-out infinite;
       }
-      .loader-clock-center {
+      [data-theme="light"] .clock-shimmer::before {
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0) 20%,
+          rgba(255, 255, 255, 0.55) 50%,
+          rgba(255, 255, 255, 0) 80%,
+          transparent 100%
+        );
+      }
+      .clock-center {
+        position: absolute;
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--primary-text);
-        z-index: 2;
+        background: var(--primary, #7000ff);
+        box-shadow: 0 0 10px var(--primary, #7000ff);
+        z-index: 10;
       }
-      .loader-clock-hand {
+      .clock-hand {
         position: absolute;
         bottom: 50%;
         left: 50%;
         border-radius: 4px;
-        transform-origin: 50% 100%;
+        transform-origin: bottom center;
+        z-index: 5;
+        transform: rotate(0deg);
       }
-      .loader-clock-hand.hour {
+      .clock-hand.hour {
         height: 35px;
         width: 4px;
         margin-left: -2px;
-        background: var(--ink);
+        background: var(--text, #e8e8ff);
       }
-      .loader-clock-hand.minute {
+      .clock-hand.min {
         height: 50px;
         width: 2px;
         margin-left: -1px;
-        background: #4cdbea;
+        background: var(--accent, #00f0ff);
       }
-      .loader-clock-hand.second {
+      .clock-hand.sec {
         height: 60px;
         width: 1px;
-        background: #fc5474;
+        margin-left: -0.5px;
+        background: var(--hydra, #ff003c);
+      }
+      @keyframes liquidMorph {
+        0% {
+          border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        50% {
+          border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+        }
+        100% {
+          border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+      }
+      @keyframes shimmerSweep {
+        0% {
+          transform: translateX(-150%) skewX(-20deg);
+        }
+        100% {
+          transform: translateX(250%) skewX(-20deg);
+        }
+      }
+      .loader-bar {
+        margin-top: 30px;
+        width: 176px;
+        height: 3px;
+        border-radius: 3px;
+        background: color-mix(in srgb, var(--primary-text, #a98cff) 16%, transparent);
+        overflow: hidden;
+      }
+      .loader-bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #7b4bff, #4cdbea);
+        box-shadow: 0 0 12px #7b4bff66;
+        transition: width 120ms linear;
       }
       .loader-label {
-        margin-top: 24px;
-        letter-spacing: 0.2em;
-        font-size: 12px;
-        font-weight: 900;
-        color: var(--primary-text);
+        margin-top: 17px;
+        letter-spacing: 0.22em;
+        font-size: 11px;
+        font-weight: 800;
+        background: linear-gradient(100deg, var(--primary, #7000ff) 40%, #fff 50%, var(--primary, #7000ff) 60%);
+        background-size: 300% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shimmerBg 2.2s ease-in-out infinite;
       }
-      [data-theme="light"] .loader-clock-blob {
-        background: linear-gradient(135deg, #8a4fff15, #00c2d60c);
-        border-color: #8a4fff30;
+      @keyframes shimmerBg {
+        0% {
+          background-position: 100% 0;
+        }
+        100% {
+          background-position: -100% 0;
+        }
       }
-      @keyframes loader-liquid {
+      /* New Year atmosphere: night sky, moon, aurora, garland, fir forest and snow. */
+      .ny-scene {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      [data-background="newyear"] .ny-scene {
+        display: block;
+      }
+      .ny-svg {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .ny-aurora {
+        animation: ny-aurora-drift 14s ease-in-out infinite;
+      }
+      .ny-aurora rect:nth-of-type(2) {
+        animation: ny-aurora-shimmer 7s ease-in-out infinite;
+      }
+      @keyframes ny-aurora-drift {
         0%,
         100% {
-          border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+          opacity: 0.85;
+          transform: translateY(0);
         }
-        33% {
-          border-radius: 65% 35% 35% 65% / 60% 35% 65% 40%;
-        }
-        66% {
-          border-radius: 35% 65% 55% 45% / 35% 65% 35% 65%;
+        50% {
+          opacity: 1;
+          transform: translateY(-14px);
         }
       }
-      @keyframes loader-shimmer {
-        from {
-          transform: translateX(-80%);
+      @keyframes ny-aurora-shimmer {
+        0%,
+        100% {
+          opacity: 0.8;
+          transform: translateX(0);
         }
+        50% {
+          opacity: 1;
+          transform: translateX(24px);
+        }
+      }
+      .ny-stars .ny-star {
+        fill: #dfe9ff;
+        opacity: 0.75;
+        animation: ny-twinkle 3.4s ease-in-out infinite;
+      }
+      .ny-stars .ny-star:nth-of-type(3n) {
+        animation-duration: 4.4s;
+        animation-delay: 0.6s;
+      }
+      .ny-stars .ny-star:nth-of-type(3n + 1) {
+        animation-duration: 2.9s;
+        animation-delay: 1.3s;
+      }
+      @keyframes ny-twinkle {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .ny-shooting .shooting-star {
+        stroke: #ffffff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: ny-shoot 6s ease-in-out infinite;
+      }
+      @keyframes ny-shoot {
+        0%,
+        72% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        76% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 0;
+          transform: translate(150px, 110px);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(150px, 110px);
+        }
+      }
+      .ny-garland circle:nth-of-type(n) {
+        animation: ny-bulb-glow 3s ease-in-out infinite;
+      }
+      .ny-garland circle:nth-of-type(2n) {
+        animation-delay: 0.9s;
+      }
+      .ny-garland circle:nth-of-type(3n) {
+        animation-delay: 1.6s;
+      }
+      @keyframes ny-bulb-glow {
+        0%,
+        100% {
+          filter: brightness(0.92);
+        }
+        50% {
+          filter: brightness(1.3);
+        }
+      }
+      .ny-trees {
+        transform-origin: bottom center;
+      }
+      .ny-snow {
+        position: absolute;
+        inset: 0;
+      }
+      .ny-snow-back {
+        opacity: 0.55;
+        filter: blur(1px);
+      }
+      .ny-snow i {
+        position: absolute;
+        left: var(--x);
+        top: -18px;
+        width: var(--size, 8px);
+        height: var(--size, 8px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #ffffff, #dceaf3 70%);
+        box-shadow: 0 0 6px #ffffff66;
+        opacity: 0;
+        pointer-events: auto;
+        cursor: pointer;
+        animation: ny-snowfall var(--dur, 14s) linear infinite;
+        animation-delay: var(--delay);
+      }
+      .ny-snow i.crystal {
+        border-radius: 2px;
+        clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
+        background: radial-gradient(circle at 35% 30%, #ffffff, #cfe2f2 70%);
+      }
+      [data-background="newyear"] .ny-snow i:hover {
+        background: radial-gradient(circle at 35% 30%, #ffffff, #bcdcf0 70%);
+        box-shadow: 0 0 12px #ffffffcc;
+      }
+      .ny-fireworks .fw-burst {
+        opacity: 0;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(1) {
+        animation: fw-pop 7s ease-out infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(2) {
+        animation: fw-pop 7s ease-out 2.1s infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(3) {
+        animation: fw-pop 7s ease-out 4.2s infinite;
+      }
+      .ny-fireworks .fw-burst:nth-of-type(4) {
+        animation: fw-pop 7s ease-out 1.1s infinite;
+      }
+      @keyframes fw-pop {
+        0%,
+        9% {
+          opacity: 0;
+          transform: scale(0.2);
+        }
+        13% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        24% {
+          opacity: 0.85;
+          transform: scale(1.18);
+        }
+        42%,
+        100% {
+          opacity: 0;
+          transform: scale(1.35);
+        }
+      }
+      @keyframes ny-snowfall {
+        0% {
+          transform: translate3d(0, -18px, 0) rotate(0deg);
+          opacity: 0;
+        }
+        8% {
+          opacity: 0.9;
+        }
+        50% {
+          transform: translate3d(var(--drift, 40px), 52vh, 0) rotate(180deg);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translate3d(calc(var(--drift, 40px) * -0.55), 110vh, 0) rotate(360deg);
+          opacity: 0;
+        }
+      }
+      [data-motion="off"] .ny-snow,
+      [data-particles="false"] .ny-snow {
+        display: none;
+      }
+      [data-background="newyear"] {
+        --bg: #0b1230;
+      }
+      [data-background="newyear"][data-theme="light"] {
+        --bg: #e9eef6;
+      }
+      /* Frosted glass under the New Year sky so the moon, aurora, trees and snow
+         stay visible through the content instead of being hidden behind it. */
+      [data-background="newyear"] .shell,
+      [data-background="newyear"] .workspace-nav,
+      [data-background="newyear"] .rail {
+        background-color: color-mix(in srgb, var(--shell) 58%, transparent);
+        backdrop-filter: blur(18px) saturate(1.15);
+        -webkit-backdrop-filter: blur(18px) saturate(1.15);
+      }
+      [data-background="newyear"] .project-card,
+      [data-background="newyear"] .demo-card,
+      [data-background="newyear"] .store-card,
+      [data-background="newyear"] .partner-card,
+      [data-background="newyear"] .preview-window,
+      [data-background="newyear"] .profile-card {
+        background-color: color-mix(in srgb, var(--surface) 62%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      [data-background="newyear"] .game-card,
+      [data-background="newyear"] .bet-panel,
+      [data-background="newyear"] .wallet-balance-panel,
+      [data-background="newyear"] .info-card,
+      [data-background="newyear"] .table-card,
+      [data-background="newyear"] .modal-section-card {
+        background-color: color-mix(in srgb, var(--card) 55%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      [data-background="newyear"] .game-scene {
+        background-color: color-mix(in srgb, var(--card) 66%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      [data-background="newyear"] .game-dock {
+        background: color-mix(in srgb, var(--surface) 62%, transparent);
+      }
+      /* Living nebula: a full deep-space scene with drifting gas clouds, twinkling
+         stars, meteors and a ringed planet, unlocked through the easter egg. */
+      .nebula-scene {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      [data-background="nebula"] .nebula-scene {
+        display: block;
+      }
+      .nebula-svg {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .nebula-clouds {
+        animation: nebula-clouds-drift 46s ease-in-out infinite alternate;
+        transform-origin: 50% 50%;
+      }
+      @keyframes nebula-clouds-drift {
+        0% {
+          transform: translate(-1.5%, -1%) scale(1) rotate(0deg);
+          opacity: 0.85;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate(1.5%, 1%) scale(1.08) rotate(1.2deg);
+          opacity: 0.92;
+        }
+      }
+      .nebula-stars .nb-star {
+        animation: nb-twinkle 3.2s ease-in-out infinite;
+      }
+      .nebula-stars .nb-star:nth-of-type(2n) {
+        animation-duration: 4.1s;
+        animation-delay: 0.7s;
+      }
+      .nebula-stars .nb-star:nth-of-type(3n) {
+        animation-duration: 2.6s;
+        animation-delay: 1.2s;
+      }
+      .nebula-stars .nb-star-bright {
+        animation: nb-bright 2.4s ease-in-out infinite;
+      }
+      @keyframes nb-twinkle {
+        0%,
+        100% {
+          opacity: 0.35;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      @keyframes nb-bright {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .nebula-shooting .nb-meteor {
+        stroke: #ffffff;
+        stroke-width: 2;
+        stroke-linecap: round;
+        opacity: 0;
+        animation: nb-shoot 7.5s ease-in-out infinite;
+      }
+      .nebula-shooting .nb-meteor-two {
+        animation-delay: 3.4s;
+        animation-duration: 9s;
+      }
+      @keyframes nb-shoot {
+        0%,
+        70% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        74% {
+          opacity: 1;
+        }
+        88% {
+          opacity: 0;
+          transform: translate(190px, 130px);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(190px, 130px);
+        }
+      }
+      .nebula-planet {
+        transform-origin: 1240px 700px;
+        animation: nb-planet-float 16s ease-in-out infinite alternate;
+      }
+      @keyframes nb-planet-float {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(-14px);
+        }
+      }
+      [data-background="nebula"] {
+        --bg: #0a0816;
+      }
+      [data-background="nebula"][data-theme="light"] {
+        --bg: #eceaf6;
+      }
+      [data-background="nebula"] .shell,
+      [data-background="nebula"] .workspace-nav,
+      [data-background="nebula"] .rail {
+        background-color: color-mix(in srgb, var(--shell) 56%, transparent);
+        backdrop-filter: blur(18px) saturate(1.2);
+        -webkit-backdrop-filter: blur(18px) saturate(1.2);
+      }
+      [data-background="nebula"] .project-card,
+      [data-background="nebula"] .demo-card,
+      [data-background="nebula"] .store-card,
+      [data-background="nebula"] .partner-card,
+      [data-background="nebula"] .preview-window,
+      [data-background="nebula"] .profile-card {
+        background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      [data-background="nebula"] .game-card,
+      [data-background="nebula"] .bet-panel,
+      [data-background="nebula"] .wallet-balance-panel,
+      [data-background="nebula"] .info-card,
+      [data-background="nebula"] .table-card,
+      [data-background="nebula"] .modal-section-card {
+        background-color: color-mix(in srgb, var(--card) 54%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      [data-background="nebula"] .game-scene {
+        background-color: color-mix(in srgb, var(--card) 64%, transparent);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      @keyframes core-pulse {
+        0%,
+        100% {
+          transform: rotate(45deg) scale(1);
+        }
+        50% {
+          transform: rotate(45deg) scale(1.18);
+        }
+      }
+      @keyframes orbit-spin {
         to {
-          transform: translateX(80%);
+          transform: rotate(360deg);
         }
       }
       @keyframes clock-appear {
         from {
           opacity: 0;
-          transform: scale(0.76) rotate(-12deg);
+          transform: scale(0.78);
         }
         to {
           opacity: 1;
@@ -12312,8 +12832,8 @@
         border-color: #698c334a;
         background: #b9d38e24;
       }
-      [data-motion="off"] .loader-clock,
-      [data-motion="off"] .loader-clock * {
+      [data-motion="off"] .loader-mark,
+      [data-motion="off"] .loader-mark * {
         animation: none !important;
       }
       @media (max-width: 700px) {
@@ -12375,8 +12895,8 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        .loader-clock,
-        .loader-clock * {
+        .loader-mark,
+        .loader-mark * {
           animation: none !important;
         }
       }
@@ -12399,11 +12919,18 @@
       .partner-inactive {
         background: var(--panel);
         border-style: dashed;
+        border-color: color-mix(in srgb, var(--line) 130%, var(--muted));
         box-shadow: none;
-        cursor: default;
+        cursor: not-allowed;
+        opacity: 0.72;
+        filter: grayscale(0.35) saturate(0.6);
+        transform: none !important;
+      }
+      .partner-inactive:hover {
+        transform: none !important;
       }
       .partner-inactive .partner-monogram {
-        opacity: 0.28;
+        opacity: 0.25;
         filter: grayscale(1);
       }
       .partner-inactive h3,
@@ -12419,10 +12946,10 @@
         min-height: 42px;
         padding: 10px 15px;
         margin-top: auto;
-        border: 1px solid var(--line);
-        border-radius: 14px;
+        border: 1px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+        border-radius: 14px 22px 14px 24px;
         color: var(--muted);
-        background: var(--surface);
+        background: color-mix(in srgb, var(--surface) 60%, transparent);
         font-size: 12px;
         font-weight: 800;
       }
@@ -12484,6 +13011,240 @@
       [data-theme="light"] .clawback-card .eyebrow {
         color: var(--muted);
       }
+
+      /* Organic shapes shared across the bio workspace — the same mirrored corner
+         language as the portal: surfaces lean left, controls lean right. */
+      dialog {
+        border-radius: 44px 20px 50px 24px;
+        transition:
+          box-shadow 0.35s ease,
+          border-radius 0.7s var(--spring);
+      }
+      dialog[open] {
+        border-radius: 44px 20px 50px 24px;
+      }
+      .dialog-body {
+        border-radius: inherit;
+      }
+      .primary-action,
+      .secondary-action,
+      .solid-button,
+      .text-button:not(.rail-link):not(.rail-action),
+      .motion-picker-trigger {
+        border-radius: 13px 24px 13px 26px;
+      }
+      .shell {
+        border-radius: 36px 20px 46px 24px;
+      }
+      .workspace-nav,
+      .workflow-switch {
+        border-radius: 26px 14px 34px 18px;
+      }
+      .demo-card {
+        border-radius: 26px 42px 22px 20px;
+      }
+      .store-card,
+      .partner-card {
+        border-radius: 22px 38px 20px 18px;
+      }
+      .background-switch,
+      .language-switch,
+      .interface-picker,
+      .agent-tabs {
+        border-radius: 18px 26px 18px 28px;
+      }
+      .project-card {
+        border-radius: 42px 18px 52px 22px / 30px 46px 34px 44px;
+        transition: border-radius 0.7s var(--spring);
+      }
+      .project-card:nth-child(even) {
+        border-radius: 52px 22px 34px 18px / 46px 30px 44px 34px;
+      }
+      .project-card:hover {
+        border-radius: 26px 46px 24px 24px / 40px 32px 44px 34px;
+      }
+      .demo-card {
+        border-radius: 28px 44px 22px 22px / 34px 30px 46px 36px;
+      }
+      .demo-card:nth-child(even) {
+        border-radius: 44px 22px 28px 40px / 30px 46px 32px 42px;
+      }
+      .demo-card:hover,
+      .store-card:hover {
+        border-radius: 20px 40px 18px 22px;
+      }
+      /* More organic silhouettes across the bio workspace. */
+      .preview-window {
+        border-radius: 26px 42px 22px 20px;
+      }
+      .preview-window:nth-child(even) {
+        border-radius: 42px 22px 24px 38px;
+      }
+      .rail-brand {
+        border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+        animation: bio-blob-morph 8s ease-in-out infinite;
+      }
+      .rail-brand:hover {
+        border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+      }
+      .rail {
+        border-radius: 30px 18px 32px 20px;
+      }
+      .header-clock {
+        border-radius: 14px 22px 14px 24px;
+        padding: 6px 13px;
+        background: color-mix(in srgb, var(--primary) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+      }
+      .partner-monogram {
+        display: inline-grid;
+        place-items: center;
+        width: 74px;
+        height: 74px;
+        margin: 26px 0 20px;
+        border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+        color: var(--primary);
+        font-size: 34px;
+        letter-spacing: 0;
+        animation: bio-blob-morph 10s ease-in-out infinite;
+      }
+      @keyframes bio-blob-morph {
+        0%,
+        100% {
+          border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+        }
+        33% {
+          border-radius: 58% 42% 44% 56% / 42% 60% 44% 54%;
+        }
+        66% {
+          border-radius: 40% 60% 58% 42% / 54% 42% 56% 44%;
+        }
+      }
+      button:not(.rail-link):not(.rail-action):not(.dialog-close) {
+        transition:
+          transform 0.35s var(--spring),
+          background 0.25s ease,
+          color 0.25s ease,
+          box-shadow 0.3s ease,
+          border-color 0.25s ease,
+          border-radius 0.6s var(--spring);
+      }
+      button:not(.rail-link):not(.rail-action):not(.dialog-close):hover {
+        border-radius: 11px 22px 11px 24px;
+      }
+      button:not(.rail-link):not(.rail-action):not(.dialog-close):active {
+        transform: scale(0.94) translateY(1px);
+        transition-duration: 0.09s;
+      }
+
+      .bio-stamp {
+        position: fixed;
+        inset: 0;
+        z-index: 89;
+        pointer-events: none;
+        display: grid;
+        place-items: center;
+      }
+      .bio-stamp .stamp-mark {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        width: 130px;
+        height: 130px;
+        border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+        background: linear-gradient(150deg, #8a4fff, #7000ff);
+        color: #fff;
+        font-size: 58px;
+        font-weight: 900;
+        box-shadow: 0 0 40px #7000ff88;
+        animation: bio-stamp-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+      }
+      .bio-stamp .stamp-ring {
+        position: absolute;
+        width: 132px;
+        height: 132px;
+        border-radius: 50%;
+        border: 3px solid #00f0ff;
+        opacity: 0;
+        animation: bio-stamp-ring 0.9s ease-out;
+      }
+      .bio-stamp .stamp-ring.two {
+        border-color: #ff003c;
+        animation-delay: 0.14s;
+      }
+      @keyframes bio-stamp-pop {
+        0% {
+          transform: scale(0) rotate(-24deg);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
+      }
+      @keyframes bio-stamp-ring {
+        0% {
+          transform: scale(0.4);
+          opacity: 0.9;
+        }
+        100% {
+          transform: scale(3.2);
+          opacity: 0;
+        }
+      }
+      .bio-rainbow {
+        position: fixed;
+        inset: 0;
+        z-index: 88;
+        pointer-events: none;
+        background: linear-gradient(
+          115deg,
+          rgba(196, 226, 126, 0.16),
+          rgba(127, 196, 234, 0.16),
+          rgba(238, 194, 126, 0.16),
+          rgba(185, 162, 244, 0.18),
+          rgba(252, 84, 116, 0.14)
+        );
+        animation: bio-rainbow-pulse 1.5s ease-in-out;
+      }
+      @keyframes bio-rainbow-pulse {
+        0% {
+          opacity: 0;
+        }
+        35% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      .secret-chip {
+        position: fixed;
+        z-index: 90;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        font-weight: 900;
+        font-size: 15px;
+        color: #e9d5ff;
+        text-shadow: 0 2px 10px #0006;
+        animation: bio-secret-burst 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes bio-secret-burst {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(0.6);
+        }
+        70% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.1);
+        }
+      }
     </style>
     <script>
       (() => {
@@ -12520,15 +13281,449 @@
   </head>
   <body>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
-      <div class="loader-clock" aria-hidden="true">
-        <div class="loader-clock-blob"><div class="loader-shimmer"></div></div>
-        <div class="loader-clock-ticks"></div>
-        <span class="loader-clock-hand hour" id="loader-hour"></span>
-        <span class="loader-clock-hand minute" id="loader-minute"></span>
-        <span class="loader-clock-hand second" id="loader-second"></span>
-        <span class="loader-clock-center"></span>
+      <div class="clock-container" aria-hidden="true">
+        <div class="clock-blob"><span class="clock-shimmer"></span></div>
+        <span class="clock-center"></span>
+        <span class="clock-hand hour" id="clock-hour"></span>
+        <span class="clock-hand min" id="clock-min"></span>
+        <span class="clock-hand sec" id="clock-sec"></span>
       </div>
+      <div class="loader-bar" aria-hidden="true"><span id="loader-progress"></span></div>
       <span class="loader-label" id="loader-label">ЗАГРУЗКА…</span>
+    </div>
+
+    <div class="ny-scene" aria-hidden="true">
+      <svg class="ny-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="ny-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#070d24" />
+            <stop offset="0.45" stop-color="#0e1a3f" />
+            <stop offset="0.78" stop-color="#1a2a55" />
+            <stop offset="1" stop-color="#27407266" />
+          </linearGradient>
+          <linearGradient id="ny-needle" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#57b983" />
+            <stop offset="0.5" stop-color="#2f7a52" />
+            <stop offset="1" stop-color="#164a2f" />
+          </linearGradient>
+          <linearGradient id="ny-needle-r" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#63c791" />
+            <stop offset="1" stop-color="#1f5c3b" />
+          </linearGradient>
+          <linearGradient id="ny-trunk" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a6340" />
+            <stop offset="1" stop-color="#5d4026" />
+          </linearGradient>
+          <radialGradient id="ny-moonglow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#fdf6dd" stop-opacity="0.7" />
+            <stop offset="0.55" stop-color="#fdf6dd" stop-opacity="0.18" />
+            <stop offset="1" stop-color="#fdf6dd" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="ny-aurora-a" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#34e0a6" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#34e0a6" stop-opacity="0.3" />
+            <stop offset="1" stop-color="#34e0a6" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="ny-aurora-b" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a6bff" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#8a6bff" stop-opacity="0.28" />
+            <stop offset="1" stop-color="#8a6bff" stop-opacity="0" />
+          </linearGradient>
+          <g id="ny-fir">
+            <ellipse cx="0" cy="10" rx="150" ry="22" fill="#bcd4ec" opacity="0.16" />
+            <rect x="-11" y="-46" width="22" height="46" rx="5" fill="url(#ny-trunk)" />
+            <path d="M0 -256 L66 -152 L-66 -152 Z" fill="url(#ny-needle)" />
+            <path d="M0 -196 L92 -88 L-92 -88 Z" fill="url(#ny-needle)" />
+            <path d="M0 -130 L112 -24 L-112 -24 Z" fill="url(#ny-needle)" />
+            <path d="M0 -60 L132 44 L-132 44 Z" fill="url(#ny-needle)" />
+            <path
+              d="M0 -256 L66 -152 M0 -256 L-66 -152"
+              stroke="#e9f3fb"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -196 L92 -88 M0 -196 L-92 -88"
+              stroke="#e4eef8"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -130 L112 -24 M0 -130 L-112 -24"
+              stroke="#e4eef8"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -60 L132 44 M0 -60 L-132 44"
+              stroke="#eef5fb"
+              stroke-width="7"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path d="M0 -262 L34 -174 L-34 -174 Z" fill="#f4f9fb" opacity="0.5" />
+            <circle cx="0" cy="-216" r="6.4" fill="#ff6b84" />
+            <circle cx="-34" cy="-188" r="6.4" fill="#ffd166" />
+            <circle cx="40" cy="-162" r="6.4" fill="#6fc3ff" />
+            <circle cx="-52" cy="-140" r="6.4" fill="#b48cff" />
+            <circle cx="14" cy="-110" r="6.4" fill="#ff6b84" />
+            <circle cx="-20" cy="-76" r="6.4" fill="#6fc3ff" />
+            <circle cx="46" cy="-60" r="6.4" fill="#ffd166" />
+            <circle cx="-60" cy="-28" r="6.4" fill="#b48cff" />
+            <circle cx="8" cy="-16" r="6.4" fill="#ffd166" />
+            <circle cx="66" cy="-8" r="6.4" fill="#ff6b84" />
+            <path
+              d="M0 -278 l5.2 10.4 11.4 1.5 -8.4 8 2.2 11.2 -10.4 -5.6 -10.4 5.6 2.2 -11.2 -8.4 -8 11.4 -1.5 Z"
+              fill="#ffd76a"
+            />
+            <circle cx="0" cy="-270" r="14" fill="#ffd76a" opacity="0.25" />
+          </g>
+          <g id="ny-fir-r">
+            <ellipse cx="0" cy="8" rx="120" ry="16" fill="#bcd4ec" opacity="0.13" />
+            <rect x="-9" y="-38" width="18" height="38" rx="4" fill="url(#ny-trunk)" />
+            <path d="M0 -210 L56 -126 L-56 -126 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -158 L78 -72 L-78 -72 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -102 L96 -16 L-96 -16 Z" fill="url(#ny-needle-r)" />
+            <path d="M0 -44 L112 36 L-112 36 Z" fill="url(#ny-needle-r)" />
+            <path
+              d="M0 -210 L56 -126 M0 -210 L-56 -126"
+              stroke="#e9f3fb"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -158 L78 -72 M0 -158 L-78 -72"
+              stroke="#e4eef8"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -102 L96 -16 M0 -102 L-96 -16"
+              stroke="#e4eef8"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <path
+              d="M0 -44 L112 36 M0 -44 L-112 36"
+              stroke="#eef5fb"
+              stroke-width="6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle cx="0" cy="-176" r="5.4" fill="#ffd166" />
+            <circle cx="-30" cy="-150" r="5.4" fill="#6fc3ff" />
+            <circle cx="34" cy="-120" r="5.4" fill="#ff6b84" />
+            <circle cx="-16" cy="-88" r="5.4" fill="#b48cff" />
+            <circle cx="28" cy="-58" r="5.4" fill="#ffd166" />
+            <circle cx="-42" cy="-34" r="5.4" fill="#ff6b84" />
+            <path
+              d="M0 -224 l4.6 9.4 10.2 1.3 -7.6 7.2 2 10.2 -9.2 -5 -9.2 5 2 -10.2 -7.6 -7.2 10.2 -1.3 Z"
+              fill="#ffe08a"
+            />
+          </g>
+          <g id="ny-gift-r">
+            <rect x="-17" y="-24" width="34" height="24" rx="3" fill="#c74b63" />
+            <rect x="-17" y="-9" width="34" height="6" fill="#ffe9c9" />
+            <rect x="-3" y="-24" width="6" height="24" fill="#ffe9c9" />
+          </g>
+          <g id="ny-gift-g">
+            <rect x="-17" y="-22" width="34" height="22" rx="3" fill="#2f8a5f" />
+            <rect x="-17" y="-8" width="34" height="5" fill="#ffd76a" />
+            <rect x="-3" y="-22" width="5" height="22" fill="#ffd76a" />
+          </g>
+        </defs>
+        <rect x="0" y="0" width="1440" height="900" fill="url(#ny-sky)" />
+        <g class="ny-aurora">
+          <rect x="0" y="120" width="1440" height="220" fill="url(#ny-aurora-a)" />
+          <rect x="0" y="70" width="1440" height="260" fill="url(#ny-aurora-b)" />
+        </g>
+        <g class="ny-stars">
+          <circle class="ny-star" cx="84" cy="80" r="2.1" />
+          <circle class="ny-star" cx="206" cy="150" r="1.4" />
+          <circle class="ny-star" cx="330" cy="64" r="2.4" />
+          <circle class="ny-star" cx="452" cy="196" r="1.5" />
+          <circle class="ny-star" cx="568" cy="96" r="1.9" />
+          <circle class="ny-star" cx="700" cy="176" r="1.3" />
+          <circle class="ny-star" cx="812" cy="70" r="2.3" />
+          <circle class="ny-star" cx="930" cy="210" r="1.5" />
+          <circle class="ny-star" cx="1044" cy="110" r="2" />
+          <circle class="ny-star" cx="1360" cy="90" r="2.2" />
+          <circle class="ny-star" cx="140" cy="300" r="1.4" />
+          <circle class="ny-star" cx="290" cy="392" r="1.7" />
+          <circle class="ny-star" cx="430" cy="300" r="1.2" />
+          <circle class="ny-star" cx="640" cy="330" r="1.6" />
+          <circle class="ny-star" cx="880" cy="360" r="1.3" />
+          <circle class="ny-star" cx="1010" cy="320" r="1.8" />
+          <circle class="ny-star" cx="1150" cy="410" r="1.4" />
+          <circle class="ny-star" cx="1270" cy="300" r="1.6" />
+          <circle class="ny-star" cx="60" cy="470" r="1.5" />
+          <circle class="ny-star" cx="520" cy="470" r="1.3" />
+          <circle class="ny-star" cx="760" cy="470" r="1.8" />
+          <circle class="ny-star" cx="1340" cy="500" r="1.5" />
+        </g>
+        <g class="ny-moon">
+          <circle cx="1186" cy="168" r="160" fill="url(#ny-moonglow)" />
+          <circle cx="1186" cy="168" r="60" fill="#fdf6dd" />
+          <circle cx="1168" cy="156" r="10" fill="#e9dfc0" opacity="0.6" />
+          <circle cx="1206" cy="188" r="7" fill="#e9dfc0" opacity="0.5" />
+          <circle cx="1190" cy="140" r="5" fill="#e9dfc0" opacity="0.5" />
+        </g>
+        <g class="ny-shooting">
+          <line class="shooting-star" x1="150" y1="40" x2="262" y2="118" />
+        </g>
+        <g class="ny-garland">
+          <path
+            d="M0 46 Q 240 108 480 78 T 960 88 T 1440 60"
+            fill="none"
+            stroke="#3a1f12"
+            stroke-width="3.6"
+            opacity="0.85"
+          />
+          <path
+            d="M0 58 Q 240 120 480 90 T 960 100 T 1440 72"
+            fill="none"
+            stroke="#241208"
+            stroke-width="2"
+            opacity="0.5"
+          />
+          <circle cx="96" cy="72" r="8" fill="#ff6b84" />
+          <circle cx="240" cy="88" r="8" fill="#ffd166" />
+          <circle cx="384" cy="84" r="8" fill="#6fc3ff" />
+          <circle cx="528" cy="82" r="8" fill="#b48cff" />
+          <circle cx="672" cy="86" r="8" fill="#ff6b84" />
+          <circle cx="816" cy="90" r="8" fill="#ffd166" />
+          <circle cx="960" cy="90" r="8" fill="#6fc3ff" />
+          <circle cx="1104" cy="84" r="8" fill="#b48cff" />
+          <circle cx="1248" cy="72" r="8" fill="#ff6b84" />
+          <circle cx="1386" cy="62" r="8" fill="#ffd166" />
+          <circle cx="96" cy="72" r="13" fill="#ff6b84" opacity="0.22" />
+          <circle cx="528" cy="82" r="13" fill="#b48cff" opacity="0.22" />
+          <circle cx="960" cy="90" r="13" fill="#6fc3ff" opacity="0.22" />
+        </g>
+        <path d="M0 900 L0 812 Q 360 782 720 812 T 1440 806 L1440 900 Z" fill="#cfe0f4" opacity="0.1" />
+        <path d="M0 900 L0 856 Q 420 826 840 858 T 1440 850 L1440 900 Z" fill="#eaf3fd" opacity="0.18" />
+        <g class="ny-trees" transform="translate(0 0)">
+          <g transform="translate(140 862) scale(0.5)" opacity="0.55"><use href="#ny-fir-r" /></g>
+          <g transform="translate(500 884) scale(0.62)" opacity="0.8"><use href="#ny-fir-r" /></g>
+          <g transform="translate(1030 884) scale(0.56)" opacity="0.75"><use href="#ny-fir-r" /></g>
+          <g transform="translate(1360 878) scale(0.72)" opacity="0.95"><use href="#ny-fir-r" /></g>
+          <g transform="translate(310 880) scale(1.02)"><use href="#ny-fir" /></g>
+          <g transform="translate(880 876) scale(1.12)"><use href="#ny-fir" /></g>
+          <g transform="translate(742 886) scale(0.8)"><use href="#ny-fir" /></g>
+          <g transform="translate(1206 872) scale(0.9)"><use href="#ny-fir" /></g>
+          <use href="#ny-gift-r" transform="translate(350 894)" />
+          <use href="#ny-gift-g" transform="translate(404 894)" />
+          <use href="#ny-gift-r" transform="translate(812 898)" />
+          <use href="#ny-gift-g" transform="translate(866 896)" />
+        </g>
+        <g class="ny-fireworks">
+          <g class="fw-burst" transform="translate(238 190)">
+            <path
+              d="M0 0 L0 -52 M0 0 L37 -37 M0 0 L52 0 M0 0 L37 37 M0 0 L0 52 M0 0 L-37 37 M0 0 L-52 0 M0 0 L-37 -37"
+              stroke="#ffd166"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="5.4" fill="#fff6de" />
+          </g>
+          <g class="fw-burst" transform="translate(952 132)">
+            <path
+              d="M0 0 L0 -44 M0 0 L31 -31 M0 0 L44 0 M0 0 L31 31 M0 0 L0 44 M0 0 L-31 31 M0 0 L-44 0 M0 0 L-31 -31"
+              stroke="#8a6bff"
+              stroke-width="2.4"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="4.6" fill="#e9e1ff" />
+          </g>
+          <g class="fw-burst" transform="translate(640 92)">
+            <path
+              d="M0 0 L0 -38 M0 0 L27 -27 M0 0 L38 0 M0 0 L27 27 M0 0 L0 38 M0 0 L-27 27 M0 0 L-38 0 M0 0 L-27 -27"
+              stroke="#ff6b84"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="4" fill="#ffe2e8" />
+          </g>
+          <g class="fw-burst" transform="translate(1204 176)">
+            <path
+              d="M0 0 L0 -34 M0 0 L24 -24 M0 0 L34 0 M0 0 L24 24 M0 0 L0 34 M0 0 L-24 24 M0 0 L-34 0 M0 0 L-24 -24"
+              stroke="#6fc3ff"
+              stroke-width="2"
+              stroke-linecap="round"
+              fill="none"
+            />
+            <circle r="3.6" fill="#e2f3ff" />
+          </g>
+        </g>
+      </svg>
+      <span class="ny-snow ny-snow-back"
+        ><i style="--x: 4%; --delay: -2s; --dur: 16s; --size: 5px; --drift: 30px"></i
+        ><i class="crystal" style="--x: 15%; --delay: -9s; --dur: 20s; --size: 6px; --drift: -26px"></i
+        ><i style="--x: 26%; --delay: -5s; --dur: 17s; --size: 5px; --drift: 34px"></i
+        ><i class="crystal" style="--x: 37%; --delay: -12s; --dur: 22s; --size: 6px; --drift: -30px"></i
+        ><i style="--x: 48%; --delay: -3s; --dur: 15s; --size: 5px; --drift: 28px"></i
+        ><i class="crystal" style="--x: 59%; --delay: -8s; --dur: 19s; --size: 6px; --drift: -34px"></i
+        ><i style="--x: 70%; --delay: -6s; --dur: 16s; --size: 5px; --drift: 32px"></i
+        ><i class="crystal" style="--x: 81%; --delay: -14s; --dur: 23s; --size: 6px; --drift: -28px"></i
+        ><i style="--x: 92%; --delay: -4s; --dur: 17s; --size: 5px; --drift: 30px"></i
+      ></span>
+      <span class="ny-snow"
+        ><i style="--x: 4%; --delay: -2s; --dur: 13s; --size: 8px; --drift: 40px"></i
+        ><i class="crystal" style="--x: 11%; --delay: -9s; --dur: 17s; --size: 9px; --drift: -34px"></i
+        ><i style="--x: 17%; --delay: -5s; --dur: 14s; --size: 10px; --drift: 52px"></i
+        ><i class="crystal" style="--x: 24%; --delay: -12s; --dur: 19s; --size: 8px; --drift: -44px"></i
+        ><i style="--x: 31%; --delay: -3s; --dur: 12s; --size: 9px; --drift: 38px"></i
+        ><i class="crystal" style="--x: 38%; --delay: -8s; --dur: 16s; --size: 7px; --drift: -52px"></i
+        ><i style="--x: 45%; --delay: -6s; --dur: 13s; --size: 11px; --drift: 46px"></i
+        ><i class="crystal" style="--x: 52%; --delay: -14s; --dur: 20s; --size: 9px; --drift: -38px"></i
+        ><i style="--x: 59%; --delay: -4s; --dur: 14s; --size: 8px; --drift: 42px"></i
+        ><i class="crystal" style="--x: 66%; --delay: -10s; --dur: 18s; --size: 7px; --drift: -46px"></i
+        ><i style="--x: 73%; --delay: -7s; --dur: 15s; --size: 10px; --drift: 36px"></i
+        ><i class="crystal" style="--x: 80%; --delay: -13s; --dur: 21s; --size: 9px; --drift: -40px"></i
+        ><i style="--x: 87%; --delay: -5s; --dur: 13s; --size: 9px; --drift: 44px"></i
+        ><i class="crystal" style="--x: 93%; --delay: -11s; --dur: 17s; --size: 7px; --drift: -32px"></i
+        ><i style="--x: 50%; --delay: -1s; --dur: 12s; --size: 7px; --drift: 28px"></i
+        ><i class="crystal" style="--x: 8%; --delay: -7s; --dur: 15s; --size: 8px; --drift: 30px"></i
+        ><i style="--x: 62%; --delay: -2s; --dur: 16s; --size: 7px; --drift: -30px"></i
+        ><i class="crystal" style="--x: 90%; --delay: -8s; --dur: 14s; --size: 10px; --drift: 34px"></i
+        ><i style="--x: 21%; --delay: -15s; --dur: 22s; --size: 6px; --drift: -42px"></i
+        ><i class="crystal" style="--x: 43%; --delay: -9s; --dur: 15s; --size: 8px; --drift: 40px"></i
+        ><i style="--x: 77%; --delay: -4s; --dur: 18s; --size: 9px; --drift: -36px"></i
+        ><i class="crystal" style="--x: 55%; --delay: -12s; --dur: 17s; --size: 7px; --drift: 26px"></i
+        ><i style="--x: 33%; --delay: -6s; --dur: 20s; --size: 6px; --drift: -30px"></i
+        ><i class="crystal" style="--x: 70%; --delay: -1s; --dur: 16s; --size: 8px; --drift: 32px"></i
+      ></span>
+    </div>
+
+    <div class="nebula-scene" aria-hidden="true">
+      <svg class="nebula-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="nb-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#07060f" />
+            <stop offset="0.5" stop-color="#0d0a1e" />
+            <stop offset="1" stop-color="#120a26" />
+          </linearGradient>
+          <radialGradient id="nb-cloud-magenta" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff4f9a" stop-opacity="0.42" />
+            <stop offset="0.45" stop-color="#b23bff" stop-opacity="0.24" />
+            <stop offset="1" stop-color="#b23bff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-violet" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#8b5cff" stop-opacity="0.38" />
+            <stop offset="0.5" stop-color="#5a3cf0" stop-opacity="0.2" />
+            <stop offset="1" stop-color="#5a3cf0" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-teal" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#1fd1c9" stop-opacity="0.3" />
+            <stop offset="0.5" stop-color="#0f7ea6" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#0f7ea6" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-blue" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#3d6bff" stop-opacity="0.34" />
+            <stop offset="0.55" stop-color="#1e3a8a" stop-opacity="0.16" />
+            <stop offset="1" stop-color="#1e3a8a" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-cloud-ember" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ff9a5c" stop-opacity="0.26" />
+            <stop offset="0.5" stop-color="#c2553d" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#c2553d" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-star-glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.9" />
+            <stop offset="0.4" stop-color="#cdd6ff" stop-opacity="0.35" />
+            <stop offset="1" stop-color="#cdd6ff" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="nb-planet" cx="0.35" cy="0.3" r="0.75">
+            <stop offset="0" stop-color="#e9c9ff" />
+            <stop offset="0.4" stop-color="#7a5bd6" />
+            <stop offset="0.78" stop-color="#2c1a63" />
+            <stop offset="1" stop-color="#150a38" />
+          </radialGradient>
+          <linearGradient id="nb-planet-ring" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffd7ef" stop-opacity="0" />
+            <stop offset="0.2" stop-color="#ffd7ef" stop-opacity="0.75" />
+            <stop offset="0.5" stop-color="#c9a8ff" stop-opacity="0.9" />
+            <stop offset="0.8" stop-color="#ffd7ef" stop-opacity="0.7" />
+            <stop offset="1" stop-color="#ffd7ef" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="1440" height="900" fill="url(#nb-sky)" />
+        <g class="nebula-clouds">
+          <ellipse cx="300" cy="240" rx="560" ry="340" fill="url(#nb-cloud-magenta)" />
+          <ellipse cx="1130" cy="200" rx="600" ry="360" fill="url(#nb-cloud-violet)" />
+          <ellipse cx="720" cy="150" rx="520" ry="300" fill="url(#nb-cloud-teal)" />
+          <ellipse cx="180" cy="600" rx="520" ry="300" fill="url(#nb-cloud-blue)" />
+          <ellipse cx="1260" cy="580" rx="540" ry="320" fill="url(#nb-cloud-teal)" />
+          <ellipse cx="760" cy="700" rx="620" ry="360" fill="url(#nb-cloud-violet)" />
+          <ellipse cx="430" cy="430" rx="300" ry="200" fill="url(#nb-cloud-ember)" />
+        </g>
+        <g class="nebula-stars">
+          <circle class="nb-star" cx="120" cy="90" r="2.4" fill="#ffffff" />
+          <circle class="nb-star" cx="262" cy="180" r="1.3" fill="#cfe0ff" />
+          <circle class="nb-star" cx="360" cy="70" r="1.8" fill="#ffffff" />
+          <circle class="nb-star" cx="452" cy="240" r="1.2" fill="#e7d6ff" />
+          <circle class="nb-star" cx="580" cy="120" r="2.2" fill="#ffffff" />
+          <circle class="nb-star" cx="690" cy="250" r="1.4" fill="#d7ffef" />
+          <circle class="nb-star" cx="830" cy="80" r="1.9" fill="#ffffff" />
+          <circle class="nb-star" cx="960" cy="260" r="1.3" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1070" cy="120" r="2.1" fill="#ffffff" />
+          <circle class="nb-star" cx="1200" cy="210" r="1.5" fill="#e0ecff" />
+          <circle class="nb-star" cx="1330" cy="90" r="2.3" fill="#ffffff" />
+          <circle class="nb-star" cx="90" cy="420" r="1.4" fill="#e7d6ff" />
+          <circle class="nb-star" cx="300" cy="470" r="1.7" fill="#ffffff" />
+          <circle class="nb-star" cx="520" cy="520" r="1.2" fill="#d7ffef" />
+          <circle class="nb-star" cx="740" cy="430" r="1.6" fill="#ffffff" />
+          <circle class="nb-star" cx="900" cy="540" r="1.3" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1120" cy="470" r="1.8" fill="#ffffff" />
+          <circle class="nb-star" cx="1300" cy="430" r="1.4" fill="#cfe0ff" />
+          <circle class="nb-star" cx="140" cy="700" r="1.5" fill="#ffffff" />
+          <circle class="nb-star" cx="420" cy="760" r="1.3" fill="#e0ecff" />
+          <circle class="nb-star" cx="660" cy="690" r="1.7" fill="#ffffff" />
+          <circle class="nb-star" cx="980" cy="730" r="1.4" fill="#ffd6f2" />
+          <circle class="nb-star" cx="1220" cy="700" r="1.6" fill="#ffffff" />
+          <circle class="nb-star" cx="1380" cy="600" r="1.3" fill="#e7d6ff" />
+          <circle class="nb-star nb-star-bright" cx="620" cy="330" r="2.6" fill="#ffffff" />
+          <circle class="nb-star nb-star-bright" cx="1180" cy="330" r="2.4" fill="#ffffff" />
+          <circle class="nb-star nb-star-bright" cx="230" cy="300" r="2" fill="#fff3d6" />
+        </g>
+        <g class="nebula-shooting">
+          <line class="nb-meteor" x1="180" y1="60" x2="330" y2="150" />
+          <line class="nb-meteor nb-meteor-two" x1="920" y1="20" x2="1030" y2="90" />
+        </g>
+        <g class="nebula-planet">
+          <circle cx="1240" cy="700" r="86" fill="url(#nb-planet)" />
+          <ellipse
+            cx="1240"
+            cy="700"
+            rx="150"
+            ry="30"
+            fill="none"
+            stroke="url(#nb-planet-ring)"
+            stroke-width="11"
+            transform="rotate(-18 1240 700)"
+          />
+          <ellipse
+            cx="1240"
+            cy="700"
+            rx="132"
+            ry="24"
+            fill="none"
+            stroke="url(#nb-planet-ring)"
+            stroke-width="5"
+            transform="rotate(-18 1240 700)"
+          />
+          <circle cx="1216" cy="672" r="16" fill="#ffffff" opacity="0.14" />
+        </g>
+      </svg>
     </div>
 
     <div class="atmosphere" aria-hidden="true">
@@ -12832,6 +14027,11 @@
       <symbol id="i-mark" viewBox="0 0 32 32">
         <path d="m3 25 10-19h7l9 19h-9l-4-12-6 12Z" />
         <path d="M18 19h8v6h-8z" />
+      </symbol>
+      <symbol id="i-volume" viewBox="0 0 448 512">
+        <path
+          d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3zM412.6 181.5C434.1 199.1 448 225.9 448 256s-13.9 56.9-35.4 74.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C393.1 284.4 400 271 400 256s-6.9-28.4-17.7-37.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5z"
+        />
       </symbol>
       <symbol id="i-gamepad" viewBox="0 0 640 512">
         <path
@@ -14300,6 +15500,20 @@
               ></span
             ></label>
           </div>
+          <div class="setting-row">
+            <div>
+              <label class="setting-title" for="sound-switch"
+                ><svg class="icon" aria-hidden="true"><use href="#i-volume" /></svg>Звуки</label
+              >
+              <p class="setting-description">Мягкие сигналы переходов и действий.</p>
+            </div>
+            <label class="switch"
+              ><input id="sound-switch" data-preference="sound" type="checkbox" checked /><span
+                class="switch-track"
+                aria-hidden="true"
+              ></span
+            ></label>
+          </div>
         </div>
         <div class="settings-section">
           <h3>
@@ -14313,7 +15527,13 @@
               <span class="background-sample sample-aurora" aria-hidden="true"></span
               ><span>Аура</span></button
             ><button type="button" data-background="plain" aria-pressed="false">
-              <span class="background-sample sample-plain" aria-hidden="true"></span><span>Тишина</span>
+              <span class="background-sample sample-plain" aria-hidden="true"></span
+              ><span>Тишина</span></button
+            ><button type="button" data-background="newyear" aria-pressed="false">
+              <span class="background-sample sample-newyear" aria-hidden="true"></span
+              ><span>Новый год</span></button
+            ><button type="button" data-background="nebula" data-secret aria-pressed="false" hidden>
+              <span class="background-sample sample-nebula" aria-hidden="true"></span><span>Туманность</span>
             </button>
           </div>
         </div>
@@ -14774,8 +15994,24 @@
         function finishBoot() {
           const root = document.documentElement, loader = document.getElementById("app-preloader");
           if (!loader) return;
+          let clockTimer = 0;
+          const tickClock = () => {
+            const hour = document.getElementById("clock-hour"), min = document.getElementById("clock-min"), sec = document.getElementById("clock-sec");
+            if (!hour || !min || !sec) return;
+            const now = /* @__PURE__ */ new Date();
+            const ms = now.getMilliseconds() / 1e3;
+            const seconds = now.getSeconds() + ms;
+            const minutes = now.getMinutes() + seconds / 60;
+            const hours = now.getHours() % 12 + minutes / 60;
+            hour.style.transform = `rotate(${hours * 30}deg)`;
+            min.style.transform = `rotate(${minutes * 6}deg)`;
+            sec.style.transform = `rotate(${seconds * 6}deg)`;
+            clockTimer = requestAnimationFrame(tickClock);
+          };
+          clockTimer = requestAnimationFrame(tickClock);
           if (!root.dataset.booting) {
             loader.hidden = true;
+            cancelAnimationFrame(clockTimer);
             return;
           }
           const started = performance.now();
@@ -14783,23 +16019,30 @@
           const english = root.lang === "en";
           loader.setAttribute("aria-label", english ? "Loading" : "Загрузка");
           document.getElementById("loader-label").textContent = english ? "LOADING…" : "ЗАГРУЗКА…";
-          let timer = 0, finished = false;
-          const tick = () => {
-            const date = /* @__PURE__ */ new Date(), seconds = date.getSeconds() + date.getMilliseconds() / 1e3, minutes = date.getMinutes() + seconds / 60;
-            document.getElementById("loader-hour").style.transform = `rotate(${date.getHours() % 12 * 30 + minutes / 2}deg)`;
-            document.getElementById("loader-minute").style.transform = `rotate(${minutes * 6}deg)`;
-            document.getElementById("loader-second").style.transform = `rotate(${seconds * 6}deg)`;
+          const progress = document.getElementById("loader-progress");
+          let finished = false;
+          const paint = (value) => {
+            if (progress) progress.style.width = `${Math.min(100, Math.max(0, value))}%`;
           };
-          tick();
-          if (enabled()) timer = setInterval(tick, 80);
+          const tick = () => {
+            if (finished) return;
+            const elapsed = performance.now() - started;
+            const t = Math.min(1, elapsed / 1150);
+            paint(4 + 88 * (1 - Math.pow(1 - t, 3)));
+            if (t < 1) requestAnimationFrame(tick);
+          };
+          paint(0);
+          if (enabled()) requestAnimationFrame(tick);
+          else paint(92);
           const finish = () => {
             if (finished) return;
             finished = true;
-            clearInterval(timer);
             clearTimeout(deadline);
+            paint(100);
             const complete = () => {
               const announce = Boolean(root.dataset.booting);
               loader.hidden = true;
+              cancelAnimationFrame(clockTimer);
               delete root.dataset.booting;
               if (announce) window.dispatchEvent(new Event("apprevealed"));
             };
@@ -14810,12 +16053,12 @@
             const animation = loader.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, easing: "ease-out" });
             animation.finished.then(complete).catch(complete);
           };
-          const deadline = setTimeout(finish, 2200);
+          const deadline = setTimeout(finish, 2e3);
           Promise.race([
             document.fonts?.ready || Promise.resolve(),
             new Promise((resolve) => setTimeout(resolve, 1600))
           ]).then(() => {
-            setTimeout(finish, enabled() ? Math.max(0, 620 - (performance.now() - started)) : 0);
+            setTimeout(finish, enabled() ? Math.max(0, 1400 - (performance.now() - started)) : 0);
           });
         }
 
@@ -18234,6 +19477,154 @@
           }
         };
 
+        // assets/bio/sound.js
+        var BioSound = class {
+          constructor(enabled) {
+            this.enabled = enabled;
+            this.context = null;
+            this.master = null;
+            this.voices = /* @__PURE__ */ new Set();
+            this.noiseBuffer = null;
+            this.lastUi = 0;
+          }
+          setEnabled(value) {
+            this.enabled = value;
+            if (!value) {
+              this.stop();
+              this.context?.suspend().catch(() => {
+              });
+            }
+          }
+          unlock() {
+            if (!this.enabled || document.hidden) return;
+            const Audio = window.AudioContext || window.webkitAudioContext;
+            if (!Audio) return;
+            if (!this.context) {
+              this.context = new Audio();
+              this.master = this.context.createGain();
+              this.master.gain.value = 0.16;
+              this.master.connect(this.context.destination);
+            }
+            if (this.context.state === "suspended") this.context.resume().catch(() => {
+            });
+          }
+          stop() {
+            for (const voice of this.voices) {
+              try {
+                voice.stop();
+              } catch {
+              }
+            }
+            this.voices.clear();
+          }
+          envelope(source, duration, delay, volume) {
+            const ctx = this.context;
+            if (!ctx || document.hidden || !this.enabled || this.voices.size >= 16) return;
+            const start = ctx.currentTime + delay, gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(volume, start + 6e-3);
+            gain.gain.exponentialRampToValueAtTime(1e-4, start + duration);
+            source.connect(gain);
+            gain.connect(this.master);
+            this.voices.add(source);
+            source.start(start);
+            source.stop(start + duration + 0.02);
+            source.addEventListener(
+              "ended",
+              () => {
+                source.disconnect();
+                gain.disconnect();
+                this.voices.delete(source);
+              },
+              { once: true }
+            );
+          }
+          tone(frequency, duration = 0.1, delay = 0, volume = 0.05, type = "sine", endFrequency = frequency) {
+            if (!this.enabled || document.hidden) return;
+            this.unlock();
+            if (!this.context) return;
+            const source = this.context.createOscillator(), start = this.context.currentTime + delay;
+            source.type = type;
+            source.frequency.setValueAtTime(frequency, start);
+            source.frequency.exponentialRampToValueAtTime(Math.max(30, endFrequency), start + duration);
+            this.envelope(source, duration, delay, volume);
+          }
+          noise(duration = 0.1, delay = 0, volume = 0.04, frequency = 2e3) {
+            if (!this.enabled || document.hidden) return;
+            this.unlock();
+            if (!this.context) return;
+            const ctx = this.context;
+            if (!this.noiseBuffer) {
+              this.noiseBuffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.5), ctx.sampleRate);
+              const data = this.noiseBuffer.getChannelData(0);
+              for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+            }
+            const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter();
+            source.buffer = this.noiseBuffer;
+            filter.type = "bandpass";
+            filter.frequency.value = frequency;
+            filter.Q.value = 0.7;
+            const start = ctx.currentTime + delay, gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(volume, start + 6e-3);
+            gain.gain.exponentialRampToValueAtTime(1e-4, start + duration);
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.master);
+            this.voices.add(source);
+            source.start(start);
+            source.stop(start + duration + 0.02);
+            source.addEventListener(
+              "ended",
+              () => {
+                source.disconnect();
+                filter.disconnect();
+                gain.disconnect();
+                this.voices.delete(source);
+              },
+              { once: true }
+            );
+          }
+          play(name) {
+            if (!this.enabled || document.hidden) return;
+            this.unlock();
+            const now = performance.now();
+            if (["tap", "toggle"].includes(name)) {
+              if (now - this.lastUi < 60) return;
+              this.lastUi = now;
+            }
+            switch (name) {
+              case "tap":
+                this.tone(430, 0.08, 0, 0.05, "sine", 620);
+                break;
+              case "toggle":
+                this.tone(560, 0.09, 0, 0.05, "triangle", 780);
+                break;
+              case "open":
+                this.tone(300, 0.2, 0, 0.055, "sine", 700);
+                this.noise(0.12, 0, 0.02, 2400);
+                break;
+              case "close":
+                this.tone(540, 0.16, 0, 0.05, "sine", 240);
+                break;
+              case "swoosh":
+                this.noise(0.28, 0, 0.035, 900);
+                break;
+              case "pop":
+                this.tone(720, 0.06, 0, 0.045, "sine", 980);
+                break;
+              case "secret":
+                [392, 523, 659, 784, 1046].forEach((note, i) => this.tone(note, 0.22, i * 0.07, 0.06));
+                this.noise(0.4, 0.3, 0.03, 3200);
+                break;
+              case "chime":
+                this.tone(1568, 0.12, 0, 0.05, "sine", 1568);
+                this.tone(2093, 0.18, 0.06, 0.035, "sine", 2093);
+                break;
+            }
+          }
+        };
+
         // assets/bio/app.js
         (() => {
           "use strict";
@@ -18266,11 +19657,12 @@
           const state = { view: "home", motion: !reduced.matches && storage.get("motion", "on") !== "off" };
           const preferences2 = {
             lang: storage.get("lang", "ru") === "en" ? "en" : "ru",
-            background: ["constellation", "aurora", "plain"].includes(storage.get("background")) ? storage.get("background") : "constellation",
+            background: ["constellation", "aurora", "plain", "nebula", "newyear"].includes(storage.get("background")) ? storage.get("background") : "constellation",
             transition: normalizeTransition(storage.get("transition", "star"))
           };
-          for (const key of ["ripple", "particles", "liquid", "glass"])
+          for (const key of ["ripple", "particles", "liquid", "glass", "sound"])
             preferences2[key] = !["off", "false", false].includes(storage.get(key, "on"));
+          const sound = new BioSound(preferences2.sound);
           let renderer = null;
           const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
           const escapeHTML = (text) => String(text).replace(
@@ -19518,7 +20910,10 @@
           const pillRecords = /* @__PURE__ */ new WeakMap(), pillObserver = new ResizeObserver((entries) => entries.forEach((entry) => syncPill(entry.target, false)));
           function syncPill(group, animate = state.motion) {
             if (!group?.isConnected || !group.getClientRects().length || group.closest("[hidden]")) return;
-            const selected = $2(':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"]', group);
+            const selected = $2(
+              ':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"],:scope>[aria-current]:not([aria-current="false"]),:scope>button[aria-checked="true"],:scope>.is-active',
+              group
+            ) || $2(":scope>button, :scope>a", group);
             if (!selected) return;
             let thumb = $2(":scope>.spring-thumb", group);
             if (!thumb) {
@@ -19900,11 +21295,12 @@
             return { refresh };
           }
           function applyPreferences(animate = false) {
-            for (const key of ["ripple", "particles", "liquid", "glass"]) {
+            for (const key of ["ripple", "particles", "liquid", "glass", "sound"]) {
               root.dataset[key] = String(preferences2[key]);
               const input = $2('[data-preference="' + key + '"]');
               if (input) input.checked = preferences2[key];
             }
+            sound.setEnabled(preferences2.sound);
             root.dataset.background = preferences2.background;
             $$2("[data-background]").filter((e) => e.tagName === "BUTTON").forEach(
               (button) => button.setAttribute("aria-pressed", String(button.dataset.background === preferences2.background))
@@ -19962,6 +21358,7 @@
                 storage.set(input.dataset.preference, input.checked ? "on" : "off");
                 if (input.dataset.preference === "liquid" && !input.checked)
                   $$2("svg.icon").forEach((icon) => icon.getAnimations().forEach((a) => a.cancel()));
+                sound.play("toggle");
                 applyPreferences();
               })
             );
@@ -19969,6 +21366,7 @@
               (button) => button.addEventListener("click", () => {
                 preferences2.background = button.dataset.background;
                 storage.set("background", preferences2.background);
+                sound.play("pop");
                 applyPreferences(true);
               })
             );
@@ -20002,6 +21400,7 @@
                 particles: true,
                 liquid: true,
                 glass: true,
+                sound: true,
                 background: "constellation",
                 transition: "star"
               });
@@ -20151,6 +21550,7 @@
           }
           function switchView(view, { history = true, focus = false, animate = true, source = null } = {}) {
             if (!validViews.has(view) || view === pendingView) return;
+            sound.play("swoosh");
             windowMotion?.finish();
             pendingView = view;
             const version = ++navigationVersion;
@@ -20505,6 +21905,7 @@
           }
           function openDialog(dialog, opener = document.activeElement) {
             if (!dialog || dialog.open) return;
+            sound.play("open");
             const source = sourceForWindow(opener);
             dialogOpeners.set(dialog, opener);
             dialogSources.set(dialog, source);
@@ -20531,6 +21932,7 @@
           }
           async function closeDialog(dialog) {
             if (!dialog?.open) return;
+            sound.play("close");
             if (dialog.classList.contains("is-closing")) return dialog._closingPromise;
             const opener = dialogOpeners.get(dialog), source = sourceForWindow(dialogSources.get(dialog) || opener);
             const current = boxOf(dialog);
@@ -20660,6 +22062,103 @@
               $2("#copy-label").textContent = "Скопировать контакт";
             }, 3e3);
           });
+          document.addEventListener("pointerdown", () => sound.unlock(), { once: true });
+          document.addEventListener("pointerdown", (event) => {
+            if (event.target.closest(".ny-snow i")) {
+              sound.play("chime");
+              return;
+            }
+            const tappable = event.target.closest(
+              "[data-project], .demo-card, .store-card, .partner-card, [data-reaction], [data-chat-scenario], [data-chat-action], [data-theme-toggle], .rail-action, .rail-link"
+            );
+            if (tappable) sound.play("tap");
+          });
+          function initializeSecrets() {
+            const code = [
+              "ArrowUp",
+              "ArrowUp",
+              "ArrowDown",
+              "ArrowDown",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowLeft",
+              "ArrowRight",
+              "b",
+              "a"
+            ];
+            let index = 0;
+            document.addEventListener("keydown", (event) => {
+              if (event.target.matches("input,textarea,select") || event.altKey || event.ctrlKey || event.metaKey) return;
+              const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+              index = key === code[index] ? index + 1 : key === code[0] ? 1 : 0;
+              if (index < code.length) return;
+              index = 0;
+              sound.play("secret");
+              flash();
+              stamp();
+              burst(".brand-mark", 16, ["✦", "❋", "✧"]);
+              $$2('button[data-background="nebula"]').forEach((button) => button.hidden = false);
+              toast(tr("Секрет разблокирован: атмосфера «Туманность» появилась в настройках."));
+            });
+            let typed = "";
+            document.addEventListener("keydown", (event) => {
+              if (event.target.matches("input,textarea,select") || event.altKey || event.ctrlKey || event.metaKey) return;
+              if (event.key.length !== 1) return;
+              typed = (typed + event.key.toLowerCase()).slice(-6);
+              if (typed !== "aubeig") return;
+              typed = "";
+              sound.play("secret");
+              burst(".brand-mark", 12, ["♡", "✦"]);
+              toast(tr("Aubeig — код с характером. Ты нашёл пасхалку."));
+            });
+            function flash() {
+              if (!state.motion) return;
+              const layer = document.createElement("div");
+              layer.className = "bio-rainbow";
+              layer.setAttribute("aria-hidden", "true");
+              document.body.append(layer);
+              setTimeout(() => layer.remove(), 1500);
+            }
+            function stamp() {
+              if (!state.motion) return;
+              const layer = document.createElement("div");
+              layer.className = "bio-stamp";
+              layer.setAttribute("aria-hidden", "true");
+              layer.innerHTML = `<span class="stamp-mark">A</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
+              document.body.append(layer);
+              setTimeout(() => layer.remove(), 1500);
+            }
+            let taps = 0, tapTimer = 0;
+            $2(".brand")?.addEventListener("click", () => {
+              taps += 1;
+              clearTimeout(tapTimer);
+              tapTimer = setTimeout(() => taps = 0, 1100);
+              if (taps < 3) return;
+              taps = 0;
+              sound.play("secret");
+              burst(".brand", 18, ["♥", "✦"]);
+              toast(tr("Aubeig передаёт привет"));
+            });
+            function burst(originSelector, count, glyphs) {
+              if (!state.motion) return;
+              const origin = $2(originSelector);
+              if (!origin) return;
+              const rect = origin.getBoundingClientRect(), cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+              for (let i = 0; i < count; i++) {
+                const chip = document.createElement("span");
+                chip.className = "secret-chip";
+                chip.textContent = glyphs[i % glyphs.length];
+                const angle = Math.PI * 2 * i / count + 0.4, distance = 38 + i % 4 * 18;
+                chip.style.setProperty("--dx", Math.cos(angle) * distance + "px");
+                chip.style.setProperty("--dy", Math.sin(angle) * distance - 20 + "px");
+                chip.style.setProperty("--rot", (i % 2 ? 1 : -1) * (120 + i % 5 * 60) + "deg");
+                chip.style.left = cx + "px";
+                chip.style.top = cy + "px";
+                document.body.append(chip);
+                setTimeout(() => chip.remove(), 1200);
+              }
+            }
+          }
           root.dataset.initialized = "true";
           initializeLab();
           initializePills();
@@ -20667,6 +22166,7 @@
           initializeKinetics();
           initializePreferences();
           initializeLanguage();
+          initializeSecrets();
           try {
             renderer = createAtmosphere();
           } catch (_) {
@@ -20729,7 +22229,8 @@
           }
           if (!["dark", "light"].includes(result.theme)) result.theme = "dark";
           if (!["ru", "en"].includes(result.lang)) result.lang = "ru";
-          if (!["constellation", "aurora", "plain"].includes(result.background)) result.background = "constellation";
+          if (!["constellation", "aurora", "plain", "nebula", "newyear"].includes(result.background))
+            result.background = "constellation";
           if (!["royal", "green", "crimson", "midnight", "gold"].includes(result.table)) result.table = "royal";
           result.transition = normalizeTransition(result.transition);
           result.volume = Math.max(0, Math.min(1, Number(result.volume) || 0));
@@ -20774,7 +22275,8 @@
             if (document.documentElement.dataset.motion === "off") return;
             panel.hidden = false;
             element2.dataset.resizing = "true";
-            const animation = element2.animate(
+            const dx = after.width - before.width, dy = after.height - before.height;
+            const animation = Math.abs(dx) < 1 && Math.abs(dy) < 1 ? null : element2.animate(
               [
                 { width: `${before.width}px`, height: `${before.height}px` },
                 { width: `${after.width}px`, height: `${after.height}px` }
@@ -20794,12 +22296,12 @@
               settled = true;
               panel.hidden = !open;
               delete element2.dataset.resizing;
-              animation.cancel();
+              animation?.cancel();
               content.cancel();
               if (this.finish === finish) this.finish = null;
             };
             this.finish = finish;
-            animation.finished.then(finish).catch(() => {
+            (animation?.finished || Promise.resolve()).then(finish).catch(() => {
             });
           }
         };
@@ -21070,6 +22572,36 @@
             document.querySelector(`.rail-link[data-view="${button.dataset.profileView}"]`)?.click();
           })
         );
+        var revealNebula = () => document.querySelectorAll('button[data-background="nebula"]').forEach((button) => button.hidden = false);
+        if (safeStorage.get("aubeig.secrets.nebula") === "on") revealNebula();
+        var konami = [
+          "ArrowUp",
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "ArrowLeft",
+          "ArrowRight",
+          "b",
+          "a"
+        ];
+        var konamiStep = 0;
+        var konamiTimer = 0;
+        document.addEventListener("keydown", (event) => {
+          if (event.target.closest("input,textarea,select") || event.altKey || event.ctrlKey || event.metaKey) return;
+          const expected = konami[konamiStep];
+          if (event.key === expected || event.key.toLowerCase() === expected) {
+            konamiStep++;
+            clearTimeout(konamiTimer);
+            konamiTimer = setTimeout(() => konamiStep = 0, 2200);
+            if (konamiStep === konami.length) {
+              konamiStep = 0;
+              safeStorage.set("aubeig.secrets.nebula", "on");
+              revealNebula();
+            }
+          } else konamiStep = 0;
+        });
         initializeTextMotion();
         finishBoot();
       })();

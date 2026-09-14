@@ -1,11 +1,18 @@
 .partner-inactive {
   background: var(--panel);
   border-style: dashed;
+  border-color: color-mix(in srgb, var(--line) 130%, var(--muted));
   box-shadow: none;
-  cursor: default;
+  cursor: not-allowed;
+  opacity: 0.72;
+  filter: grayscale(0.35) saturate(0.6);
+  transform: none !important;
+}
+.partner-inactive:hover {
+  transform: none !important;
 }
 .partner-inactive .partner-monogram {
-  opacity: 0.28;
+  opacity: 0.25;
   filter: grayscale(1);
 }
 .partner-inactive h3,
@@ -21,10 +28,10 @@
   min-height: 42px;
   padding: 10px 15px;
   margin-top: auto;
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+  border-radius: 14px 22px 14px 24px;
   color: var(--muted);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
   font-size: 12px;
   font-weight: 800;
 }
@@ -85,4 +92,238 @@
 [data-theme='light'] .clawback-card p,
 [data-theme='light'] .clawback-card .eyebrow {
   color: var(--muted);
+}
+
+/* Organic shapes shared across the bio workspace — the same mirrored corner
+   language as the portal: surfaces lean left, controls lean right. */
+dialog {
+  border-radius: 44px 20px 50px 24px;
+  transition:
+    box-shadow 0.35s ease,
+    border-radius 0.7s var(--spring);
+}
+dialog[open] {
+  border-radius: 44px 20px 50px 24px;
+}
+.dialog-body {
+  border-radius: inherit;
+}
+.primary-action,
+.secondary-action,
+.solid-button,
+.text-button:not(.rail-link):not(.rail-action),
+.motion-picker-trigger {
+  border-radius: 13px 24px 13px 26px;
+}
+.shell {
+  border-radius: 36px 20px 46px 24px;
+}
+.workspace-nav,
+.workflow-switch {
+  border-radius: 26px 14px 34px 18px;
+}
+.demo-card {
+  border-radius: 26px 42px 22px 20px;
+}
+.store-card,
+.partner-card {
+  border-radius: 22px 38px 20px 18px;
+}
+.background-switch,
+.language-switch,
+.interface-picker,
+.agent-tabs {
+  border-radius: 18px 26px 18px 28px;
+}
+.project-card {
+  border-radius: 42px 18px 52px 22px / 30px 46px 34px 44px;
+  transition: border-radius 0.7s var(--spring);
+}
+.project-card:nth-child(even) {
+  border-radius: 52px 22px 34px 18px / 46px 30px 44px 34px;
+}
+.project-card:hover {
+  border-radius: 26px 46px 24px 24px / 40px 32px 44px 34px;
+}
+.demo-card {
+  border-radius: 28px 44px 22px 22px / 34px 30px 46px 36px;
+}
+.demo-card:nth-child(even) {
+  border-radius: 44px 22px 28px 40px / 30px 46px 32px 42px;
+}
+.demo-card:hover,
+.store-card:hover {
+  border-radius: 20px 40px 18px 22px;
+}
+/* More organic silhouettes across the bio workspace. */
+.preview-window {
+  border-radius: 26px 42px 22px 20px;
+}
+.preview-window:nth-child(even) {
+  border-radius: 42px 22px 24px 38px;
+}
+.rail-brand {
+  border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  animation: bio-blob-morph 8s ease-in-out infinite;
+}
+.rail-brand:hover {
+  border-radius: 60% 40% 46% 54% / 42% 58% 44% 56%;
+}
+.rail {
+  border-radius: 30px 18px 32px 20px;
+}
+.header-clock {
+  border-radius: 14px 22px 14px 24px;
+  padding: 6px 13px;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+}
+.partner-monogram {
+  display: inline-grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  margin: 26px 0 20px;
+  border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  color: var(--primary);
+  font-size: 34px;
+  letter-spacing: 0;
+  animation: bio-blob-morph 10s ease-in-out infinite;
+}
+@keyframes bio-blob-morph {
+  0%,
+  100% {
+    border-radius: 44% 56% 52% 48% / 56% 44% 58% 46%;
+  }
+  33% {
+    border-radius: 58% 42% 44% 56% / 42% 60% 44% 54%;
+  }
+  66% {
+    border-radius: 40% 60% 58% 42% / 54% 42% 56% 44%;
+  }
+}
+button:not(.rail-link):not(.rail-action):not(.dialog-close) {
+  transition:
+    transform 0.35s var(--spring),
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.3s ease,
+    border-color 0.25s ease,
+    border-radius 0.6s var(--spring);
+}
+button:not(.rail-link):not(.rail-action):not(.dialog-close):hover {
+  border-radius: 11px 22px 11px 24px;
+}
+button:not(.rail-link):not(.rail-action):not(.dialog-close):active {
+  transform: scale(0.94) translateY(1px);
+  transition-duration: 0.09s;
+}
+
+.bio-stamp {
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+.bio-stamp .stamp-mark {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 130px;
+  height: 130px;
+  border-radius: 46% 54% 50% 58% / 54% 46% 58% 44%;
+  background: linear-gradient(150deg, #8a4fff, #7000ff);
+  color: #fff;
+  font-size: 58px;
+  font-weight: 900;
+  box-shadow: 0 0 40px #7000ff88;
+  animation: bio-stamp-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+}
+.bio-stamp .stamp-ring {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 3px solid #00f0ff;
+  opacity: 0;
+  animation: bio-stamp-ring 0.9s ease-out;
+}
+.bio-stamp .stamp-ring.two {
+  border-color: #ff003c;
+  animation-delay: 0.14s;
+}
+@keyframes bio-stamp-pop {
+  0% {
+    transform: scale(0) rotate(-24deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+@keyframes bio-stamp-ring {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+.bio-rainbow {
+  position: fixed;
+  inset: 0;
+  z-index: 88;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    rgba(196, 226, 126, 0.16),
+    rgba(127, 196, 234, 0.16),
+    rgba(238, 194, 126, 0.16),
+    rgba(185, 162, 244, 0.18),
+    rgba(252, 84, 116, 0.14)
+  );
+  animation: bio-rainbow-pulse 1.5s ease-in-out;
+}
+@keyframes bio-rainbow-pulse {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.secret-chip {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  font-weight: 900;
+  font-size: 15px;
+  color: #e9d5ff;
+  text-shadow: 0 2px 10px #0006;
+  animation: bio-secret-burst 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes bio-secret-burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.1);
+  }
 }

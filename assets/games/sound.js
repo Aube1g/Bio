@@ -19,6 +19,21 @@ export const SOUND_EVENTS = [
   'loss',
   'push',
   'blackjack',
+  'open',
+  'close',
+  'coin',
+  'error',
+  'levelup',
+  'hover',
+  'chime',
+  'flip',
+  'whoosh',
+  'softPop',
+  'tick',
+  'deal',
+  'sparkle',
+  'glide',
+  'ping',
 ];
 
 export class GameSound {
@@ -32,7 +47,7 @@ export class GameSound {
     window.addEventListener('preferenceschange', () => {
       if (this.master)
         this.master.gain.setTargetAtTime(
-          preferences.sound ? preferences.volume * 0.65 : 0,
+          preferences.sound ? preferences.volume * 0.5 : 0,
           this.context.currentTime,
           0.025,
         );
@@ -55,7 +70,7 @@ export class GameSound {
     if (!this.context) {
       this.context = new Audio();
       this.master = this.context.createGain();
-      this.master.gain.value = preferences.volume * 0.65;
+      this.master.gain.value = preferences.volume * 0.5;
       this.master.connect(this.context.destination);
     }
     if (this.context.state === 'suspended') this.context.resume().catch(() => {});
@@ -209,6 +224,64 @@ export class GameSound {
       case 'push':
         this.tone(440, 0.18, 0, 0.085);
         this.tone(440, 0.22, 0.18, 0.065);
+        break;
+      case 'open':
+        this.tone(300, 0.2, 0, 0.075, 'sine', 720);
+        this.noise(0.12, 0, 0.04, 2400);
+        break;
+      case 'close':
+        this.tone(560, 0.16, 0, 0.07, 'sine', 250);
+        this.noise(0.09, 0, 0.03, 1800);
+        break;
+      case 'coin':
+        this.tone(880, 0.07, 0, 0.05, 'square', 880);
+        this.tone(1318, 0.12, 0.05, 0.045, 'square', 1318);
+        break;
+      case 'error':
+        this.tone(220, 0.1, 0, 0.08, 'square', 180);
+        this.tone(196, 0.14, 0.09, 0.07, 'square', 150);
+        break;
+      case 'levelup':
+        [392, 523, 659, 784, 1046].forEach((note, i) => this.tone(note, 0.24, i * 0.08, 0.09));
+        this.noise(0.4, 0.34, 0.04, 3200);
+        break;
+      case 'hover':
+        this.tone(1180, 0.03, 0, 0.016, 'sine', 1320);
+        break;
+      case 'chime':
+        this.tone(1568, 0.12, 0, 0.05, 'sine', 1568);
+        this.tone(2093, 0.18, 0.06, 0.035, 'sine', 2093);
+        break;
+      case 'flip':
+        this.noise(0.07, 0, 0.05, 2600);
+        this.tone(520, 0.08, 0.02, 0.05, 'triangle', 760);
+        break;
+      case 'whoosh':
+        this.noise(0.3, 0, 0.05, 900);
+        this.noise(0.22, 0.08, 0.035, 1500);
+        break;
+      case 'softPop':
+        this.tone(660, 0.05, 0, 0.04, 'sine', 880);
+        break;
+      case 'tick':
+        this.tone(1200, 0.025, 0, 0.02, 'sine', 1180);
+        break;
+      case 'deal':
+        this.noise(0.06, 0, 0.05, 2900);
+        this.noise(0.05, 0.09, 0.045, 2600);
+        this.tone(640, 0.05, 0.02, 0.04, 'triangle', 900);
+        break;
+      case 'sparkle':
+        this.tone(1568, 0.06, 0, 0.022, 'sine', 1760);
+        this.tone(2093, 0.08, 0.05, 0.018, 'sine', 2217);
+        break;
+      case 'glide':
+        this.tone(520, 0.14, 0, 0.03, 'sine', 940);
+        this.noise(0.12, 0, 0.03, 1200);
+        break;
+      case 'ping':
+        this.tone(1320, 0.05, 0, 0.03, 'sine', 1320);
+        this.tone(1760, 0.06, 0.045, 0.02, 'sine', 1760);
         break;
     }
   }
