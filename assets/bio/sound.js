@@ -8,6 +8,11 @@ export class BioSound {
     this.voices = new Set();
     this.noiseBuffer = null;
     this.lastUi = 0;
+    this.volume = 0.4;
+  }
+  setVolume(value) {
+    this.volume = Math.min(1, Math.max(0, value));
+    if (this.master) this.master.gain.value = 0.38 * this.volume;
   }
   setEnabled(value) {
     this.enabled = value;
@@ -23,7 +28,7 @@ export class BioSound {
     if (!this.context) {
       this.context = new Audio();
       this.master = this.context.createGain();
-      this.master.gain.value = 0.16;
+      this.master.gain.value = 0.38 * this.volume;
       this.master.connect(this.context.destination);
     }
     if (this.context.state === 'suspended') this.context.resume().catch(() => {});

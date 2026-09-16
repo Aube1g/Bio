@@ -327,3 +327,537 @@ button:not(.rail-link):not(.rail-action):not(.dialog-close):active {
     transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.1);
   }
 }
+
+/* ==========================================================================
+   Expressive 2026-09 pass (bio)
+   — XGO live phone preview (dynamic island, status bar, wake-on-scroll)
+   — Material 3 Expressive volume slider
+   — Visibility-aware rendering
+   ========================================================================== */
+@keyframes range-shell-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0 round 999px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+}
+
+/* ---------- Volume slider (Material 3 Expressive) ---------- */
+.sound-volume-section label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.sound-volume-section label .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 9px;
+}
+.volume-control > .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: color 0.3s;
+}
+.volume-control:hover > .icon {
+  color: var(--primary);
+}
+#sound-volume-value {
+  min-width: 52px;
+  text-align: center;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  padding: 5px 8px;
+  border-radius: 13px 5px 13px 5px;
+  font-variant-numeric: tabular-nums;
+}
+#sound-volume-value[data-muted='true'] {
+  color: var(--muted);
+  background: var(--shell);
+  border-color: var(--line);
+}
+#sound-volume-value.is-popping {
+  animation: volume-pop 0.45s var(--spring);
+}
+@keyframes volume-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.14) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.range {
+  --sw-on: var(--switch-on, var(--primary));
+  --sw-off: var(--switch-off, var(--panel));
+  animation: range-shell-in 0.45s ease-out both;
+}
+.range::-webkit-slider-runnable-track {
+  height: 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 999px;
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 74%, #ffffff), var(--sw-on) 48%, #5626ac) 0
+      0 / var(--value) 100% no-repeat,
+    var(--sw-off);
+  box-shadow:
+    inset 0 2px 4px #0004,
+    0 1px #ffffff0c;
+}
+.range::-moz-range-track {
+  height: 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 999px;
+  background: var(--sw-off);
+  box-shadow: inset 0 2px 4px #0004;
+}
+.range::-moz-range-progress {
+  height: 13px;
+  border-radius: 999px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--sw-on) 74%, #ffffff),
+    var(--sw-on) 48%,
+    #5626ac
+  );
+}
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -5px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 9px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+  -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+}
+.range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+}
+.range:hover::-webkit-slider-thumb,
+.range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.14);
+  border-radius: 46% 54% 50% 50% / 54% 46% 54% 46%;
+}
+.range:active::-webkit-slider-thumb {
+  transform: scale(1.22);
+  border-radius: 20px 24px 22px 20px;
+}
+.range:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+[data-theme='light'] .range::-webkit-slider-runnable-track {
+  border-color: #4f30751c;
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 78%, #ffffff), var(--sw-on) 50%, #5f2bc0) 0
+      0 / var(--value) 100% no-repeat,
+    var(--sw-off);
+}
+[data-theme='light'] .range::-moz-range-track {
+  border-color: #4f30751c;
+}
+[data-theme='light'] .range::-webkit-slider-thumb,
+[data-theme='light'] .range::-moz-range-thumb {
+  border-color: #fff;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffff, transparent 70%),
+    linear-gradient(140deg, #ffffff76, #ffffff15 50%, #c3a2f520);
+  box-shadow:
+    inset 1px 1.5px 3px #ffffff,
+    inset -1px -1px 3px #ffffffa8,
+    0 3px 8px #32204b33;
+}
+[data-glass='false'] .range::-webkit-slider-thumb,
+[data-glass='false'] .range::-moz-range-thumb {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffe6, transparent 70%),
+    linear-gradient(135deg, #efe8ff, #c9b8f2);
+  border-color: #fff;
+  box-shadow: 0 2px 7px #05000f55;
+}
+[data-motion='off'] .range,
+[data-motion='off'] #sound-volume-value.is-popping {
+  animation: none;
+}
+
+/* ---------- XGO live phone preview ---------- */
+.xgo-phone-window {
+  overflow: visible;
+}
+.xgo-device {
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.55s ease 0.05s;
+  will-change: transform, opacity;
+}
+.xgo-device.is-awake {
+  opacity: 1;
+  transform: none;
+}
+[data-motion='off'] .xgo-device,
+.no-js .xgo-device {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.xgo-device-frame {
+  position: relative;
+  width: min(318px, 100%);
+  background: #0e0c12;
+  border-radius: 46px;
+  padding: 9px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.06),
+    inset 0 0 0 9px #0e0c12,
+    0 40px 70px -28px rgba(8, 6, 16, 0.9),
+    0 0 46px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.xgo-device-frame::before,
+.xgo-device-frame::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  width: 3px;
+  border-radius: 2px;
+  background: #1b1821;
+}
+.xgo-device-frame::before {
+  top: 92px;
+  height: 52px;
+}
+.xgo-device-frame::after {
+  top: 156px;
+  height: 26px;
+}
+.xgo-screen {
+  /* Material 3 dark scheme scoped to the device screen */
+  --surface: #16121b;
+  --panel: #16121b;
+  --shell: #241f2c;
+  --line: #39323f;
+  --ink: #ece5f4;
+  --muted: #a99fb5;
+  --primary: #cfb6ff;
+  --primary-soft: #4b3a6b;
+  position: relative;
+  height: 552px;
+  border-radius: 37px;
+  overflow: hidden;
+  background: #16121b;
+  display: flex;
+  flex-direction: column;
+}
+.xgo-screen > p {
+  padding: 24px 18px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.xgo-statusbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 22px 0;
+  color: #ece5f4;
+  pointer-events: none;
+}
+.xgo-clock {
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.xgo-status-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.xgo-gsm {
+  width: 15px;
+  height: 11px;
+}
+.xgo-wifi {
+  width: 14px;
+  height: 11px;
+}
+.xgo-battery {
+  position: relative;
+  width: 22px;
+  height: 11px;
+  border: 1px solid rgba(236, 229, 244, 0.7);
+  border-radius: 3px;
+  padding: 1px;
+  display: inline-flex;
+}
+.xgo-battery::after {
+  content: '';
+  position: absolute;
+  right: -3.5px;
+  top: 3px;
+  width: 2px;
+  height: 5px;
+  background: rgba(236, 229, 244, 0.7);
+  border-radius: 0 1px 1px 0;
+}
+.xgo-battery i {
+  display: block;
+  height: 100%;
+  border-radius: 1.5px;
+  background: #ece5f4;
+  transition: width 1s ease;
+}
+.xgo-notch {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  z-index: 9;
+  transform: translateX(-50%);
+  width: 94px;
+  height: 24px;
+  border-radius: 999px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.045);
+  transition:
+    width 0.55s var(--spring),
+    height 0.55s var(--spring),
+    box-shadow 0.4s;
+}
+.xgo-notch:hover {
+  box-shadow:
+    0 0 0 1px rgba(207, 182, 255, 0.3),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.xgo-notch-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transform: scale(0.7);
+  white-space: nowrap;
+  transition:
+    opacity 0.3s ease 0.1s,
+    transform 0.5s var(--spring) 0.1s;
+}
+.xgo-notch-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #cfb6ff;
+  animation: xgo-pulse 1.5s ease-in-out infinite;
+}
+@keyframes xgo-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.65);
+  }
+}
+.xgo-notch-title {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: #ece5f4;
+}
+.xgo-device.notch-open .xgo-notch {
+  width: 148px;
+  height: 32px;
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(207, 182, 255, 0.25);
+}
+.xgo-device.notch-open .xgo-notch-pill {
+  opacity: 1;
+  transform: scale(1);
+}
+.xgo-home-bar {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 98px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(236, 229, 244, 0.75);
+  z-index: 8;
+  pointer-events: none;
+}
+
+/* Chat demo re-flows to fill the device screen */
+.xgo-screen .chat-demo {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.xgo-screen .chat-topbar {
+  padding: 42px 13px 9px;
+  background: #211a29;
+  border-color: #2c2534;
+  flex-shrink: 0;
+}
+.xgo-screen .chat-avatar {
+  border-radius: 50%;
+}
+.xgo-screen .chat-topbar-title {
+  color: var(--ink);
+}
+.xgo-screen .chat-topbar-title small {
+  color: #9dd6a4;
+}
+.xgo-screen .chat-topbar-title [data-demo-status] {
+  color: #9dd6a4;
+}
+.xgo-screen .demo-tag {
+  display: none;
+}
+.xgo-screen .demo-controls {
+  gap: 2px;
+}
+.xgo-screen .chat-feed {
+  flex: 1 1 auto;
+  height: auto !important;
+  min-height: 0;
+  background-image: radial-gradient(#2c2534 0.8px, transparent 0.8px);
+  background-size: 15px 15px;
+}
+.xgo-screen .chat-composer {
+  background: #211a29;
+  border-color: #2c2534;
+  padding: 8px 10px 15px;
+  flex-shrink: 0;
+}
+.xgo-screen .compact-chat .chat-scenarios {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.xgo-screen .compact-chat .chat-scenarios::-webkit-scrollbar {
+  display: none;
+}
+.xgo-screen .chat-scenarios button {
+  white-space: nowrap;
+  border-radius: 999px;
+  min-height: 26px;
+}
+.xgo-screen .chat-input-row input {
+  background: #16121b;
+  border-color: #2c2534;
+}
+.xgo-screen .chat-input-row input:focus {
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.xgo-screen .chat-composer-note {
+  display: none;
+}
+@media (max-width: 520px) {
+  .xgo-screen {
+    height: 508px;
+  }
+}
+@media (max-width: 370px) {
+  .xgo-device-frame {
+    border-radius: 40px;
+    padding: 7px;
+  }
+  .xgo-screen {
+    border-radius: 33px;
+  }
+}
+
+/* ---------- Visibility-aware rendering ---------- */
+.offscreen *,
+.offscreen::before,
+.offscreen::after {
+  animation-play-state: paused !important;
+}
+.tab-hidden *,
+.tab-hidden::before,
+.tab-hidden::after {
+  animation-play-state: paused !important;
+}
+.lab-section,
+.store-grid > *,
+.partner-card {
+  content-visibility: auto;
+}
+.lab-section {
+  contain-intrinsic-size: auto 560px;
+}
+
+/* Phone fit polish */
+.xgo-screen .demo-control[data-demo-speed],
+.xgo-screen .demo-control[data-demo-loop] {
+  display: none;
+}
+.xgo-screen .chat-topbar .demo-controls {
+  margin-left: auto;
+}
+
+[data-motion='off'] .xgo-notch {
+  transition: none;
+}

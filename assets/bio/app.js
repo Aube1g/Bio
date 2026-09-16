@@ -2897,6 +2897,118 @@ import { BioSound } from './sound.js';
     if (tappable) sound.play('tap');
   });
 
+  /* XGO live preview phone: clock, battery and the expanding island notch. */
+  function initializeXgoDevice() {
+    const device = $('#xgo-device');
+    if (!device) return;
+    const clock = $('#xgo-clock'),
+      fill = $('#xgo-battery-fill'),
+      notch = $('#xgo-notch');
+    const paintTime = () => {
+      const now = new Date();
+      clock.textContent =
+        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    };
+    paintTime();
+    let battery = 78;
+    const paintBattery = () => {
+      if (fill) fill.style.width = battery + '%';
+      device.style.setProperty('--battery', battery / 100);
+    };
+    paintBattery();
+    // One slow interval drives both the clock and the cosmetic battery cycle.
+    setInterval(() => {
+      if (document.hidden) return;
+      paintTime();
+      battery -= 1;
+      if (battery < 18) battery = 86;
+      paintBattery();
+    }, 30_000);
+    let collapse = 0;
+    notch.addEventListener('click', () => {
+      const open = notch.getAttribute('aria-pressed') !== 'true';
+      notch.setAttribute('aria-pressed', String(open));
+      device.classList.toggle('notch-open', open);
+      sound.play('pop');
+      clearTimeout(collapse);
+      if (open) {
+        const replay = $('[data-demo-replay]', device);
+        replay?.click();
+        collapse = setTimeout(() => {
+          notch.setAttribute('aria-pressed', 'false');
+          device.classList.remove('notch-open');
+        }, 3200);
+      }
+    });
+    // Entrance: the device wakes when the card scrolls into view.
+    if ('IntersectionObserver' in window) {
+      const host = $('#xgo-phone-window');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              device.classList.add('is-awake');
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.35 },
+      );
+      if (host) observer.observe(host);
+    } else device.classList.add('is-awake');
+  }
+  /* Material-style expressive volume slider for interface sounds. */
+  function initializeVolumeControl() {
+    const slider = $('#sound-volume-slider'),
+      output = $('#sound-volume-value');
+    if (!slider || !output) return;
+    const saved = Number(storage.get('volume', '40'));
+    const initial = Number.isFinite(saved) ? Math.min(100, Math.max(0, saved)) : 40;
+    slider.value = String(initial);
+    sound.setVolume(initial / 100);
+    let tickTimer = 0;
+    const paint = (announce = false) => {
+      const value = Number(slider.value);
+      slider.style.setProperty('--value', value + '%');
+      output.textContent = value + '%';
+      output.dataset.muted = String(value === 0);
+      sound.setVolume(value / 100);
+      if (announce) {
+        output.classList.remove('is-popping');
+        void output.offsetWidth;
+        output.classList.add('is-popping');
+      }
+    };
+    paint();
+    slider.addEventListener('input', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      clearTimeout(tickTimer);
+      tickTimer = setTimeout(() => sound.play('tap'), 90);
+    });
+    slider.addEventListener('change', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      sound.play('toggle');
+    });
+  }
+  /* Render budget: pause decorative motion that is off screen or when the
+     whole tab is hidden; skip layout work the user cannot see. */
+  function initializeRenderBudget() {
+    if ('IntersectionObserver' in window) {
+      const budget = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((entry) => entry.target.classList.toggle('offscreen', !entry.isIntersecting)),
+        { rootMargin: '110px' },
+      );
+      $$(
+        '.signal-board, .hero-skin, .workflow-card, .xli-art, .anon-art, .preview-window, .profile-card, .feature-card',
+      ).forEach((node) => budget.observe(node));
+    }
+    document.addEventListener('visibilitychange', () =>
+      document.body.classList.toggle('tab-hidden', document.hidden),
+    );
+  }
   function initializeSecrets() {
     const code = [
       'ArrowUp',
@@ -2912,7 +3024,8 @@ import { BioSound } from './sound.js';
     ];
     let index = 0;
     document.addEventListener('keydown', (event) => {
-      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
       index = key === code[index] ? index + 1 : key === code[0] ? 1 : 0;
       if (index < code.length) return;
@@ -2927,7 +3040,8 @@ import { BioSound } from './sound.js';
     // Typing "aubeig" quietly greets you back.
     let typed = '';
     document.addEventListener('keydown', (event) => {
-      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
       if (event.key.length !== 1) return;
       typed = (typed + event.key.toLowerCase()).slice(-6);
       if (typed !== 'aubeig') return;
@@ -2996,6 +3110,9 @@ import { BioSound } from './sound.js';
   initializeKinetics();
   initializePreferences();
   initializeLanguage();
+  initializeXgoDevice();
+  initializeVolumeControl();
+  initializeRenderBudget();
   initializeSecrets();
   try {
     renderer = createAtmosphere();
