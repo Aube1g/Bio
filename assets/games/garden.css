@@ -1158,3 +1158,710 @@ button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
   background: var(--panel);
   box-shadow: 0 0 0 2px #a37aca12;
 }
+
+/* ==========================================================================
+   Expressive 2026-09 pass
+   — Spotlight carousel instead of a flat grid
+   — Selection happens on the card itself + a wide launch deck (no more pill)
+   — Desktop dock turns into a left icon rail
+   — Material-3-Expressive slider, forms and shapes
+   — Visibility-aware rendering
+   ========================================================================== */
+:root {
+  --spring-expressive: cubic-bezier(0.05, 0.75, 0.1, 1.05);
+  --spring-pop: cubic-bezier(0.34, 1.7, 0.44, 1);
+  --rail-offset: 0px;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Spotlight collection carousel ---------- */
+.collection-heading {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.collection-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.carousel-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px 999px 999px 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  transition:
+    transform 0.45s var(--spring-pop),
+    border-radius 0.45s var(--spring-pop),
+    background 0.3s,
+    border-color 0.3s;
+}
+.carousel-btn:last-child {
+  border-radius: 999px 999px 6px 999px;
+}
+.carousel-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+.carousel-btn:hover {
+  transform: translateY(-3px) scale(1.06);
+  border-radius: 999px;
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+}
+.carousel-btn:active {
+  transform: scale(0.92);
+}
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+}
+.carousel-dot {
+  width: 22px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+.carousel-dot i {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+  opacity: 0.4;
+  transition:
+    width 0.5s var(--spring-expressive),
+    border-radius 0.5s var(--spring-expressive),
+    background 0.3s,
+    opacity 0.3s,
+    transform 0.5s var(--spring-expressive);
+}
+.carousel-dot:hover i {
+  opacity: 0.85;
+  transform: scale(1.2);
+}
+.carousel-dot.is-active i {
+  width: 20px;
+  height: 8px;
+  border-radius: 999px 999px 999px 2px;
+  background: var(--primary);
+  opacity: 1;
+}
+.game-collection {
+  --spot-card: min(76vw, 322px);
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  perspective: 1300px;
+  scroll-padding-inline: max(16px, calc((100% - var(--spot-card)) / 2));
+  scrollbar-width: none;
+  margin: 4px -18px 0;
+  padding: 22px max(16px, calc((100% - var(--spot-card)) / 2)) 26px;
+  position: relative;
+  outline-offset: 3px;
+  border-radius: 30px;
+}
+.game-collection::-webkit-scrollbar {
+  display: none;
+}
+.game-card {
+  flex: 0 0 var(--spot-card);
+  scroll-snap-align: center;
+  transform: rotateY(var(--rz, 0deg)) translateZ(var(--tz, 0px)) translateY(var(--ty, 0px))
+    scale(var(--sc, 1));
+  opacity: var(--dim, 1);
+  filter: saturate(var(--sat, 1)) brightness(var(--bri, 1));
+}
+@media (min-width: 900px) {
+  .game-collection {
+    --spot-card: clamp(320px, 30vw, 384px);
+    scroll-padding-inline: max(24px, calc((100% - var(--spot-card)) / 2));
+    padding-inline: max(24px, calc((100% - var(--spot-card)) / 2));
+  }
+}
+/* Neutralize the legacy compact 2-col card layout: carousel cards stay tall. */
+@media (max-width: 900px) {
+  .game-art {
+    position: static;
+    right: auto;
+    top: auto;
+    width: 100%;
+    height: 116px;
+    margin: 6px 0 8px;
+  }
+  .game-card-meta {
+    margin-top: 0;
+  }
+  .game-card-main {
+    min-height: 318px;
+  }
+}
+/* Game selection lives ON the card: the whole card morphs into a new figure. */
+.game-card {
+  transition:
+    border-radius 0.75s var(--spring-expressive),
+    border-color 0.35s,
+    box-shadow 0.45s,
+    opacity 0.35s,
+    filter 0.35s;
+}
+.game-card.is-selected {
+  border-radius: 48px 18px 44px 24px / 20px 46px 22px 42px;
+  border-color: color-mix(in srgb, var(--game-accent) 58%, var(--line));
+  box-shadow:
+    0 22px 54px -16px color-mix(in srgb, var(--game-accent) 46%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--game-accent) 34%, transparent);
+}
+.game-card.is-selected .card-launch {
+  background: var(--game-accent);
+  border-color: color-mix(in srgb, var(--game-accent) 80%, #ffffff);
+  color: #241f2e;
+}
+
+/* ---------- Launch pill: compact confirm floating above the dock ---------- */
+.lobby-launch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: auto;
+  max-width: calc(100% - 28px);
+  padding: 8px;
+  border-radius: 28px 38px 26px 18px / 24px 30px 34px 22px;
+  background: linear-gradient(
+    118deg,
+    color-mix(in srgb, var(--tray-accent, var(--lime)) 14%, var(--surface)),
+    color-mix(in srgb, var(--surface) 96%, transparent) 64%
+  );
+}
+.launch-art {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 18px 22px 16px 20px;
+  background:
+    radial-gradient(
+      80% 80% at 50% 38%,
+      color-mix(in srgb, var(--tray-accent, var(--lime)) 28%, transparent),
+      transparent 75%
+    ),
+    color-mix(in srgb, var(--panel) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tray-accent, var(--lime)) 28%, var(--line));
+  overflow: hidden;
+}
+.launch-art img {
+  width: 30px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+.launch-copy {
+  min-width: 0;
+}
+.launch-eyebrow {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.launch-copy strong {
+  display: block;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 38vw;
+}
+#dock-launch-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border-radius: 999px 999px 999px 10px;
+  background: var(--tray-accent, var(--lime));
+  color: #26200f;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 10px 22px -8px color-mix(in srgb, var(--tray-accent, var(--lime)) 68%, transparent),
+    inset 0 1.5px rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.45s var(--spring-pop),
+    border-radius 0.45s var(--spring-pop),
+    box-shadow 0.3s;
+}
+#dock-launch-play .icon {
+  width: 13px;
+  height: 13px;
+}
+#dock-launch-play:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-radius: 999px;
+}
+#dock-launch-play:active {
+  transform: scale(0.94);
+}
+@media (max-width: 700px) {
+  .launch-copy strong {
+    max-width: 30vw;
+    font-size: 14px;
+  }
+}
+
+
+/* ---------- Desktop: dock becomes a left icon rail (reference look) ---------- */
+@media (min-width: 1280px) {
+  :root {
+    --rail-offset: 54px;
+  }
+  .game-dock {
+    left: 26px;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
+    padding: 12px 9px;
+    border-radius: 34px 20px 40px 18px / 26px 38px 20px 44px;
+  }
+  .dock-games {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dock-divider {
+    width: 26px;
+    height: 1px;
+    margin: 5px auto;
+  }
+  .game-dock a > span:not(.tap-wave) {
+    bottom: auto;
+    top: 50%;
+    left: 64px;
+    transform: translate(6px, -50%);
+  }
+  .game-dock a:hover > span:not(.tap-wave),
+  .game-dock a:focus-visible > span:not(.tap-wave) {
+    transform: translate(0, -50%);
+  }
+  .game-dock a:hover .icon,
+  .game-dock > button:hover .icon {
+    translate: 3px 0;
+  }
+  .site-wrap {
+    padding-inline-start: 108px;
+  }
+  .lobby-launch {
+    left: calc(50% + var(--rail-offset));
+  }
+}
+@media (min-width: 1280px) and (max-width: 1420px) {
+  .site-wrap {
+    padding-inline-start: 96px;
+  }
+}
+
+/* ---------- Hero date badge (reference: NEW EPISODE / 21 FEB) ---------- */
+.hero-date {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: grid;
+  gap: 3px;
+  text-align: center;
+  padding: 13px 20px 15px;
+  border-radius: 24px 24px 24px 6px;
+  background: color-mix(in srgb, var(--panel) 62%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  z-index: 3;
+  animation: hero-date-in 0.9s var(--spring-pop) 0.35s backwards;
+}
+@keyframes hero-date-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) rotate(4deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-date-label {
+  font-family: ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.hero-date strong {
+  font-size: 29px;
+  font-weight: 1000;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.hero-date-month {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: var(--primary-text);
+}
+@media (max-width: 900px) {
+  .hero-date {
+    display: none;
+  }
+}
+[data-motion='off'] .hero-date {
+  animation: none;
+}
+
+/* ---------- Range slider in the glass-switch language ---------- */
+.range-control {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 26px;
+  margin: 12px 0 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  --fill: 50%;
+  --sw-on: var(--switch-on, var(--primary));
+  --sw-off: var(--switch-off, var(--panel));
+  --sw-edge: var(--switch-edge, #ffffff20);
+  animation: range-fade-in 0.45s ease-out both;
+}
+@keyframes range-fade-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0 round 999px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+}
+[data-motion='off'] .range-control {
+  animation: none;
+}
+.range-control::-webkit-slider-runnable-track {
+  height: 14px;
+  border: 1px solid var(--sw-edge);
+  border-radius: 999px;
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 74%, #ffffff), var(--sw-on) 48%, #5626ac) 0
+      0 / var(--fill) 100% no-repeat,
+    var(--sw-off);
+  box-shadow:
+    inset 0 2px 4px #0004,
+    0 1px #ffffff0c;
+}
+.range-control::-moz-range-track {
+  height: 14px;
+  border: 1px solid var(--sw-edge);
+  border-radius: 999px;
+  background: var(--sw-off);
+  box-shadow: inset 0 2px 4px #0004;
+}
+.range-control::-moz-range-progress {
+  height: 13px;
+  border-radius: 999px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--sw-on) 74%, #ffffff),
+    var(--sw-on) 48%,
+    #5626ac
+  );
+}
+/* The thumb is the same glass lens as the switch knob. */
+.range-control::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -5px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 9px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+  -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  transition:
+    transform 0.35s var(--spring-pop),
+    border-radius 0.35s var(--spring-pop),
+    box-shadow 0.25s;
+}
+.range-control::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+  transition:
+    transform 0.35s var(--spring-pop),
+    box-shadow 0.25s;
+}
+.range-control:hover::-webkit-slider-thumb,
+.range-control:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.14);
+  border-radius: 46% 54% 50% 50% / 54% 46% 54% 46%;
+}
+.range-control:active::-webkit-slider-thumb {
+  transform: scale(1.22);
+  border-radius: 20px 24px 22px 20px;
+}
+.range-control:hover::-moz-range-thumb,
+.range-control:focus-visible::-moz-range-thumb {
+  transform: scale(1.14);
+}
+.range-control:active::-moz-range-thumb {
+  transform: scale(1.22);
+}
+.range-control:focus-visible {
+  outline: 3px solid var(--primary-text);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+.range-control:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+[data-theme='light'] .range-control::-webkit-slider-runnable-track {
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 78%, #ffffff), var(--sw-on) 50%, #5f2bc0) 0
+      0 / var(--fill) 100% no-repeat,
+    var(--sw-off);
+}
+[data-theme='light'] .range-control::-webkit-slider-thumb,
+[data-theme='light'] .range-control::-moz-range-thumb {
+  border-color: #ffffff;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffff, transparent 70%),
+    linear-gradient(140deg, #ffffff76, #ffffff15 50%, #c3a2f520);
+  box-shadow:
+    inset 1px 1.5px 3px #ffffff,
+    inset -1px -1px 3px #ffffffa8,
+    0 3px 8px #32204b33;
+}
+/* Glass off = solid switch off the liquid lens too. */
+[data-glass='false'] .range-control::-webkit-slider-thumb,
+[data-glass='false'] .range-control::-moz-range-thumb {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffe6, transparent 70%),
+    linear-gradient(135deg, #efe8ff, #c9b8f2);
+  border-color: #fff;
+  box-shadow: 0 2px 7px #05000f55;
+}
+.range-pips {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px 0;
+}
+.range-pips i {
+  font-style: normal;
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  opacity: 0.65;
+  min-width: 12px;
+  text-align: center;
+  padding: 2px 3px;
+  border-radius: 6px;
+  transition:
+    color 0.3s,
+    background 0.3s,
+    transform 0.45s var(--spring-pop),
+    opacity 0.3s;
+}
+.range-pips i.is-active {
+  color: #fff;
+  background: var(--primary);
+  opacity: 1;
+  transform: translateY(-2px) scale(1.15);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+[data-theme='light'] .range-pips i.is-active {
+  color: #fff;
+}
+[data-motion='off'] .range-pips i {
+  transition: none;
+}
+.dice-target-label strong {
+  font-size: 15px;
+  font-weight: 1000;
+  color: var(--primary-text);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  min-width: 34px;
+  text-align: center;
+  padding: 4px 9px;
+  border-radius: 12px 4px 12px 4px;
+}
+
+/* ---------- Wallet stats ---------- */
+/* ------ Dialog fit guarantee: content never escapes the viewport ------ */
+.portal-dialog {
+  max-width: min(480px, calc(100vw - 20px));
+  max-height: min(860px, calc(100dvh - 24px));
+}
+.portal-dialog.wide-dialog {
+  max-width: min(760px, calc(100vw - 20px));
+}
+
+/* ---------- Visibility-aware rendering ---------- */
+.offscreen *,
+.offscreen::before,
+.offscreen::after {
+  animation-play-state: paused !important;
+}
+.tab-hidden *,
+.tab-hidden::before,
+.tab-hidden::after {
+  animation-play-state: paused !important;
+}
+.session-strip,
+.recent-rounds,
+.lobby-bento > * {
+  content-visibility: auto;
+}
+.session-strip {
+  contain-intrinsic-size: auto 90px;
+}
+
+/* Collection heading on narrow screens: nav row stays compact */
+@media (max-width: 700px) {
+  .collection-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .carousel-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .carousel-dots {
+    padding: 5px 7px;
+    gap: 3px;
+  }
+}
+
+/* ---------- M3 Expressive shape play ---------- */
+.favorite-button {
+  transition:
+    border-radius 0.5s var(--spring-expressive),
+    background 0.3s,
+    color 0.3s,
+    transform 0.5s var(--spring-pop);
+}
+.favorite-button:hover {
+  border-radius: 38% 62% 55% 45% / 45% 38% 62% 55%;
+}
+.favorite-button[aria-pressed='true'] {
+  border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+}
+.favorite-button[aria-pressed='true'] .icon {
+  animation: fav-spin 0.6s var(--spring-pop);
+}
+@keyframes fav-spin {
+  from {
+    transform: scale(0.3) rotate(-130deg);
+  }
+  to {
+    transform: none;
+  }
+}
+.segmented > button {
+  transition:
+    border-radius 0.45s var(--spring-expressive),
+    color 0.25s,
+    transform 0.35s var(--spring-pop),
+    background 0.25s;
+}
+.segmented > button:hover:not([aria-pressed='true']) {
+  border-radius: 16px 6px 16px 6px;
+  color: var(--ink);
+}
+.segmented > button:active {
+  transform: scale(0.93);
+}
+[data-motion='off'] .favorite-button[aria-pressed='true'] .icon {
+  animation: none;
+}
+
+/* ---------- Truly minimal animation mode (data-motion=off) ---------- */
+[data-motion='off'] .game-collection {
+  scroll-snap-type: none;
+}
+[data-motion='off'] .game-collection .game-card {
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+[data-motion='off'] :is(
+    .game-card,
+    .card-launch,
+    .favorite-button,
+    .segmented > button,
+    #dock-launch-play,
+    .carousel-btn,
+    .carousel-dot i,
+    .lobby-launch,
+    .xgo-notch
+  ) {
+  transition: none !important;
+}
+
+/* Launch pill: keep legacy min-heights out of the compact form */
+#dock-launch-play {
+  min-height: 0;
+}
