@@ -1158,3 +1158,1213 @@ button:not(.text-button):not(.dialog-close):not(.favorite-button):active {
   background: var(--panel);
   box-shadow: 0 0 0 2px #a37aca12;
 }
+
+/* ==========================================================================
+   Expressive 2026-09 pass
+   — Spotlight carousel instead of a flat grid
+   — Selection happens on the card itself + a wide launch deck (no more pill)
+   — Desktop dock turns into a left icon rail
+   — Material-3-Expressive slider, forms and shapes
+   — Visibility-aware rendering
+   ========================================================================== */
+:root {
+  --spring-expressive: cubic-bezier(0.05, 0.75, 0.1, 1.05);
+  --spring-pop: cubic-bezier(0.34, 1.7, 0.44, 1);
+  --rail-offset: 0px;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Spotlight collection carousel ---------- */
+.collection-heading {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.collection-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.carousel-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px 999px 999px 6px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  transition:
+    transform 0.45s var(--spring-pop),
+    border-radius 0.45s var(--spring-pop),
+    background 0.3s,
+    border-color 0.3s;
+}
+.carousel-btn:last-child {
+  border-radius: 999px 999px 6px 999px;
+}
+.carousel-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+.carousel-btn:hover {
+  transform: translateY(-3px) scale(1.06);
+  border-radius: 999px;
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+}
+.carousel-btn:active {
+  transform: scale(0.92);
+}
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+}
+.carousel-dot {
+  width: 22px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+}
+.carousel-dot i {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+  opacity: 0.4;
+  transition:
+    width 0.5s var(--spring-expressive),
+    border-radius 0.5s var(--spring-expressive),
+    background 0.3s,
+    opacity 0.3s,
+    transform 0.5s var(--spring-expressive);
+}
+.carousel-dot:hover i {
+  opacity: 0.85;
+  transform: scale(1.2);
+}
+.carousel-dot.is-active i {
+  width: 20px;
+  height: 8px;
+  border-radius: 999px 999px 999px 2px;
+  background: var(--primary);
+  opacity: 1;
+}
+.game-collection {
+  --spot-card: min(76vw, 322px);
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  perspective: 1300px;
+  scroll-padding-inline: max(16px, calc((100% - var(--spot-card)) / 2));
+  scrollbar-width: none;
+  margin: 4px -18px 0;
+  padding: 22px max(16px, calc((100% - var(--spot-card)) / 2)) 26px;
+  position: relative;
+  outline-offset: 3px;
+  border-radius: 30px;
+}
+.game-collection::-webkit-scrollbar {
+  display: none;
+}
+.game-card {
+  flex: 0 0 var(--spot-card);
+  scroll-snap-align: center;
+  transform: rotateY(var(--rz, 0deg)) translateZ(var(--tz, 0px)) translateY(var(--ty, 0px))
+    scale(var(--sc, 1));
+  opacity: var(--dim, 1);
+  contain: layout style;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+@media (min-width: 900px) {
+  .game-collection {
+    --spot-card: clamp(320px, 30vw, 384px);
+    scroll-padding-inline: max(24px, calc((100% - var(--spot-card)) / 2));
+    padding-inline: max(24px, calc((100% - var(--spot-card)) / 2));
+  }
+}
+/* Neutralize the legacy compact 2-col card layout: carousel cards stay tall. */
+@media (max-width: 900px) {
+  .game-art {
+    position: static;
+    right: auto;
+    top: auto;
+    width: 100%;
+    height: 116px;
+    margin: 6px 0 8px;
+  }
+  .game-card-meta {
+    margin-top: 0;
+  }
+  .game-card-main {
+    min-height: 318px;
+  }
+}
+/* Game selection lives ON the card: the whole card morphs into a new figure. */
+.game-card {
+  transition:
+    border-radius 0.75s var(--spring-expressive),
+    border-color 0.35s,
+    box-shadow 0.45s,
+    opacity 0.35s,
+    filter 0.35s;
+}
+.game-card.is-selected {
+  border-radius: 48px 18px 44px 24px / 20px 46px 22px 42px;
+  border-color: color-mix(in srgb, var(--game-accent) 58%, var(--line));
+  box-shadow:
+    0 22px 54px -16px color-mix(in srgb, var(--game-accent) 46%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--game-accent) 34%, transparent);
+}
+.game-card.is-selected .card-launch {
+  background: var(--game-accent);
+  border-color: color-mix(in srgb, var(--game-accent) 80%, #ffffff);
+  color: #241f2e;
+}
+
+/* ---------- Launch pill: compact confirm floating above the dock ---------- */
+.lobby-launch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: auto;
+  max-width: calc(100% - 28px);
+  padding: 8px;
+  border-radius: 28px 38px 26px 18px / 24px 30px 34px 22px;
+  background: linear-gradient(
+    118deg,
+    color-mix(in srgb, var(--tray-accent, var(--lime)) 14%, var(--surface)),
+    color-mix(in srgb, var(--surface) 96%, transparent) 64%
+  );
+}
+.launch-art {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 18px 22px 16px 20px;
+  background:
+    radial-gradient(
+      80% 80% at 50% 38%,
+      color-mix(in srgb, var(--tray-accent, var(--lime)) 28%, transparent),
+      transparent 75%
+    ),
+    color-mix(in srgb, var(--panel) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tray-accent, var(--lime)) 28%, var(--line));
+  overflow: hidden;
+}
+.launch-art img {
+  width: 30px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+.launch-copy {
+  min-width: 0;
+}
+.launch-eyebrow {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.launch-copy strong {
+  display: block;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 38vw;
+}
+#dock-launch-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border-radius: 999px 999px 999px 10px;
+  background: var(--tray-accent, var(--lime));
+  color: #26200f;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 10px 22px -8px color-mix(in srgb, var(--tray-accent, var(--lime)) 68%, transparent),
+    inset 0 1.5px rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.45s var(--spring-pop),
+    border-radius 0.45s var(--spring-pop),
+    box-shadow 0.3s;
+}
+#dock-launch-play .icon {
+  width: 13px;
+  height: 13px;
+}
+#dock-launch-play:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-radius: 999px;
+}
+#dock-launch-play:active {
+  transform: scale(0.94);
+}
+@media (max-width: 700px) {
+  .launch-copy strong {
+    max-width: 30vw;
+    font-size: 14px;
+  }
+}
+
+
+/* ---------- Desktop: dock becomes a left icon rail (reference look) ---------- */
+@media (min-width: 1280px) {
+  :root {
+    --rail-offset: 54px;
+  }
+  .game-dock {
+    left: 26px;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
+    padding: 12px 9px;
+    border-radius: 34px 20px 40px 18px / 26px 38px 20px 44px;
+  }
+  .dock-games {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .dock-divider {
+    width: 26px;
+    height: 1px;
+    margin: 5px auto;
+  }
+  .game-dock a > span:not(.tap-wave) {
+    bottom: auto;
+    top: 50%;
+    left: 64px;
+    transform: translate(6px, -50%);
+  }
+  .game-dock a:hover > span:not(.tap-wave),
+  .game-dock a:focus-visible > span:not(.tap-wave) {
+    transform: translate(0, -50%);
+  }
+  .game-dock a:hover .icon,
+  .game-dock > button:hover .icon {
+    translate: 3px 0;
+  }
+  .site-wrap {
+    padding-inline-start: 108px;
+  }
+  .lobby-launch {
+    left: calc(50% + var(--rail-offset));
+  }
+}
+@media (min-width: 1280px) and (max-width: 1420px) {
+  .site-wrap {
+    padding-inline-start: 96px;
+  }
+}
+
+/* ---------- Hero date badge (reference: NEW EPISODE / 21 FEB) ---------- */
+.hero-date {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: grid;
+  gap: 3px;
+  text-align: center;
+  padding: 13px 20px 15px;
+  border-radius: 24px 24px 24px 6px;
+  background: color-mix(in srgb, var(--panel) 62%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  z-index: 3;
+  animation: hero-date-in 0.9s var(--spring-pop) 0.35s backwards;
+}
+@keyframes hero-date-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) rotate(4deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-date-label {
+  font-family: ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.hero-date strong {
+  font-size: 29px;
+  font-weight: 1000;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.hero-date-month {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: var(--primary-text);
+}
+@media (max-width: 900px) {
+  .hero-date {
+    display: none;
+  }
+}
+[data-motion='off'] .hero-date {
+  animation: none;
+}
+
+/* ---------- Range slider in the glass-switch language ---------- */
+.range-control {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 26px;
+  margin: 12px 0 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  --fill: 50%;
+  --sw-on: var(--switch-on, var(--primary));
+  --sw-off: var(--switch-off, var(--panel));
+  --sw-edge: var(--switch-edge, #ffffff20);
+  animation: range-fade-in 0.45s ease-out both;
+}
+@keyframes range-fade-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0 round 999px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
+  }
+}
+[data-motion='off'] .range-control {
+  animation: none;
+}
+.range-control::-webkit-slider-runnable-track {
+  height: 14px;
+  border: 1px solid var(--sw-edge);
+  border-radius: 999px;
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 74%, #ffffff), var(--sw-on) 48%, #5626ac) 0
+      0 / var(--fill) 100% no-repeat,
+    var(--sw-off);
+  box-shadow:
+    inset 0 2px 4px #0004,
+    0 1px #ffffff0c;
+}
+.range-control::-moz-range-track {
+  height: 14px;
+  border: 1px solid var(--sw-edge);
+  border-radius: 999px;
+  background: var(--sw-off);
+  box-shadow: inset 0 2px 4px #0004;
+}
+.range-control::-moz-range-progress {
+  height: 13px;
+  border-radius: 999px;
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--sw-on) 74%, #ffffff),
+    var(--sw-on) 48%,
+    #5626ac
+  );
+}
+/* The thumb is the same glass lens as the switch knob. */
+.range-control::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -5px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 9px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+  -webkit-backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  backdrop-filter: blur(1.4px) saturate(1.7) brightness(1.2);
+  transition:
+    transform 0.35s var(--spring-pop),
+    border-radius 0.35s var(--spring-pop),
+    box-shadow 0.25s;
+}
+.range-control::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ffffffe0;
+  border-bottom-color: #ffffff62;
+  border-right-color: #ffffff78;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffb8, transparent 70%),
+    linear-gradient(135deg, #ffffff3b, #ffffff0a 45%, #d8bcff1c 75%, #ffffff2a);
+  box-shadow:
+    inset 1px 1.5px 2px #ffffffb8,
+    inset -1px -1px 3px #f0ddff65,
+    0 3px 8px #05000f6b;
+  transition:
+    transform 0.35s var(--spring-pop),
+    box-shadow 0.25s;
+}
+.range-control:hover::-webkit-slider-thumb,
+.range-control:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.14);
+  border-radius: 46% 54% 50% 50% / 54% 46% 54% 46%;
+}
+.range-control:active::-webkit-slider-thumb {
+  transform: scale(1.22);
+  border-radius: 20px 24px 22px 20px;
+}
+.range-control:hover::-moz-range-thumb,
+.range-control:focus-visible::-moz-range-thumb {
+  transform: scale(1.14);
+}
+.range-control:active::-moz-range-thumb {
+  transform: scale(1.22);
+}
+.range-control:focus-visible {
+  outline: 3px solid var(--primary-text);
+  outline-offset: 6px;
+  border-radius: 999px;
+}
+.range-control:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+[data-theme='light'] .range-control::-webkit-slider-runnable-track {
+  background:
+    linear-gradient(130deg, color-mix(in srgb, var(--sw-on) 78%, #ffffff), var(--sw-on) 50%, #5f2bc0) 0
+      0 / var(--fill) 100% no-repeat,
+    var(--sw-off);
+}
+[data-theme='light'] .range-control::-webkit-slider-thumb,
+[data-theme='light'] .range-control::-moz-range-thumb {
+  border-color: #ffffff;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffff, transparent 70%),
+    linear-gradient(140deg, #ffffff76, #ffffff15 50%, #c3a2f520);
+  box-shadow:
+    inset 1px 1.5px 3px #ffffff,
+    inset -1px -1px 3px #ffffffa8,
+    0 3px 8px #32204b33;
+}
+/* Glass off = solid switch off the liquid lens too. */
+[data-glass='false'] .range-control::-webkit-slider-thumb,
+[data-glass='false'] .range-control::-moz-range-thumb {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background:
+    radial-gradient(ellipse 8px 5px at 32% 20%, #ffffffe6, transparent 70%),
+    linear-gradient(135deg, #efe8ff, #c9b8f2);
+  border-color: #fff;
+  box-shadow: 0 2px 7px #05000f55;
+}
+.range-pips {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px 0;
+}
+.range-pips i {
+  font-style: normal;
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  opacity: 0.65;
+  min-width: 12px;
+  text-align: center;
+  padding: 2px 3px;
+  border-radius: 6px;
+  transition:
+    color 0.3s,
+    background 0.3s,
+    transform 0.45s var(--spring-pop),
+    opacity 0.3s;
+}
+.range-pips i.is-active {
+  color: #fff;
+  background: var(--primary);
+  opacity: 1;
+  transform: translateY(-2px) scale(1.15);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+[data-theme='light'] .range-pips i.is-active {
+  color: #fff;
+}
+[data-motion='off'] .range-pips i {
+  transition: none;
+}
+.dice-target-label strong {
+  font-size: 15px;
+  font-weight: 1000;
+  color: var(--primary-text);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  min-width: 34px;
+  text-align: center;
+  padding: 4px 9px;
+  border-radius: 12px 4px 12px 4px;
+}
+
+/* ---------- Wallet stats ---------- */
+/* ------ Dialog fit guarantee: content never escapes the viewport ------ */
+.portal-dialog {
+  max-width: min(480px, calc(100vw - 20px));
+  max-height: min(860px, calc(100dvh - 24px));
+}
+.portal-dialog.wide-dialog {
+  max-width: min(760px, calc(100vw - 20px));
+}
+
+/* ---------- Visibility-aware rendering ---------- */
+.offscreen *,
+.offscreen::before,
+.offscreen::after {
+  animation-play-state: paused !important;
+}
+.tab-hidden *,
+.tab-hidden::before,
+.tab-hidden::after {
+  animation-play-state: paused !important;
+}
+.session-strip,
+.recent-rounds,
+.lobby-bento > * {
+  content-visibility: auto;
+}
+.session-strip {
+  contain-intrinsic-size: auto 90px;
+}
+
+/* Collection heading on narrow screens: nav row stays compact */
+@media (max-width: 700px) {
+  .collection-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .carousel-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .carousel-dots {
+    padding: 5px 7px;
+    gap: 3px;
+  }
+}
+
+/* ---------- M3 Expressive shape play ---------- */
+.favorite-button {
+  transition:
+    border-radius 0.5s var(--spring-expressive),
+    background 0.3s,
+    color 0.3s,
+    transform 0.5s var(--spring-pop);
+}
+.favorite-button:hover {
+  border-radius: 38% 62% 55% 45% / 45% 38% 62% 55%;
+}
+.favorite-button[aria-pressed='true'] {
+  border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+}
+.favorite-button[aria-pressed='true'] .icon {
+  animation: fav-spin 0.6s var(--spring-pop);
+}
+@keyframes fav-spin {
+  from {
+    transform: scale(0.3) rotate(-130deg);
+  }
+  to {
+    transform: none;
+  }
+}
+.segmented > button {
+  transition:
+    border-radius 0.45s var(--spring-expressive),
+    color 0.25s,
+    transform 0.35s var(--spring-pop),
+    background 0.25s;
+}
+.segmented > button:hover:not([aria-pressed='true']) {
+  border-radius: 16px 6px 16px 6px;
+  color: var(--ink);
+}
+.segmented > button:active {
+  transform: scale(0.93);
+}
+[data-motion='off'] .favorite-button[aria-pressed='true'] .icon {
+  animation: none;
+}
+
+/* ---------- Truly minimal animation mode (data-motion=off) ---------- */
+[data-motion='off'] .game-collection {
+  scroll-snap-type: none;
+}
+[data-motion='off'] .game-collection .game-card {
+  transform: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+[data-motion='off'] :is(
+    .game-card,
+    .card-launch,
+    .favorite-button,
+    .segmented > button,
+    #dock-launch-play,
+    .carousel-btn,
+    .carousel-dot i,
+    .lobby-launch,
+    .xgo-notch
+  ) {
+  transition: none !important;
+}
+
+/* Launch pill: keep legacy min-heights out of the compact form */
+#dock-launch-play {
+  min-height: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Caelestia-style entrances: springy shape pop-ins with a soft blur clear.
+   ----------------------------------------------------------------------- */
+@keyframes caelestia-in {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.84);
+    filter: blur(10px);
+    border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+html:not([data-motion='off']) .lobby-bento > * {
+  animation: caelestia-in 0.72s cubic-bezier(0.22, 1.32, 0.36, 1) backwards;
+}
+html:not([data-motion='off']) .lobby-bento > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+html:not([data-motion='off']) .lobby-bento > *:nth-child(3) {
+  animation-delay: 180ms;
+}
+html:not([data-motion='off']) .game-collection .game-card-main,
+html:not([data-motion='off']) .game-dock a {
+  animation: caelestia-in 0.66s cubic-bezier(0.22, 1.32, 0.36, 1) backwards;
+}
+html:not([data-motion='off']) .game-collection .game-card:nth-child(2) .game-card-main {
+  animation-delay: 80ms;
+}
+html:not([data-motion='off']) .game-collection .game-card:nth-child(3) .game-card-main {
+  animation-delay: 160ms;
+}
+html:not([data-motion='off']) .game-collection .game-card:nth-child(4) .game-card-main {
+  animation-delay: 240ms;
+}
+html:not([data-motion='off']) .game-dock a:nth-child(2) {
+  animation-delay: 60ms;
+}
+html:not([data-motion='off']) .game-dock a:nth-child(3) {
+  animation-delay: 120ms;
+}
+html:not([data-motion='off']) .game-dock a:nth-child(4) {
+  animation-delay: 180ms;
+}
+html:not([data-motion='off']) .game-dock a:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+/* --------------------------------------------------------------------------
+   Expressive card shapes: every game card gets its own slowly-morphing
+   silhouette plus a huge rotating accent shape filling it from inside.
+   ----------------------------------------------------------------------- */
+@keyframes card-silhouette {
+  from {
+    border-radius: 42px 18px 52px 22px / 30px 46px 34px 44px;
+  }
+  to {
+    border-radius: 22px 52px 18px 44px / 46px 30px 44px 34px;
+  }
+}
+@keyframes card-shape-spin {
+  to {
+    transform: rotate(1turn) scale(1.04);
+  }
+}
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: -38%;
+  z-index: -1;
+  background: conic-gradient(
+    from 40deg,
+    color-mix(in srgb, var(--game-accent, #a683ff) 34%, transparent),
+    transparent 32%,
+    color-mix(in srgb, var(--game-accent, #a683ff) 24%, transparent) 54%,
+    transparent 78%,
+    color-mix(in srgb, var(--game-accent, #a683ff) 30%, transparent)
+  );
+  filter: blur(22px) saturate(1.1);
+  opacity: 0.55;
+  border-radius: 48% 52% 44% 56% / 52% 46% 54% 48%;
+  animation: card-shape-spin 18s linear infinite;
+  pointer-events: none;
+}
+.game-card:nth-child(2n)::after {
+  animation-duration: 23s;
+  animation-direction: reverse;
+}
+.game-card:nth-child(3n)::after {
+  animation-duration: 15s;
+}
+html:not([data-motion='off']) .game-card:not(.is-selected) {
+  animation: card-silhouette 9s ease-in-out infinite alternate;
+}
+.game-card:nth-child(2):not(.is-selected) {
+  animation-delay: -3s !important;
+}
+.game-card:nth-child(3):not(.is-selected) {
+  animation-delay: -6s !important;
+}
+html[data-motion='off'] .game-card::after {
+  animation: none;
+}
+
+/* --------------------------------------------------------------------------
+   Carousel navigation: arrows hug the cards themselves, dots live below.
+   ----------------------------------------------------------------------- */
+.game-collection-wrap {
+  position: relative;
+}
+.carousel-side {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px 999px 999px 16px;
+  border: 1.5px solid color-mix(in srgb, var(--text) 16%, transparent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 26px #0006, inset 0 1px #ffffff1a;
+  cursor: pointer;
+  transition:
+    transform 0.35s var(--spring),
+    background 0.3s,
+    border-color 0.3s,
+    opacity 0.3s,
+    box-shadow 0.3s;
+}
+.carousel-side .icon {
+  width: 20px;
+  height: 20px;
+}
+.carousel-side-prev {
+  left: clamp(6px, 1.4vw, 18px);
+}
+.carousel-side-next {
+  right: clamp(6px, 1.4vw, 18px);
+  background: linear-gradient(135deg, #a683ff, #6a3cf0 60%, #4b21b4);
+  border-color: #ffffff33;
+  color: #fff;
+  box-shadow:
+    0 10px 28px #6a3cf066,
+    inset 0 1px #ffffff59;
+}
+/* The organic corner leans towards the scroll direction. */
+.carousel-side-prev {
+  border-radius: 16px 999px 999px 999px;
+}
+.carousel-side:hover {
+  transform: scale(1.1);
+}
+.carousel-side:active {
+  transform: scale(0.92);
+}
+.carousel-side[aria-disabled='true'] {
+  opacity: 0.32;
+  box-shadow: none;
+  pointer-events: none;
+}
+html[data-motion='off'] .carousel-side,
+html[data-motion='off'] .carousel-side:hover,
+html[data-motion='off'] .carousel-side:active {
+  transform: none;
+}
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+@media (max-width: 720px) {
+  .carousel-side {
+    width: 42px;
+    height: 42px;
+  }
+  .carousel-side-prev {
+    left: 4px;
+  }
+  .carousel-side-next {
+    right: 4px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Rich dialog backdrop: heavier dim + lens blur + soft vignette, and the
+   content cascades in like a Caelestia panel.
+   ----------------------------------------------------------------------- */
+.portal-dialog::backdrop {
+  background:
+    radial-gradient(120% 90% at 50% 8%, color-mix(in srgb, var(--primary, #6a3cf0) 14%, transparent), transparent 52%),
+    radial-gradient(140% 120% at 50% 50%, transparent 42%, rgba(6, 4, 12, 0.52) 100%),
+    rgba(8, 6, 14, 0.58);
+  backdrop-filter: blur(16px) saturate(1.25) brightness(0.82);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25) brightness(0.82);
+}
+html:not([data-motion='off']) .portal-dialog[open] .dialog-content > * {
+  animation: caelestia-in 0.5s cubic-bezier(0.22, 1.24, 0.36, 1) backwards;
+}
+html:not([data-motion='off']) .portal-dialog[open] .dialog-content > *:nth-child(2) {
+  animation-delay: 45ms;
+}
+html:not([data-motion='off']) .portal-dialog[open] .dialog-content > *:nth-child(3) {
+  animation-delay: 90ms;
+}
+html:not([data-motion='off']) .portal-dialog[open] .dialog-content > *:nth-child(4) {
+  animation-delay: 135ms;
+}
+/* Two-tap confirms get an emphatic pulse while armed. */
+@keyframes confirm-arm {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 #ff7d904d,
+      inset 0 1px #ffffff1f;
+  }
+  50% {
+    box-shadow:
+      0 0 0 7px #ff7d9012,
+      inset 0 1px #ffffff1f;
+  }
+}
+html:not([data-motion='off']) #logout-button[data-confirm],
+html:not([data-motion='off']) #practice-reset[data-confirm] {
+  animation: confirm-arm 1.1s ease-in-out infinite;
+  border-color: #ff7d90aa !important;
+}
+
+/* --------------------------------------------------------------------------
+   Custom scrollbars: inset pill thumbs that can never escape their track.
+   Pure CSS — zero JS, zero jank.
+   ----------------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--primary, #a683ff) 55%, transparent) transparent;
+}
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--primary, #a683ff) 72%, transparent),
+    color-mix(in srgb, var(--primary, #6a3cf0) 42%, transparent)
+  );
+  border: 4px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  min-height: 28px;
+  min-width: 28px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--primary, #a683ff) 88%, transparent);
+  background-clip: padding-box;
+  border-width: 3px;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Plinko fine-tuning drawer + friendlier cells.
+   ----------------------------------------------------------------------- */
+.plinko-tune {
+  margin-top: 10px;
+  border-radius: 15px 24px 15px 26px;
+  background: color-mix(in srgb, var(--panel) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 9%, transparent);
+  overflow: hidden;
+}
+.plinko-tune summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 13px;
+  min-height: 44px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  font-weight: 800;
+  list-style: none;
+}
+.plinko-tune summary::-webkit-details-marker {
+  display: none;
+}
+.plinko-tune summary .icon {
+  width: 15px;
+  height: 15px;
+  opacity: 0.8;
+}
+.plinko-tune .tune-peek {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.plinko-tune .tune-chevron {
+  transition: transform 0.4s var(--spring);
+}
+.plinko-tune[open] .tune-chevron {
+  transform: rotate(180deg);
+}
+.plinko-tune-shell {
+  overflow: hidden;
+}
+.plinko-tune-body {
+  padding: 4px 13px 13px;
+  display: grid;
+  gap: 10px;
+}
+html[data-motion='off'] .plinko-tune .tune-chevron {
+  transition: none;
+}
+/* Cells: rounded chips with a readable number, no overflow surprises. */
+.plinko-bin {
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.4px;
+  padding-inline: 1px;
+  font-size: var(--bin-font, 10px);
+  border-radius: 8px 8px 13px 13px;
+  box-shadow:
+    inset 0 1px #ffffff33,
+    inset 0 -2px #0000002c;
+}
+.plinko-bin > span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.plinko-bin:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--text) 55%, transparent);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Light theme pass: warmer paper surface, softer ink, kinder shadows.
+   ----------------------------------------------------------------------- */
+[data-theme='light'] body {
+  background:
+    radial-gradient(120% 70% at 85% -10%, #e9defa66, transparent 55%),
+    radial-gradient(90% 60% at 8% 10%, #d9ecc266, transparent 60%),
+    #f7f5f0;
+  color: #232030;
+}
+[data-theme='light'] .game-card {
+  background: #fffdf9;
+  border-color: #7a5fd033;
+  box-shadow:
+    0 1px #ffffff,
+    0 10px 26px #5d4a8a12,
+    0 2px 6px #5d4a8a0d;
+}
+[data-theme='light'] .game-card.is-selected {
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--game-accent, #7b5cd6) 65%, transparent),
+    0 14px 34px color-mix(in srgb, var(--game-accent, #7b5cd6) 26%, transparent);
+}
+[data-theme='light'] .carousel-btn {
+  background: #ffffffd9;
+  border-color: #48386b26;
+}
+[data-theme='light'] .plinko-tune {
+  background: #ffffffb8;
+  border-color: #48386b1f;
+}
+[data-theme='light'] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(160deg, #b39df2d9, #8b6ee0a6);
+  background-clip: padding-box;
+}
+
+/* --------------------------------------------------------------------------
+   Caelestia sheet for portal dialogs: organic shell, glow crown, pop entry.
+   ----------------------------------------------------------------------- */
+@keyframes dialog-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.94);
+    filter: blur(8px);
+  }
+  62% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.portal-dialog {
+  border-radius: 44px 22px 48px 26px / 34px 40px 30px 46px;
+  border: 1px solid color-mix(in srgb, var(--ink) 13%, transparent);
+  background:
+    radial-gradient(130% 55% at 50% -12%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 60%),
+    linear-gradient(165deg, color-mix(in srgb, #ffffff 5%, var(--surface)), var(--surface) 46%);
+  box-shadow:
+    0 50px 140px #00000099,
+    0 12px 34px #00000055,
+    inset 0 1px #ffffff17;
+  position: fixed;
+}
+html:not([data-motion='off']) .portal-dialog[open]:not(.morphing) {
+  animation: dialog-pop 0.5s cubic-bezier(0.22, 1.24, 0.36, 1) backwards;
+}
+.portal-dialog .dialog-close {
+  transition:
+    transform 0.35s var(--spring),
+    background 0.25s;
+}
+html:not([data-motion='off']) .portal-dialog .dialog-close:hover {
+  transform: rotate(90deg) scale(1.08);
+}
+/* Hero blocks inside sheets read like Caelestia cards. */
+.auth-hero {
+  border-radius: 120px 26px 120px 26px / 30px 110px 30px 110px;
+}
+.telegram-button,
+.guest-button,
+.practice-login {
+  border-radius: 16px 26px 16px 28px;
+  transition:
+    transform 0.4s var(--spring),
+    border-radius 0.5s var(--spring),
+    box-shadow 0.3s,
+    filter 0.25s;
+}
+html:not([data-motion='off']) .telegram-button:hover,
+html:not([data-motion='off']) .guest-button:hover,
+html:not([data-motion='off']) .practice-login:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-radius: 999px 999px 999px 22px;
+}
+/* History sheet: toolbar sticks with its own lens. */
+#history-dialog .history-toolbar {
+  position: sticky;
+  top: -34px;
+  z-index: 5;
+  margin: -6px -6px 10px;
+  padding: 6px;
+  border-radius: 18px 24px 18px 26px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-glass='false'] #history-dialog .history-toolbar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--panel);
+}
+
+/* --------------------------------------------------------------------------
+   Light theme — second pass: airier page, softer violet, crisper controls.
+   ----------------------------------------------------------------------- */
+[data-theme='light'] .portal-dialog {
+  border-color: #4f30751f;
+  background:
+    radial-gradient(130% 55% at 50% -12%, #b694ff36, transparent 60%),
+    linear-gradient(165deg, #fffdf8, #ffffff 46%);
+  box-shadow:
+    0 40px 110px #4b3a7a33,
+    0 10px 26px #4b3a7a1f,
+    inset 0 1px #ffffff;
+}
+[data-theme='light'] .carousel-side {
+  background: #ffffffe0;
+  border-color: #48386b26;
+  box-shadow: 0 8px 22px #4b3a7a20, inset 0 1px #ffffff;
+}
+[data-theme='light'] .game-dock,
+[data-theme='light'] .lobby-launch {
+  box-shadow:
+    0 1px #ffffff inset,
+    0 18px 40px #4b3a7a1c;
+}
+[data-theme='light'] .portal-dialog .dialog-content,
+[data-theme='light'] .bet-panel,
+[data-theme='light'] .lobby-hero {
+  scrollbar-color: #8b6ee0a6 transparent;
+}

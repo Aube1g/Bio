@@ -1332,7 +1332,17 @@ import { BioSound } from './sound.js';
     });
     $('#agent-panel-xli').hidden = agent !== 'xli';
     $('#agent-panel-xgo').hidden = agent !== 'xgo';
-    if (animate && previous !== agent) morphRegion($('#agent-panel-' + agent), null, { duration: 590 });
+    syncPill($('.agent-tabs'), animate && state.motion);
+    if (animate && previous !== agent) {
+      morphRegion($('#agent-panel-' + agent), null, { duration: 590 });
+      const panel = $('#agent-panel-' + agent);
+      if (state.motion && panel) {
+        panel.classList.remove('panel-refresh');
+        void panel.offsetWidth;
+        panel.classList.add('panel-refresh');
+        setTimeout(() => panel.classList.remove('panel-refresh'), 900);
+      }
+    }
     syncDemos();
   }
   async function openLab(agent, opener) {
@@ -2832,7 +2842,7 @@ import { BioSound } from './sound.js';
           ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ''}
           <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + richText(tr(feature)) + '</span></li>').join('')}</ul>
           <div class="info-callout">${icons('info')}<p class="dialog-note">${richText(tr(project.note))}</p></div>
-          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? chatFrame('modal-chat') : ''}
+          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? '<div class="mock-phone mock-phone-dialog"><div class="mock-phone-frame"><span class="mock-phone-notch" aria-hidden="true"><i></i>XGO · LIVE</span><div class="mock-phone-screen">' + chatFrame('modal-chat', true) + '</div></div></div>' : ''}
           ${projectExtra(id)}
           <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Терминалы и 14 подсистем' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
     mountDemos(dialog);
@@ -2897,6 +2907,205 @@ import { BioSound } from './sound.js';
     if (tappable) sound.play('tap');
   });
 
+  /* Lab phone: Чат / Инструменты / Профиль panes with a springy swap. */
+  function initializeXgoLabPhone() {
+    const phone = $('#xgo-lab-phone');
+    if (!phone) return;
+    const tabs = $$('[data-phone-screen]', phone);
+    const panes = $$('[data-phone-pane]', phone);
+    function show(key) {
+      tabs.forEach((tab) => tab.setAttribute('aria-pressed', String(tab.dataset.phoneScreen === key)));
+      panes.forEach((pane) => {
+        const on = pane.dataset.phonePane === key;
+        if (on) {
+          pane.hidden = false;
+          pane.classList.remove('is-live');
+          if (state.motion) requestAnimationFrame(() => pane.classList.add('is-live'));
+          else pane.classList.add('is-live');
+        } else {
+          pane.hidden = true;
+          pane.classList.remove('is-live');
+        }
+      });
+      sound.play('tap');
+    }
+    tabs.forEach((tab) => tab.addEventListener('click', () => show(tab.dataset.phoneScreen)));
+    const clock = $('#xgo-lab-clock');
+    const paintClock = () => {
+      if (!clock) return;
+      const now = new Date();
+      clock.textContent =
+        String(now.getHours()) + ':' + String(now.getMinutes()).padStart(2, '0');
+    };
+    paintClock();
+    setInterval(() => {
+      if (!document.hidden) paintClock();
+    }, 30_000);
+  }
+  initializeXgoLabPhone();
+
+  /* Caelestia-style entrance: shapes pop in with a spring as they scroll in. */
+  function initializeCaelEntrances() {
+    const targets = $$(
+      '.tile, .project-card, .preview-window, .demo-card, .lab-section, .store-card, .partner-card',
+    );
+    if (!targets.length) return;
+    targets.forEach((element) => {
+      const siblings = [...element.parentElement.children].filter((child) =>
+        child.matches?.('.tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card'),
+      );
+      element.style.setProperty('--cael-i', siblings.indexOf(element) % 5);
+      element.classList.add('cael');
+    });
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach((element) => element.classList.add('cael-in'));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('cael-in');
+          observer.unobserve(entry.target);
+        }),
+      { threshold: 0.12, rootMargin: '0px 0px -6%' },
+    );
+    targets.forEach((element) => observer.observe(element));
+  }
+  initializeCaelEntrances();
+
+  /* Project cards: pointer tilt with a springy settle + a light sheen. */
+  function initializeProjectTilt() {
+    if (!window.matchMedia?.('(pointer: fine)')?.matches) return;
+    $$('.project-card').forEach((card) => {
+      card.addEventListener('pointermove', (event) => {
+        if (!state.motion) return;
+        const rect = card.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.setProperty('--tilt-x', (-py * 7).toFixed(2) + 'deg');
+        card.style.setProperty('--tilt-y', (px * 9).toFixed(2) + 'deg');
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.removeProperty('--tilt-x');
+        card.style.removeProperty('--tilt-y');
+      });
+    });
+  }
+  initializeProjectTilt();
+
+  /* XGO live preview phone: clock, battery and the expanding island notch. */
+  function initializeXgoDevice() {
+    const device = $('#xgo-device');
+    if (!device) return;
+    const clock = $('#xgo-clock'),
+      fill = $('#xgo-battery-fill'),
+      notch = $('#xgo-notch');
+    const paintTime = () => {
+      const now = new Date();
+      clock.textContent =
+        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    };
+    paintTime();
+    let battery = 78;
+    const paintBattery = () => {
+      if (fill) fill.style.width = battery + '%';
+      device.style.setProperty('--battery', battery / 100);
+    };
+    paintBattery();
+    // One slow interval drives both the clock and the cosmetic battery cycle.
+    setInterval(() => {
+      if (document.hidden) return;
+      paintTime();
+      battery -= 1;
+      if (battery < 18) battery = 86;
+      paintBattery();
+    }, 30_000);
+    let collapse = 0;
+    notch.addEventListener('click', () => {
+      const open = notch.getAttribute('aria-pressed') !== 'true';
+      notch.setAttribute('aria-pressed', String(open));
+      device.classList.toggle('notch-open', open);
+      sound.play('pop');
+      clearTimeout(collapse);
+      if (open) {
+        const replay = $('[data-demo-replay]', device);
+        replay?.click();
+        collapse = setTimeout(() => {
+          notch.setAttribute('aria-pressed', 'false');
+          device.classList.remove('notch-open');
+        }, 3200);
+      }
+    });
+    // Entrance: the device wakes when the card scrolls into view.
+    if ('IntersectionObserver' in window) {
+      const host = $('#xgo-phone-window');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              device.classList.add('is-awake');
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.35 },
+      );
+      if (host) observer.observe(host);
+    } else device.classList.add('is-awake');
+  }
+  /* Material-style expressive volume slider for interface sounds. */
+  function initializeVolumeControl() {
+    const slider = $('#sound-volume-slider'),
+      output = $('#sound-volume-value');
+    if (!slider || !output) return;
+    const saved = Number(storage.get('volume', '40'));
+    const initial = Number.isFinite(saved) ? Math.min(100, Math.max(0, saved)) : 40;
+    slider.value = String(initial);
+    sound.setVolume(initial / 100);
+    let tickTimer = 0;
+    const paint = (announce = false) => {
+      const value = Number(slider.value);
+      slider.style.setProperty('--value', value + '%');
+      output.textContent = value + '%';
+      output.dataset.muted = String(value === 0);
+      sound.setVolume(value / 100);
+      if (announce) {
+        output.classList.remove('is-popping');
+        void output.offsetWidth;
+        output.classList.add('is-popping');
+      }
+    };
+    paint();
+    slider.addEventListener('input', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      clearTimeout(tickTimer);
+      tickTimer = setTimeout(() => sound.play('tap'), 90);
+    });
+    slider.addEventListener('change', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      sound.play('toggle');
+    });
+  }
+  /* Render budget: pause decorative motion that is off screen or when the
+     whole tab is hidden; skip layout work the user cannot see. */
+  function initializeRenderBudget() {
+    if ('IntersectionObserver' in window) {
+      const budget = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((entry) => entry.target.classList.toggle('offscreen', !entry.isIntersecting)),
+        { rootMargin: '110px' },
+      );
+      $$(
+        '.signal-board, .hero-skin, .workflow-card, .xli-art, .anon-art, .preview-window, .profile-card, .feature-card',
+      ).forEach((node) => budget.observe(node));
+    }
+    document.addEventListener('visibilitychange', () =>
+      document.body.classList.toggle('tab-hidden', document.hidden),
+    );
+  }
   function initializeSecrets() {
     const code = [
       'ArrowUp',
@@ -2912,7 +3121,8 @@ import { BioSound } from './sound.js';
     ];
     let index = 0;
     document.addEventListener('keydown', (event) => {
-      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
       index = key === code[index] ? index + 1 : key === code[0] ? 1 : 0;
       if (index < code.length) return;
@@ -2927,7 +3137,8 @@ import { BioSound } from './sound.js';
     // Typing "aubeig" quietly greets you back.
     let typed = '';
     document.addEventListener('keydown', (event) => {
-      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
       if (event.key.length !== 1) return;
       typed = (typed + event.key.toLowerCase()).slice(-6);
       if (typed !== 'aubeig') return;
@@ -2996,6 +3207,9 @@ import { BioSound } from './sound.js';
   initializeKinetics();
   initializePreferences();
   initializeLanguage();
+  initializeXgoDevice();
+  initializeVolumeControl();
+  initializeRenderBudget();
   initializeSecrets();
   try {
     renderer = createAtmosphere();
