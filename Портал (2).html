@@ -10068,7 +10068,7 @@
         place-items: center;
         width: 54px;
         height: 54px;
-        border-radius: 999px 999px 999px 16px;
+        border-radius: 999px 999px 999px 18px;
         border: 1.5px solid color-mix(in srgb, var(--text) 16%, transparent);
         color: var(--text);
         background: color-mix(in srgb, var(--panel) 78%, transparent);
@@ -10094,16 +10094,13 @@
       }
       .carousel-side-next {
         right: clamp(6px, 1.4vw, 18px);
-        background: linear-gradient(135deg, #a683ff, #6a3cf0 60%, #4b21b4);
-        border-color: #ffffff33;
-        color: #fff;
-        box-shadow:
-          0 10px 28px #6a3cf066,
-          inset 0 1px #ffffff59;
       }
-      /* The organic corner leans towards the scroll direction. */
+      /* The organic corner leans towards the travel direction. */
       .carousel-side-prev {
-        border-radius: 16px 999px 999px 999px;
+        border-radius: 18px 999px 999px 999px;
+      }
+      .carousel-side-next {
+        border-radius: 999px 999px 18px 999px;
       }
       .carousel-side:hover {
         transform: scale(1.1);

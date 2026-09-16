@@ -916,6 +916,20 @@ import { BioSound } from './sound.js';
     const feed = $('.chat-feed', root),
       input = $('input', root),
       history = [];
+    /* Follow the conversation: the feed slides to the newest message on its own
+       unless the viewer scrolled up to read earlier history. */
+    let chatFollow = true;
+    feed.addEventListener(
+      'scroll',
+      () => {
+        chatFollow = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 10;
+      },
+      { passive: true },
+    );
+    const followObserver = new MutationObserver(() => {
+      if (chatFollow) feed.scrollTop = feed.scrollHeight;
+    });
+    followObserver.observe(feed, { childList: true, subtree: true, characterData: true });
     let currentPrompt = tr(CHAT_PROMPT),
       treeVisible = true,
       reaction = null,
@@ -2906,43 +2920,6 @@ import { BioSound } from './sound.js';
     );
     if (tappable) sound.play('tap');
   });
-
-  /* Lab phone: Чат / Инструменты / Профиль panes with a springy swap. */
-  function initializeXgoLabPhone() {
-    const phone = $('#xgo-lab-phone');
-    if (!phone) return;
-    const tabs = $$('[data-phone-screen]', phone);
-    const panes = $$('[data-phone-pane]', phone);
-    function show(key) {
-      tabs.forEach((tab) => tab.setAttribute('aria-pressed', String(tab.dataset.phoneScreen === key)));
-      panes.forEach((pane) => {
-        const on = pane.dataset.phonePane === key;
-        if (on) {
-          pane.hidden = false;
-          pane.classList.remove('is-live');
-          if (state.motion) requestAnimationFrame(() => pane.classList.add('is-live'));
-          else pane.classList.add('is-live');
-        } else {
-          pane.hidden = true;
-          pane.classList.remove('is-live');
-        }
-      });
-      sound.play('tap');
-    }
-    tabs.forEach((tab) => tab.addEventListener('click', () => show(tab.dataset.phoneScreen)));
-    const clock = $('#xgo-lab-clock');
-    const paintClock = () => {
-      if (!clock) return;
-      const now = new Date();
-      clock.textContent =
-        String(now.getHours()) + ':' + String(now.getMinutes()).padStart(2, '0');
-    };
-    paintClock();
-    setInterval(() => {
-      if (!document.hidden) paintClock();
-    }, 30_000);
-  }
-  initializeXgoLabPhone();
 
   /* Caelestia-style entrance: shapes pop in with a spring as they scroll in. */
   function initializeCaelEntrances() {
