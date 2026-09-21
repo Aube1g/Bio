@@ -11,6 +11,7 @@ import art2 from '../../assets/bio/bio-image-2.webp';
 import art1 from '../../assets/bio/bio-image-1.webp';
 import translations from './translations.json';
 import demos from './demos.json';
+import { BioSound } from './sound.js';
 
 (() => {
   'use strict';
@@ -44,13 +45,14 @@ import demos from './demos.json';
   const state = { view: 'home', motion: !reduced.matches && storage.get('motion', 'on') !== 'off' };
   const preferences = {
     lang: storage.get('lang', 'ru') === 'en' ? 'en' : 'ru',
-    background: ['constellation', 'aurora', 'plain'].includes(storage.get('background'))
+    background: ['constellation', 'aurora', 'plain', 'nebula', 'newyear'].includes(storage.get('background'))
       ? storage.get('background')
       : 'constellation',
     transition: normalizeTransition(storage.get('transition', 'star')),
   };
-  for (const key of ['ripple', 'particles', 'liquid', 'glass'])
+  for (const key of ['ripple', 'particles', 'liquid', 'glass', 'sound'])
     preferences[key] = !['off', 'false', false].includes(storage.get(key, 'on'));
+  const sound = new BioSound(preferences.sound);
   let renderer = null;
   const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
   const escapeHTML = (text) =>
@@ -914,6 +916,20 @@ import demos from './demos.json';
     const feed = $('.chat-feed', root),
       input = $('input', root),
       history = [];
+    /* Follow the conversation: the feed slides to the newest message on its own
+       unless the viewer scrolled up to read earlier history. */
+    let chatFollow = true;
+    feed.addEventListener(
+      'scroll',
+      () => {
+        chatFollow = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 10;
+      },
+      { passive: true },
+    );
+    const followObserver = new MutationObserver(() => {
+      if (chatFollow) feed.scrollTop = feed.scrollHeight;
+    });
+    followObserver.observe(feed, { childList: true, subtree: true, characterData: true });
     let currentPrompt = tr(CHAT_PROMPT),
       treeVisible = true,
       reaction = null,
@@ -1330,7 +1346,17 @@ import demos from './demos.json';
     });
     $('#agent-panel-xli').hidden = agent !== 'xli';
     $('#agent-panel-xgo').hidden = agent !== 'xgo';
-    if (animate && previous !== agent) morphRegion($('#agent-panel-' + agent), null, { duration: 590 });
+    syncPill($('.agent-tabs'), animate && state.motion);
+    if (animate && previous !== agent) {
+      morphRegion($('#agent-panel-' + agent), null, { duration: 590 });
+      const panel = $('#agent-panel-' + agent);
+      if (state.motion && panel) {
+        panel.classList.remove('panel-refresh');
+        void panel.offsetWidth;
+        panel.classList.add('panel-refresh');
+        setTimeout(() => panel.classList.remove('panel-refresh'), 900);
+      }
+    }
     syncDemos();
   }
   async function openLab(agent, opener) {
@@ -1589,7 +1615,11 @@ import demos from './demos.json';
     pillObserver = new ResizeObserver((entries) => entries.forEach((entry) => syncPill(entry.target, false)));
   function syncPill(group, animate = state.motion) {
     if (!group?.isConnected || !group.getClientRects().length || group.closest('[hidden]')) return;
-    const selected = $(':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"]', group);
+    const selected =
+      $(
+        ':scope>button[aria-pressed="true"],:scope>button[aria-selected="true"],:scope>[aria-current]:not([aria-current="false"]),:scope>button[aria-checked="true"],:scope>.is-active',
+        group,
+      ) || $(':scope>button, :scope>a', group);
     if (!selected) return;
     let thumb = $(':scope>.spring-thumb', group);
     if (!thumb) {
@@ -1999,11 +2029,12 @@ import demos from './demos.json';
   }
 
   function applyPreferences(animate = false) {
-    for (const key of ['ripple', 'particles', 'liquid', 'glass']) {
+    for (const key of ['ripple', 'particles', 'liquid', 'glass', 'sound']) {
       root.dataset[key] = String(preferences[key]);
       const input = $('[data-preference="' + key + '"]');
       if (input) input.checked = preferences[key];
     }
+    sound.setEnabled(preferences.sound);
     root.dataset.background = preferences.background;
     $$('[data-background]')
       .filter((e) => e.tagName === 'BUTTON')
@@ -2063,6 +2094,7 @@ import demos from './demos.json';
         storage.set(input.dataset.preference, input.checked ? 'on' : 'off');
         if (input.dataset.preference === 'liquid' && !input.checked)
           $$('svg.icon').forEach((icon) => icon.getAnimations().forEach((a) => a.cancel()));
+        sound.play('toggle');
         applyPreferences();
       }),
     );
@@ -2070,6 +2102,7 @@ import demos from './demos.json';
       button.addEventListener('click', () => {
         preferences.background = button.dataset.background;
         storage.set('background', preferences.background);
+        sound.play('pop');
         applyPreferences(true);
       }),
     );
@@ -2103,6 +2136,7 @@ import demos from './demos.json';
         particles: true,
         liquid: true,
         glass: true,
+        sound: true,
         background: 'constellation',
         transition: 'star',
       });
@@ -2290,6 +2324,7 @@ import demos from './demos.json';
   }
   function switchView(view, { history = true, focus = false, animate = true, source = null } = {}) {
     if (!validViews.has(view) || view === pendingView) return;
+    sound.play('swoosh');
     windowMotion?.finish();
     pendingView = view;
     const version = ++navigationVersion;
@@ -2707,6 +2742,7 @@ import demos from './demos.json';
   }
   function openDialog(dialog, opener = document.activeElement) {
     if (!dialog || dialog.open) return;
+    sound.play('open');
     const source = sourceForWindow(opener);
     dialogOpeners.set(dialog, opener);
     dialogSources.set(dialog, source);
@@ -2734,6 +2770,7 @@ import demos from './demos.json';
   }
   async function closeDialog(dialog) {
     if (!dialog?.open) return;
+    sound.play('close');
     if (dialog.classList.contains('is-closing')) return dialog._closingPromise;
     const opener = dialogOpeners.get(dialog),
       source = sourceForWindow(dialogSources.get(dialog) || opener);
@@ -2819,7 +2856,7 @@ import demos from './demos.json';
           ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ''}
           <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + richText(tr(feature)) + '</span></li>').join('')}</ul>
           <div class="info-callout">${icons('info')}<p class="dialog-note">${richText(tr(project.note))}</p></div>
-          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? chatFrame('modal-chat') : ''}
+          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? '<div class="mock-phone mock-phone-dialog"><div class="mock-phone-frame"><span class="mock-phone-notch" aria-hidden="true"><i></i>XGO · LIVE</span><div class="mock-phone-screen">' + chatFrame('modal-chat', true) + '</div></div></div>' : ''}
           ${projectExtra(id)}
           <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Терминалы и 14 подсистем' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
     mountDemos(dialog);
@@ -2872,6 +2909,274 @@ import demos from './demos.json';
     }, 3000);
   });
 
+  document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
+  document.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.ny-snow i')) {
+      sound.play('chime');
+      return;
+    }
+    const tappable = event.target.closest(
+      '[data-project], .demo-card, .store-card, .partner-card, [data-reaction], [data-chat-scenario], [data-chat-action], [data-theme-toggle], .rail-action, .rail-link',
+    );
+    if (tappable) sound.play('tap');
+  });
+
+  /* Caelestia-style entrance: shapes pop in with a spring as they scroll in. */
+  function initializeCaelEntrances() {
+    const targets = $$(
+      '.tile, .project-card, .preview-window, .demo-card, .lab-section, .store-card, .partner-card',
+    );
+    if (!targets.length) return;
+    targets.forEach((element) => {
+      const siblings = [...element.parentElement.children].filter((child) =>
+        child.matches?.('.tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card'),
+      );
+      element.style.setProperty('--cael-i', siblings.indexOf(element) % 5);
+      element.classList.add('cael');
+    });
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach((element) => element.classList.add('cael-in'));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('cael-in');
+          observer.unobserve(entry.target);
+        }),
+      { threshold: 0.12, rootMargin: '0px 0px -6%' },
+    );
+    targets.forEach((element) => observer.observe(element));
+  }
+  initializeCaelEntrances();
+
+  /* Project cards: pointer tilt with a springy settle + a light sheen. */
+  function initializeProjectTilt() {
+    if (!window.matchMedia?.('(pointer: fine)')?.matches) return;
+    $$('.project-card').forEach((card) => {
+      card.addEventListener('pointermove', (event) => {
+        if (!state.motion) return;
+        const rect = card.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.setProperty('--tilt-x', (-py * 7).toFixed(2) + 'deg');
+        card.style.setProperty('--tilt-y', (px * 9).toFixed(2) + 'deg');
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.removeProperty('--tilt-x');
+        card.style.removeProperty('--tilt-y');
+      });
+    });
+  }
+  initializeProjectTilt();
+
+  /* XGO live preview phone: clock, battery and the expanding island notch. */
+  function initializeXgoDevice() {
+    const device = $('#xgo-device');
+    if (!device) return;
+    const clock = $('#xgo-clock'),
+      fill = $('#xgo-battery-fill'),
+      notch = $('#xgo-notch');
+    const paintTime = () => {
+      const now = new Date();
+      clock.textContent =
+        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    };
+    paintTime();
+    let battery = 78;
+    const paintBattery = () => {
+      if (fill) fill.style.width = battery + '%';
+      device.style.setProperty('--battery', battery / 100);
+    };
+    paintBattery();
+    // One slow interval drives both the clock and the cosmetic battery cycle.
+    setInterval(() => {
+      if (document.hidden) return;
+      paintTime();
+      battery -= 1;
+      if (battery < 18) battery = 86;
+      paintBattery();
+    }, 30_000);
+    let collapse = 0;
+    notch.addEventListener('click', () => {
+      const open = notch.getAttribute('aria-pressed') !== 'true';
+      notch.setAttribute('aria-pressed', String(open));
+      device.classList.toggle('notch-open', open);
+      sound.play('pop');
+      clearTimeout(collapse);
+      if (open) {
+        const replay = $('[data-demo-replay]', device);
+        replay?.click();
+        collapse = setTimeout(() => {
+          notch.setAttribute('aria-pressed', 'false');
+          device.classList.remove('notch-open');
+        }, 3200);
+      }
+    });
+    // Entrance: the device wakes when the card scrolls into view.
+    if ('IntersectionObserver' in window) {
+      const host = $('#xgo-phone-window');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              device.classList.add('is-awake');
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.35 },
+      );
+      if (host) observer.observe(host);
+    } else device.classList.add('is-awake');
+  }
+  /* Material-style expressive volume slider for interface sounds. */
+  function initializeVolumeControl() {
+    const slider = $('#sound-volume-slider'),
+      output = $('#sound-volume-value');
+    if (!slider || !output) return;
+    const saved = Number(storage.get('volume', '40'));
+    const initial = Number.isFinite(saved) ? Math.min(100, Math.max(0, saved)) : 40;
+    slider.value = String(initial);
+    sound.setVolume(initial / 100);
+    let tickTimer = 0;
+    const paint = (announce = false) => {
+      const value = Number(slider.value);
+      slider.style.setProperty('--value', value + '%');
+      output.textContent = value + '%';
+      output.dataset.muted = String(value === 0);
+      sound.setVolume(value / 100);
+      if (announce) {
+        output.classList.remove('is-popping');
+        void output.offsetWidth;
+        output.classList.add('is-popping');
+      }
+    };
+    paint();
+    slider.addEventListener('input', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      clearTimeout(tickTimer);
+      tickTimer = setTimeout(() => sound.play('tap'), 90);
+    });
+    slider.addEventListener('change', () => {
+      paint(true);
+      storage.set('volume', slider.value);
+      sound.play('toggle');
+    });
+  }
+  /* Render budget: pause decorative motion that is off screen or when the
+     whole tab is hidden; skip layout work the user cannot see. */
+  function initializeRenderBudget() {
+    if ('IntersectionObserver' in window) {
+      const budget = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((entry) => entry.target.classList.toggle('offscreen', !entry.isIntersecting)),
+        { rootMargin: '110px' },
+      );
+      $$(
+        '.signal-board, .hero-skin, .workflow-card, .xli-art, .anon-art, .preview-window, .profile-card, .feature-card',
+      ).forEach((node) => budget.observe(node));
+    }
+    document.addEventListener('visibilitychange', () =>
+      document.body.classList.toggle('tab-hidden', document.hidden),
+    );
+  }
+  function initializeSecrets() {
+    const code = [
+      'ArrowUp',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowLeft',
+      'ArrowRight',
+      'b',
+      'a',
+    ];
+    let index = 0;
+    document.addEventListener('keydown', (event) => {
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      index = key === code[index] ? index + 1 : key === code[0] ? 1 : 0;
+      if (index < code.length) return;
+      index = 0;
+      sound.play('secret');
+      flash();
+      stamp();
+      burst('.brand-mark', 16, ['✦', '❋', '✧']);
+      $$('button[data-background="nebula"]').forEach((button) => (button.hidden = false));
+      toast(tr('Секрет разблокирован: атмосфера «Туманность» появилась в настройках.'));
+    });
+    // Typing "aubeig" quietly greets you back.
+    let typed = '';
+    document.addEventListener('keydown', (event) => {
+      if (event.target.matches('input,textarea,select') || event.altKey || event.ctrlKey || event.metaKey)
+        return;
+      if (event.key.length !== 1) return;
+      typed = (typed + event.key.toLowerCase()).slice(-6);
+      if (typed !== 'aubeig') return;
+      typed = '';
+      sound.play('secret');
+      burst('.brand-mark', 12, ['♡', '✦']);
+      toast(tr('Aubeig — код с характером. Ты нашёл пасхалку.'));
+    });
+    function flash() {
+      if (!state.motion) return;
+      const layer = document.createElement('div');
+      layer.className = 'bio-rainbow';
+      layer.setAttribute('aria-hidden', 'true');
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 1500);
+    }
+    function stamp() {
+      if (!state.motion) return;
+      const layer = document.createElement('div');
+      layer.className = 'bio-stamp';
+      layer.setAttribute('aria-hidden', 'true');
+      layer.innerHTML = `<span class="stamp-mark">A</span><span class="stamp-ring"></span><span class="stamp-ring two"></span>`;
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 1500);
+    }
+    let taps = 0,
+      tapTimer = 0;
+    $('.brand')?.addEventListener('click', () => {
+      taps += 1;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => (taps = 0), 1100);
+      if (taps < 3) return;
+      taps = 0;
+      sound.play('secret');
+      burst('.brand', 18, ['♥', '✦']);
+      toast(tr('Aubeig передаёт привет'));
+    });
+    function burst(originSelector, count, glyphs) {
+      if (!state.motion) return;
+      const origin = $(originSelector);
+      if (!origin) return;
+      const rect = origin.getBoundingClientRect(),
+        cx = rect.left + rect.width / 2,
+        cy = rect.top + rect.height / 2;
+      for (let i = 0; i < count; i++) {
+        const chip = document.createElement('span');
+        chip.className = 'secret-chip';
+        chip.textContent = glyphs[i % glyphs.length];
+        const angle = (Math.PI * 2 * i) / count + 0.4,
+          distance = 38 + (i % 4) * 18;
+        chip.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+        chip.style.setProperty('--dy', Math.sin(angle) * distance - 20 + 'px');
+        chip.style.setProperty('--rot', (i % 2 ? 1 : -1) * (120 + (i % 5) * 60) + 'deg');
+        chip.style.left = cx + 'px';
+        chip.style.top = cy + 'px';
+        document.body.append(chip);
+        setTimeout(() => chip.remove(), 1200);
+      }
+    }
+  }
+
   root.dataset.initialized = 'true';
   initializeLab();
   initializePills();
@@ -2879,6 +3184,10 @@ import demos from './demos.json';
   initializeKinetics();
   initializePreferences();
   initializeLanguage();
+  initializeXgoDevice();
+  initializeVolumeControl();
+  initializeRenderBudget();
+  initializeSecrets();
   try {
     renderer = createAtmosphere();
   } catch (_) {

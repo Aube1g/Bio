@@ -101,7 +101,7 @@ export class BlackjackRenderer {
           return;
         }
         jobs[index++]();
-        this.sound.play('card');
+        this.sound.play(index === 1 ? 'deal' : 'card');
         this.timer = setTimeout(tick, fresh ? 260 : 370);
       };
       tick();

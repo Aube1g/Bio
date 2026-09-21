@@ -41,6 +41,14 @@ export class PlinkoRenderer {
     });
     this.resize();
   }
+  /* Boards are hidden with display:none while other games are active, so the
+     canvas rect (and therefore the bins grid) can go stale. Call this when the
+     board becomes visible again to force a clean layout. */
+  reveal() {
+    this.layoutKey = '';
+    this.resize();
+    requestAnimationFrame(() => this.resize());
+  }
   configure(rows, risk) {
     if (this.balls.length) return false;
     plinkoTable(rows, risk);
@@ -80,7 +88,7 @@ export class PlinkoRenderer {
       .map((multiplier, index) => {
         const value = String(multiplier);
         const size = Math.max(6, Math.min(10, ((this.geometry.gap - 5) * 1.75) / value.length));
-        return `<button type="button" class="plinko-bin ${this.lastSlot === index ? 'is-last ' : ''}${multiplier >= 4 ? 'hot' : multiplier >= 1 ? 'warm' : 'cool'}" data-bin="${index}" style="left:${this.geometry.bins[index].x}px;width:${Math.max(4, this.geometry.gap - 2)}px;--bin-font:${size}px" aria-label="${preferences.lang === 'en' ? 'Slot' : 'Ячейка'} ${index + 1} · ×${value}" title="×${value}"><span>${value}</span></button>`;
+        return `<button type="button" class="plinko-bin ${this.lastSlot === index ? 'is-last ' : ''}${multiplier >= 4 ? 'hot' : multiplier >= 1 ? 'warm' : 'cool'}" data-bin="${index}" style="left:${this.geometry.bins[index].x}px;width:${Math.max(4, this.geometry.gap - 4)}px;--bin-font:${size}px" aria-label="${preferences.lang === 'en' ? 'Slot' : 'Ячейка'} ${index + 1} · ×${value}" title="×${value}"><span>${value}</span></button>`;
       })
       .join('');
     this.paintPegs();

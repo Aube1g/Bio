@@ -16,7 +16,7 @@
     {{styles:games}} {{bootstrap}}
   </head>
   <body class="games-page">
-    {{garden}} {{boot-screen}}
+    {{garden}} {{ny-scene}} {{nebula-scene}} {{boot-screen}}
     <a class="skip-link" href="#portal-stage" data-t="skip">Перейти к играм</a>
     {{icons}}
     <div class="ambient" aria-hidden="true">
@@ -57,7 +57,7 @@
                 <div><strong id="island-net">0</strong><span data-t="net">результат</span></div>
               </div>
               <p id="island-activity" data-t="firstRound">Первая партия впереди.</p>
-              <button class="island-history" type="button" data-open="history-dialog">
+              <button class="island-history" type="button" data-open="history-dialog" data-history-context="auto">
                 <svg class="icon" aria-hidden="true"><use href="#i-history" /></svg
                 ><span data-t="history">История партий</span
                 ><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
@@ -95,6 +95,11 @@
               <div class="hero-caption">
                 <span>PLAY A LITTLE.</span><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
               </div>
+              <div class="hero-date" aria-hidden="true">
+                <span class="hero-date-label" data-t="heroDate">Твой день</span>
+                <strong id="hero-date-day">–</strong>
+                <span class="hero-date-month" id="hero-date-month">—</span>
+              </div>
               <div class="lobby-hero-copy">
                 <p class="eyebrow" data-t="makeYourMove">ТВОЙ ХОД.</p>
                 <h1 id="lobby-title">
@@ -125,8 +130,9 @@
                 </div>
                 <div class="hero-cube-camera"><div class="cube hero-cube" id="hero-cube"></div></div>
                 <div class="floating-chip chip-one">A</div>
-                <div class="floating-chip chip-two">✦</div>
-                <span class="playground-star star-one">✦</span><span class="playground-star star-two">+</span>
+                <div class="floating-chip chip-two">7</div>
+                <span class="hero-seven">7</span>
+                <span class="hero-ball"><i></i><i></i><i></i></span>
               </div>
               <div class="hero-bottom-code">AUBEIG / AFTER HOURS</div>
             </article>
@@ -151,14 +157,19 @@
               <span class="eyebrow" data-t="collection">КОЛЛЕКЦИЯ / 04</span>
               <h2 data-t="pickMood">Во что сыграем?</h2>
             </div>
-            <div class="collection-legend">
-              <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
-                data-t="practiceShort"
-                >Играем на фишки</span
-              >
+            <div class="collection-controls">
+              <div class="collection-legend">
+                <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
+                  data-t="practiceShort"
+                  >Играем на фишки</span
+                >
+              </div>
+              
             </div>
           </header>
-          <div class="game-collection">
+          <div class="game-collection-wrap">
+            <button class="carousel-side carousel-side-prev" id="carousel-prev" type="button" data-t-label="prevGame" aria-label="Предыдущая игра"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg></button>
+<div class="game-collection">
             <article class="game-card" data-card="blackjack">
               <button
                 class="favorite-button"
@@ -248,6 +259,9 @@
               </button>
             </article>
           </div>
+            <button class="carousel-side carousel-side-next" id="carousel-next" type="button" data-t-label="nextGame" aria-label="Следующая игра"><svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></button>
+          </div>
+          <div class="carousel-dots" id="carousel-dots" role="tablist" aria-label="Игры"></div>
           <section class="session-strip">
             <div class="session-symbol">
               <svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>
@@ -455,19 +469,15 @@
                   <button type="button" data-risk="low" aria-pressed="false" data-t="low">Низкий</button
                   ><button type="button" data-risk="medium" aria-pressed="true" data-t="medium">
                     Средний</button
-                  ><button type="button" data-risk="high" aria-pressed="false" data-t="high">Высокий</button>
+                  ><button type="button" data-risk="high" aria-pressed="false" data-t="high"> Высокий
+                  </button>
                 </div>
-                <label class="field-label" data-t="rowCount">Количество рядов</label>
-                <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
-                  <button type="button" data-rows="8" aria-pressed="false">8</button
-                  ><button type="button" data-rows="12" aria-pressed="true">12</button
-                  ><button type="button" data-rows="16" aria-pressed="false">16</button>
-                </div>
-                <div class="potential">
-                  <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
-                </div>
-                <label class="field-label" data-t="ballCount">За один запуск</label>
-                <div class="segmented spring-group batch-control" role="group" aria-label="Количество шаров">
+                <label class="field-label" data-t="ballCount">Шаров за запуск</label>
+                <div
+                  class="segmented spring-group batch-control"
+                  role="group"
+                  aria-label="Количество шаров"
+                >
                   <button type="button" data-batch="1" aria-pressed="true">1</button
                   ><button type="button" data-batch="3" aria-pressed="false">3</button
                   ><button type="button" data-batch="5" aria-pressed="false">5</button
@@ -476,9 +486,30 @@
                 <div class="batch-price">
                   <span data-t="batchCost">Стоимость запуска</span><strong id="batch-cost">10</strong>
                 </div>
-                <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
-                  Ряды и риск фиксируются, пока летят шары.
-                </p>
+                <details class="plinko-tune" id="plinko-tune">
+                  <summary>
+                    <svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg
+                    ><span data-t="tune">Тонкая настройка</span
+                    ><span class="tune-peek" data-t="tunePeek">ряды · максимум</span
+                    ><svg class="icon tune-chevron" aria-hidden="true"><use href="#i-chevron" /></svg>
+                  </summary>
+                  <div class="plinko-tune-shell">
+                    <div class="plinko-tune-body">
+                      <label class="field-label" data-t="rowCount">Количество рядов</label>
+                      <div class="segmented spring-group rows-control" role="group" aria-label="Ряды">
+                        <button type="button" data-rows="8" aria-pressed="false">8</button
+                        ><button type="button" data-rows="12" aria-pressed="true">12</button
+                        ><button type="button" data-rows="16" aria-pressed="false">16</button>
+                      </div>
+                      <div class="potential">
+                        <span data-t="maxReturn">Макс. возврат</span><strong id="plinko-max">—</strong>
+                      </div>
+                      <p class="small-note" id="plinko-lock-note" data-t="plinkoLock">
+                        Ряды и риск фиксируются, пока летят шары.
+                      </p>
+                    </div>
+                  </div>
+                </details>
               </div>
               <div class="game-options" id="dice-options" hidden>
                 <label class="field-label" data-t="prediction">Твой прогноз</label>
@@ -491,17 +522,21 @@
                     ><span data-t="over">Больше</span>
                   </button>
                 </div>
-                <label class="field-label" for="dice-target"
+                <label class="field-label dice-target-label" for="dice-target"
                   ><span data-t="target">Порог</span><strong id="dice-target-value">4</strong></label
-                ><input
-                  class="range-control"
-                  type="range"
-                  id="dice-target"
-                  min="2"
-                  max="6"
-                  step="1"
-                  value="4"
-                />
+                >
+                <div class="range-shell">
+                  <input
+                    class="range-control"
+                    type="range"
+                    id="dice-target"
+                    min="2"
+                    max="6"
+                    step="1"
+                    value="4"
+                  />
+                  <div class="range-pips" id="dice-pips" aria-hidden="true"></div>
+                </div>
                 <div class="dice-odds">
                   <div><span data-t="chance">Шанс</span><strong id="dice-chance">50%</strong></div>
                   <div>
@@ -576,16 +611,6 @@
         </button>
       </footer>
     </div>
-    <aside class="lobby-launch" id="lobby-launch" hidden aria-label="Выбранная игра">
-      <span class="launch-symbol"
-        ><svg class="icon" aria-hidden="true"><use id="launch-game-icon" href="#i-plinko" /></svg
-      ></span>
-      <div><span data-t="selectedGame">Выбрана игра</span><strong id="launch-game-name">Plinko</strong></div>
-      <button type="button" id="launch-selected">
-        <span data-t="enterGame">Играть</span
-        ><svg class="icon" aria-hidden="true"><use href="#i-play" /></svg>
-      </button>
-    </aside>
     <nav class="game-dock" aria-label="Игровой док">
       <div class="dock-games spring-group">
         <a href="#lobby" data-go="lobby" aria-current="page" aria-label="Коллекция"
@@ -602,10 +627,33 @@
         >
       </div>
       <span class="dock-divider"></span
-      ><button type="button" data-open="game-settings-dialog" aria-label="Настройки">
+      ><button type="button" data-open="game-settings-dialog" aria-label="Настройки" id="dock-settings">
         <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>
       </button>
     </nav>
+    <div class="table-popover" id="table-popover" hidden role="dialog" aria-label="Быстрый стиль стола">
+      <p class="popover-eyebrow">QUICK TABLE STYLE</p>
+      <div class="table-swatches" role="group" aria-label="Цвет стола">
+        <button type="button" data-pop-table-color="royal" aria-label="Фиолетовый"><i></i></button
+        ><button type="button" data-pop-table-color="green" aria-label="Зелёный"><i></i></button
+        ><button type="button" data-pop-table-color="crimson" aria-label="Красный"><i></i></button
+        ><button type="button" data-pop-table-color="midnight" aria-label="Синий"><i></i></button
+        ><button type="button" data-pop-table-color="gold" aria-label="Золотой"><i></i></button>
+      </div>
+      <button class="text-button" type="button" id="popover-open-settings" data-t="allSettings">
+        Все настройки
+      </button>
+    </div>
+    <div class="lobby-launch" id="dock-launch" role="dialog" aria-label="Выбранная игра" hidden>
+      <span class="launch-art" aria-hidden="true"><img id="dock-launch-art" alt="" /></span>
+      <div class="launch-copy">
+        <span class="launch-eyebrow" data-t="selectedGame">Выбрана игра</span>
+        <strong id="dock-launch-title">Dice</strong>
+      </div>
+      <button type="button" id="dock-launch-play">
+        <svg class="icon" aria-hidden="true"><use href="#i-play" /></svg><span data-t="enterGame">Играть</span>
+      </button>
+    </div>
     <div class="connection-banner" id="connection-banner" role="status" hidden>
       <svg class="icon" aria-hidden="true"><use href="#i-wifi" /></svg><span id="connection-message"></span
       ><button type="button" id="retry-connection" data-t="retry">Повторить</button
@@ -616,9 +664,15 @@
         <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
       </button>
       <div class="dialog-content">
-        <span class="dialog-symbol"
-          ><svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg
-        ></span>
+        <div class="auth-hero" aria-hidden="true">
+          <span class="auth-glow"></span>
+          <span class="auth-chip chip-a"></span>
+          <span class="auth-chip chip-b"></span>
+          <span class="auth-chip chip-c"></span>
+          <span class="auth-mark"
+            ><svg class="brand-mark"><use href="#i-mark" /></svg
+          ></span>
+        </div>
         <p class="eyebrow" data-t="welcome">РАД ТЕБЯ ВИДЕТЬ</p>
         <h2 id="auth-title" data-t="loginTitle">Твоя игра начинается здесь.</h2>
         <p class="dialog-lead" data-t="loginDescription">Войди через Telegram или просто загляни в гости.</p>
@@ -634,7 +688,10 @@
           ><span data-t="guestLogin">Продолжить гостем</span
           ><svg class="icon" aria-hidden="true"><use href="#i-arrow-right" /></svg>
         </button>
-        <p class="small-note" data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</p>
+        <div class="auth-chips-note">
+          <span class="chips-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span data-t="guestNote">1 000 тренировочных фишек. Без покупок и вывода средств.</span>
+        </div>
         <button class="practice-login" id="practice-login" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg
           ><span data-t="tryWithoutServer">Попробовать без входа</span>
@@ -653,6 +710,52 @@
         <p class="dialog-lead" data-t="historyDescription">
           Каждая ставка, каждый результат. Нажми на партию, чтобы проверить её.
         </p>
+        <div class="history-toolbar">
+          <div class="history-filters">
+            <div class="segmented spring-group history-games" role="group" aria-label="Фильтр по игре">
+              <button type="button" data-history-game="all" aria-pressed="true" data-t="filterAll">Все</button
+              ><button
+                type="button"
+                data-history-game="blackjack"
+                aria-pressed="false"
+                data-t="gameBlackjack"
+              >
+                Блэкджек</button
+              ><button type="button" data-history-game="slots" aria-pressed="false" data-t="gameSlots">
+                Слоты</button
+              ><button type="button" data-history-game="dice" aria-pressed="false" data-t="gameDice">
+                Кубик</button
+              ><button type="button" data-history-game="plinko" aria-pressed="false" data-t="gamePlinko">
+                Плинко
+              </button>
+            </div>
+            <div
+              class="segmented spring-group history-results"
+              role="group"
+              aria-label="Фильтр по результату"
+            >
+              <button type="button" data-history-result="all" aria-pressed="true" data-t="filterAll">
+                Все</button
+              ><button type="button" data-history-result="win" aria-pressed="false" data-t="filterWins">
+                Выигрыши</button
+              ><button type="button" data-history-result="loss" aria-pressed="false" data-t="filterLosses">
+                Проигрыши</button
+              ><button type="button" data-history-result="push" aria-pressed="false" data-t="filterPushes">
+                Ничьи
+              </button>
+            </div>
+          </div>
+          <div class="history-sort-row">
+            <div class="segmented spring-group history-sort" role="group" aria-label="Сортировка истории">
+              <button type="button" data-history-sort="recent" aria-pressed="true" data-t="sortRecent">
+                Недавние</button
+              ><button type="button" data-history-sort="amount" aria-pressed="false" data-t="sortAmount">
+                Сумма
+              </button>
+            </div>
+            <span class="history-count" id="history-count" aria-live="polite"></span>
+          </div>
+        </div>
         <div id="history-list" class="history-list"></div>
         <button type="button" id="history-more" class="secondary-button" data-t="loadMore" hidden>
           Показать ещё
@@ -698,6 +801,11 @@
         <div class="wallet-balance-panel">
           <span data-t="practice">Тренировочные фишки</span>
           <div class="wallet-amount" id="wallet-amount">—</div>
+          <div class="wallet-stats">
+            <div><strong id="wallet-rounds">0</strong><span data-t="rounds">партий</span></div>
+            <div><strong id="wallet-wins">0</strong><span data-t="wins">побед</span></div>
+            <div><strong id="wallet-net">0</strong><span data-t="net">результат</span></div>
+          </div>
         </div>
         <button class="primary-button" id="practice-reset" type="button">
           <svg class="icon" aria-hidden="true"><use href="#i-replay" /></svg
@@ -707,7 +815,11 @@
       </div>
     </dialog>
     {{game-settings}}
-    <div class="portal-toast" id="portal-toast" role="status" aria-live="polite"></div>
+    <div class="portal-toast" id="portal-toast" role="status" aria-live="polite">
+      <span class="toast-coin"
+        ><img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /></span
+      ><span class="toast-msg" id="toast-msg"></span>
+    </div>
     <noscript
       ><div class="noscript-message">
         Для игр нужен JavaScript. <a href="bio.html">Перейти к био Aubeig</a>.

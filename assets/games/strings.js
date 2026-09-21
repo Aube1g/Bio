@@ -83,6 +83,8 @@ export const ru = {
   bet: 'Ставка',
   chips: 'фишки',
   risk: 'Риск',
+  tune: 'Тонкая настройка',
+  tunePeek: 'ряды · максимум',
   low: 'Низкий',
   medium: 'Средний',
   high: 'Высокий',
@@ -140,6 +142,9 @@ export const ru = {
   constellation: 'Созвездие',
   aurora: 'Аура',
   plain: 'Тишина',
+  nebula: 'Туманность',
+  newyear: 'Новый год',
+  secretUnlocked: 'Секрет разблокирован: атмосфера «Туманность» появилась в настройках.',
   transitions: 'Характер переходов',
   mix: 'Микс',
   reducedNote: 'Анимации ограничены системной настройкой уменьшения движения.',
@@ -203,6 +208,7 @@ export const ru = {
   insufficient: 'Недостаточно фишек для этой ставки.',
   loginNeeded: 'Войди, чтобы начать партию.',
   noHistory: 'Сыграй первую партию — она появится здесь.',
+  noHistoryMatch: 'Ничего не нашлось под эти фильтры.',
   historyLogin: 'Войди, чтобы увидеть свою историю.',
   favoriteAdded: 'Игра добавлена в избранное',
   favoriteRemoved: 'Игра убрана из избранного',
@@ -246,7 +252,24 @@ export const ru = {
   genericError: 'Не удалось выполнить действие. Попробуй ещё раз.',
   returnToCollection: 'К коллекции',
   settings: 'Настройки',
+  allSettings: 'Все настройки',
+  sortRecent: 'Недавние',
+  sortAmount: 'Сумма',
+  roundsShown: '{count} партий',
+  filterAll: 'Все',
+  filterWins: 'Выигрыши',
+  filterLosses: 'Проигрыши',
+  filterPushes: 'Ничьи',
+  gameBlackjack: 'Блэкджек',
+  gameSlots: 'Слоты',
+  gameDice: 'Кубик',
+  gamePlinko: 'Плинко',
+  luckySeven: 'Счастливая семёрка!',
   close: 'Закрыть',
+  heroDate: 'Твой день',
+  prevGame: 'Предыдущая игра',
+  nextGame: 'Следующая игра',
+  carouselHint: 'Листай коллекцию: стрелки, колесо или свайп.',
 };
 export const en = {
   selectedGame: 'Selected game',
@@ -333,6 +356,8 @@ export const en = {
   bet: 'Stake',
   chips: 'chips',
   risk: 'Risk',
+  tune: 'Fine tuning',
+  tunePeek: 'rows · max',
   low: 'Low',
   medium: 'Medium',
   high: 'High',
@@ -389,6 +414,9 @@ export const en = {
   constellation: 'Constellation',
   aurora: 'Aura',
   plain: 'Quiet',
+  nebula: 'Nebula',
+  newyear: 'New Year',
+  secretUnlocked: 'Secret unlocked: the Nebula atmosphere appeared in settings.',
   transitions: 'Transition character',
   mix: 'Mix',
   reducedNote: 'Animations are limited by your system’s reduced-motion preference.',
@@ -452,6 +480,7 @@ export const en = {
   insufficient: 'Not enough chips for this stake.',
   loginNeeded: 'Sign in to play a round.',
   noHistory: 'Play your first round to see it here.',
+  noHistoryMatch: 'Nothing matches these filters.',
   historyLogin: 'Sign in to see your history.',
   favoriteAdded: 'Game added to favorites',
   favoriteRemoved: 'Game removed from favorites',
@@ -494,7 +523,24 @@ export const en = {
   genericError: 'Could not complete the action. Please retry.',
   returnToCollection: 'Back to collection',
   settings: 'Settings',
+  allSettings: 'All settings',
+  sortRecent: 'Recent',
+  sortAmount: 'Amount',
+  roundsShown: '{count} rounds',
+  filterAll: 'All',
+  filterWins: 'Wins',
+  filterLosses: 'Losses',
+  filterPushes: 'Pushes',
+  gameBlackjack: 'Blackjack',
+  gameSlots: 'Slots',
+  gameDice: 'Dice',
+  gamePlinko: 'Plinko',
+  luckySeven: 'Lucky seven!',
   close: 'Close',
+  heroDate: 'Your day',
+  prevGame: 'Previous game',
+  nextGame: 'Next game',
+  carouselHint: 'Browse the collection: arrows, wheel or swipe.',
 };
 export function t(key, values = {}) {
   const value = (preferences.lang === 'en' ? en[key] : ru[key]) || ru[key] || key;
@@ -507,6 +553,9 @@ export function translatePage(scope = document) {
   scope
     .querySelectorAll('[data-t-label]')
     .forEach((element) => element.setAttribute('aria-label', t(element.dataset.tLabel)));
+  scope
+    .querySelectorAll('[data-t-placeholder]')
+    .forEach((element) => element.setAttribute('placeholder', t(element.dataset.tPlaceholder)));
 }
 export const money = (minor) =>
   new Intl.NumberFormat(preferences.lang === 'en' ? 'en-US' : 'ru-RU', { maximumFractionDigits: 2 }).format(

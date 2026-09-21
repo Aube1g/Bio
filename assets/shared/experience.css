@@ -14,104 +14,550 @@ html[data-booting='true'] .app-preloader {
   display: flex;
   animation: boot-failsafe 4.5s step-end forwards;
 }
-.loader-clock {
+.loader-mark,
+.loader-core,
+.loader-orbit {
+  display: none;
+}
+/* The liquid clock — the exact preloader from the original index.html:
+   a morphing glass blob with a purple glow and three thin, real-time hands. */
+.clock-container {
+  position: relative;
   width: 140px;
   height: 140px;
-  display: grid;
-  place-items: center;
-  position: relative;
-  animation: clock-appear 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: clock-appear 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.loader-clock-blob {
+.clock-blob {
   position: absolute;
   inset: 0;
-  border: 1px solid #ffffff25;
-  background: linear-gradient(135deg, #ffffff0d, #ffffff03);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation: liquidMorph 8s infinite ease-in-out;
   box-shadow:
-    0 0 40px #7000ff35,
-    inset 0 1px #ffffff1a;
+    0 0 40px rgba(112, 0, 255, 0.45),
+    0 0 100px rgba(112, 0, 255, 0.18);
   overflow: hidden;
-  animation: loader-liquid 8s infinite ease-in-out;
 }
-.loader-shimmer {
+[data-theme='light'] .clock-blob {
+  background: linear-gradient(135deg, rgba(138, 79, 255, 0.1), rgba(0, 194, 214, 0.05));
+  border: 1px solid rgba(138, 79, 255, 0.2);
+  box-shadow: 0 0 40px rgba(138, 79, 255, 0.2);
+}
+.clock-shimmer {
   position: absolute;
-  inset: -30%;
-  background: linear-gradient(110deg, transparent 30%, #ffffff12 50%, transparent 70%);
-  animation: loader-shimmer 2.2s ease-in-out infinite;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
-.loader-clock-ticks {
+.clock-shimmer::before {
+  content: '';
   position: absolute;
-  inset: 16px;
-  border-radius: 50%;
-  border: 1px dashed color-mix(in srgb, var(--primary-text) 35%, transparent);
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0) 80%,
+    transparent 100%
+  );
+  animation: shimmerSweep 2.4s ease-in-out infinite;
 }
-.loader-clock-center {
+[data-theme='light'] .clock-shimmer::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 80%,
+    transparent 100%
+  );
+}
+.clock-center {
+  position: absolute;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--primary-text);
-  z-index: 2;
+  background: var(--primary, #7000ff);
+  box-shadow: 0 0 10px var(--primary, #7000ff);
+  z-index: 10;
 }
-.loader-clock-hand {
+.clock-hand {
   position: absolute;
   bottom: 50%;
   left: 50%;
   border-radius: 4px;
-  transform-origin: 50% 100%;
+  transform-origin: bottom center;
+  z-index: 5;
+  transform: rotate(0deg);
 }
-.loader-clock-hand.hour {
+.clock-hand.hour {
   height: 35px;
   width: 4px;
   margin-left: -2px;
-  background: var(--ink);
+  background: var(--text, #e8e8ff);
 }
-.loader-clock-hand.minute {
+.clock-hand.min {
   height: 50px;
   width: 2px;
   margin-left: -1px;
-  background: #4cdbea;
+  background: var(--accent, #00f0ff);
 }
-.loader-clock-hand.second {
+.clock-hand.sec {
   height: 60px;
   width: 1px;
-  background: #fc5474;
+  margin-left: -0.5px;
+  background: var(--hydra, #ff003c);
 }
-.loader-label {
-  margin-top: 24px;
-  letter-spacing: 0.2em;
-  font-size: 12px;
-  font-weight: 900;
-  color: var(--primary-text);
+@keyframes liquidMorph {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
 }
-[data-theme='light'] .loader-clock-blob {
-  background: linear-gradient(135deg, #8a4fff15, #00c2d60c);
-  border-color: #8a4fff30;
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
 }
-@keyframes loader-liquid {
+@keyframes shimmerBg {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+/* New Year atmosphere: night sky, moon, aurora, garland, fir forest and snow. */
+.ny-scene {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+[data-background='newyear'] .ny-scene {
+  display: block;
+}
+.ny-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+.ny-aurora {
+  animation: ny-aurora-drift 14s ease-in-out infinite;
+}
+.ny-aurora rect:nth-of-type(2) {
+  animation: ny-aurora-shimmer 7s ease-in-out infinite;
+}
+@keyframes ny-aurora-drift {
   0%,
   100% {
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    opacity: 0.85;
+    transform: translateY(0);
   }
-  33% {
-    border-radius: 65% 35% 35% 65% / 60% 35% 65% 40%;
-  }
-  66% {
-    border-radius: 35% 65% 55% 45% / 35% 65% 35% 65%;
+  50% {
+    opacity: 1;
+    transform: translateY(-14px);
   }
 }
-@keyframes loader-shimmer {
-  from {
-    transform: translateX(-80%);
+@keyframes ny-aurora-shimmer {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translateX(0);
   }
+  50% {
+    opacity: 1;
+    transform: translateX(24px);
+  }
+}
+.ny-stars .ny-star {
+  fill: #dfe9ff;
+  opacity: 0.75;
+  animation: ny-twinkle 3.4s ease-in-out infinite;
+}
+.ny-stars .ny-star:nth-of-type(3n) {
+  animation-duration: 4.4s;
+  animation-delay: 0.6s;
+}
+.ny-stars .ny-star:nth-of-type(3n + 1) {
+  animation-duration: 2.9s;
+  animation-delay: 1.3s;
+}
+@keyframes ny-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.ny-shooting .shooting-star {
+  stroke: #ffffff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: ny-shoot 6s ease-in-out infinite;
+}
+@keyframes ny-shoot {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  76% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+    transform: translate(150px, 110px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(150px, 110px);
+  }
+}
+.ny-garland circle:nth-of-type(n) {
+  animation: ny-bulb-glow 3s ease-in-out infinite;
+}
+.ny-garland circle:nth-of-type(2n) {
+  animation-delay: 0.9s;
+}
+.ny-garland circle:nth-of-type(3n) {
+  animation-delay: 1.6s;
+}
+@keyframes ny-bulb-glow {
+  0%,
+  100% {
+    filter: brightness(0.92);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+.ny-trees {
+  transform-origin: bottom center;
+}
+.ny-snow {
+  position: absolute;
+  inset: 0;
+}
+.ny-snow-back {
+  opacity: 0.55;
+  filter: blur(1px);
+}
+.ny-snow i {
+  position: absolute;
+  left: var(--x);
+  top: -18px;
+  width: var(--size, 8px);
+  height: var(--size, 8px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff, #dceaf3 70%);
+  box-shadow: 0 0 6px #ffffff66;
+  opacity: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: ny-snowfall var(--dur, 14s) linear infinite;
+  animation-delay: var(--delay);
+}
+.ny-snow i.crystal {
+  border-radius: 2px;
+  clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
+  background: radial-gradient(circle at 35% 30%, #ffffff, #cfe2f2 70%);
+}
+[data-background='newyear'] .ny-snow i:hover {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #bcdcf0 70%);
+  box-shadow: 0 0 12px #ffffffcc;
+}
+.ny-fireworks .fw-burst {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ny-fireworks .fw-burst:nth-of-type(1) {
+  animation: fw-pop 7s ease-out infinite;
+}
+.ny-fireworks .fw-burst:nth-of-type(2) {
+  animation: fw-pop 7s ease-out 2.1s infinite;
+}
+.ny-fireworks .fw-burst:nth-of-type(3) {
+  animation: fw-pop 7s ease-out 4.2s infinite;
+}
+.ny-fireworks .fw-burst:nth-of-type(4) {
+  animation: fw-pop 7s ease-out 1.1s infinite;
+}
+@keyframes fw-pop {
+  0%,
+  9% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  13% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  24% {
+    opacity: 0.85;
+    transform: scale(1.18);
+  }
+  42%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+@keyframes ny-snowfall {
+  0% {
+    transform: translate3d(0, -18px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate3d(var(--drift, 40px), 52vh, 0) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(calc(var(--drift, 40px) * -0.55), 110vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+[data-motion='off'] .ny-snow,
+[data-particles='false'] .ny-snow {
+  display: none;
+}
+[data-background='newyear'] {
+  --bg: #0b1230;
+}
+[data-background='newyear'][data-theme='light'] {
+  --bg: #e9eef6;
+}
+/* Frosted glass under the New Year sky so the moon, aurora, trees and snow
+   stay visible through the content instead of being hidden behind it. */
+[data-background='newyear'] .shell,
+[data-background='newyear'] .workspace-nav,
+[data-background='newyear'] .rail {
+  background-color: color-mix(in srgb, var(--shell) 58%, transparent);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+}
+[data-background='newyear'] .project-card,
+[data-background='newyear'] .demo-card,
+[data-background='newyear'] .store-card,
+[data-background='newyear'] .partner-card,
+[data-background='newyear'] .preview-window,
+[data-background='newyear'] .profile-card {
+  background-color: color-mix(in srgb, var(--surface) 62%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-background='newyear'] .game-card,
+[data-background='newyear'] .bet-panel,
+[data-background='newyear'] .wallet-balance-panel,
+[data-background='newyear'] .info-card,
+[data-background='newyear'] .table-card,
+[data-background='newyear'] .modal-section-card {
+  background-color: color-mix(in srgb, var(--card) 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-background='newyear'] .game-scene {
+  background-color: color-mix(in srgb, var(--card) 66%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-background='newyear'] .game-dock {
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+}
+/* Living nebula: a full deep-space scene with drifting gas clouds, twinkling
+   stars, meteors and a ringed planet, unlocked through the easter egg. */
+.nebula-scene {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+[data-background='nebula'] .nebula-scene {
+  display: block;
+}
+.nebula-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+.nebula-clouds {
+  animation: nebula-clouds-drift 46s ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+}
+@keyframes nebula-clouds-drift {
+  0% {
+    transform: translate(-1.5%, -1%) scale(1) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(1.5%, 1%) scale(1.08) rotate(1.2deg);
+    opacity: 0.92;
+  }
+}
+.nebula-stars .nb-star {
+  animation: nb-twinkle 3.2s ease-in-out infinite;
+}
+.nebula-stars .nb-star:nth-of-type(2n) {
+  animation-duration: 4.1s;
+  animation-delay: 0.7s;
+}
+.nebula-stars .nb-star:nth-of-type(3n) {
+  animation-duration: 2.6s;
+  animation-delay: 1.2s;
+}
+.nebula-stars .nb-star-bright {
+  animation: nb-bright 2.4s ease-in-out infinite;
+}
+@keyframes nb-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes nb-bright {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.nebula-shooting .nb-meteor {
+  stroke: #ffffff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: nb-shoot 7.5s ease-in-out infinite;
+}
+.nebula-shooting .nb-meteor-two {
+  animation-delay: 3.4s;
+  animation-duration: 9s;
+}
+@keyframes nb-shoot {
+  0%,
+  70% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  74% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 0;
+    transform: translate(190px, 130px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(190px, 130px);
+  }
+}
+.nebula-planet {
+  transform-origin: 1240px 700px;
+  animation: nb-planet-float 16s ease-in-out infinite alternate;
+}
+@keyframes nb-planet-float {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-14px);
+  }
+}
+[data-background='nebula'] {
+  --bg: #0a0816;
+}
+[data-background='nebula'][data-theme='light'] {
+  --bg: #eceaf6;
+}
+[data-background='nebula'] .shell,
+[data-background='nebula'] .workspace-nav,
+[data-background='nebula'] .rail {
+  background-color: color-mix(in srgb, var(--shell) 56%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+[data-background='nebula'] .project-card,
+[data-background='nebula'] .demo-card,
+[data-background='nebula'] .store-card,
+[data-background='nebula'] .partner-card,
+[data-background='nebula'] .preview-window,
+[data-background='nebula'] .profile-card {
+  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-background='nebula'] .game-card,
+[data-background='nebula'] .bet-panel,
+[data-background='nebula'] .wallet-balance-panel,
+[data-background='nebula'] .info-card,
+[data-background='nebula'] .table-card,
+[data-background='nebula'] .modal-section-card {
+  background-color: color-mix(in srgb, var(--card) 54%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-background='nebula'] .game-scene {
+  background-color: color-mix(in srgb, var(--card) 64%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+@keyframes core-pulse {
+  0%,
+  100% {
+    transform: rotate(45deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.18);
+  }
+}
+@keyframes orbit-spin {
   to {
-    transform: translateX(80%);
+    transform: rotate(360deg);
   }
 }
 @keyframes clock-appear {
   from {
     opacity: 0;
-    transform: scale(0.76) rotate(-12deg);
+    transform: scale(0.78);
   }
   to {
     opacity: 1;
@@ -375,8 +821,8 @@ html[data-booting='true'] .app-preloader {
   border-color: #698c334a;
   background: #b9d38e24;
 }
-[data-motion='off'] .loader-clock,
-[data-motion='off'] .loader-clock * {
+[data-motion='off'] .loader-mark,
+[data-motion='off'] .loader-mark * {
   animation: none !important;
 }
 @media (max-width: 700px) {
@@ -438,8 +884,8 @@ html[data-booting='true'] .app-preloader {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .loader-clock,
-  .loader-clock * {
+  .loader-mark,
+  .loader-mark * {
     animation: none !important;
   }
 }
@@ -457,4 +903,12 @@ html[data-booting='true'] .app-preloader {
 .motion-preview-directions button[aria-pressed='true'] {
   color: #fff;
   background: var(--button-primary, var(--primary));
+}
+
+/* Theme iris wipe overlay (shared/theme-wipe.js). */
+.theme-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  pointer-events: none;
 }

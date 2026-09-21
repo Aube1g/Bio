@@ -42,8 +42,7 @@ try {
   const loaded = page.waitForResponse((response) => response.url().endsWith('/api/config'));
   release();
   await loaded;
-  await page.waitForTimeout(120);
-  assert.match(await page.locator('#account-label').textContent(), /Гость|Guest/);
+  await page.waitForTimeout(120);  assert.match(await page.locator('#account-label').textContent(), /Гость|Guest/);
   assert.equal((await page.evaluate(() => fetch('/api/session').then((r) => r.json()))).user.kind, 'guest');
   pass('A late anonymous bootstrap cannot overwrite a successful guest login');
   await enterGame(page, 'dice');
@@ -90,9 +89,10 @@ try {
   await parent.goto(base + '/frame-test');
   const frame = parent.frames().find((frame) => frame.url().includes('/games.html'));
   await frame.waitForFunction(() => document.documentElement.dataset.ready === 'true');
-  await frame.locator('#account-button').click();
-  await frame.locator('#guest-login').click();
-  await frame.waitForFunction(() => !document.querySelector('#auth-dialog').open);
+  // Preview builds auto-sign-in as a guest (via the tab token, since cookies are stripped).
+  await frame.waitForFunction(() =>
+    /Гость|Guest/.test(document.querySelector('#account-label')?.textContent || ''),
+  );
   assert.match(
     await frame.evaluate(() => sessionStorage.getItem('aubeig.preview.session')),
     /^[a-f0-9]{64}$/,

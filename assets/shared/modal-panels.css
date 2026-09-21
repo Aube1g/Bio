@@ -845,13 +845,18 @@ dialog :is(.dialog-body, .dialog-content) {
   border-radius: 18px;
   background: var(--modal-card);
 }
-#history-dialog .dialog-lead,
-#auth-dialog .dialog-lead {
+#history-dialog .dialog-lead {
   padding: 15px 17px;
   border: 1px solid var(--line);
   border-radius: 17px;
   background: var(--modal-card);
   font-size: 13px;
+}
+#auth-dialog .dialog-lead {
+  font-size: 13px;
+  border: 0;
+  padding: 0;
+  background: none;
 }
 #auth-dialog .guest-button,
 #auth-dialog .telegram-button {

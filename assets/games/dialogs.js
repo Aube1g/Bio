@@ -23,6 +23,7 @@ export class PortalDialogs {
     api,
     state,
     notify,
+    sound,
     onError,
     onData,
     onSession,
@@ -35,6 +36,7 @@ export class PortalDialogs {
       api,
       state,
       notify,
+      sound,
       onError,
       onData,
       onSession,
@@ -45,6 +47,9 @@ export class PortalDialogs {
     this.rounds = new Map();
     this.proofRound = null;
     this.historyCursor = null;
+    this.historySort = 'recent';
+    this.historyGame = 'all';
+    this.historyResult = 'all';
     document.addEventListener('click', (event) => {
       const trigger = event.target.closest('[data-open]');
       if (trigger) this.open(trigger.dataset.open, trigger);
@@ -66,6 +71,41 @@ export class PortalDialogs {
       }
     });
     $('#history-more').addEventListener('click', () => this.history(true));
+    $$('[data-history-sort]').forEach((button) =>
+      button.addEventListener('click', () => {
+        this.historySort = button.dataset.historySort;
+        $$('[data-history-sort]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item === button)),
+        );
+        this.renderHistory();
+      }),
+    );
+    $$('[data-history-game]').forEach((button) =>
+      button.addEventListener('click', () => {
+        this.historyGame = button.dataset.historyGame;
+        $$('[data-history-game]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item === button)),
+        );
+        try {
+          this.sound?.unlock();
+          this.sound?.play('ping');
+        } catch {}
+        this.renderHistory();
+      }),
+    );
+    $$('[data-history-result]').forEach((button) =>
+      button.addEventListener('click', () => {
+        this.historyResult = button.dataset.historyResult;
+        $$('[data-history-result]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item === button)),
+        );
+        try {
+          this.sound?.unlock();
+          this.sound?.play('ping');
+        } catch {}
+        this.renderHistory();
+      }),
+    );
     $('#rules-button').addEventListener('click', (event) => this.rules(event.currentTarget));
     $('#plinko-table-button').addEventListener('click', (event) => this.rules(event.currentTarget));
     $('#slot-table-button').addEventListener('click', (event) => this.rules(event.currentTarget));
@@ -86,9 +126,27 @@ export class PortalDialogs {
       return;
     }
     if (id === 'account-dialog') this.account();
-    if (id === 'history-dialog') this.history();
+    if (id === 'history-dialog') {
+      const current = this.state().game;
+      if (opener?.dataset.historyContext === 'auto' || opener?.dataset.historyContext === 'game') {
+        this.historyResult = 'all';
+        this.historyGame = current && current !== 'lobby' ? current : 'all';
+        $$('[data-history-game]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item.dataset.historyGame === this.historyGame)),
+        );
+        $$('[data-history-result]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item.dataset.historyResult === 'all')),
+        );
+      }
+      this.history();
+    }
     if (id === 'wallet-dialog') {
       $('#wallet-amount').textContent = money(this.state().wallet.balanceMinor);
+      const stats = this.state().stats || { rounds: 0, wins: 0, netMinor: 0 };
+      $('#wallet-rounds').textContent = String(stats.rounds);
+      $('#wallet-wins').textContent = String(stats.wins);
+      $('#wallet-net').textContent = signedMoney(stats.netMinor);
+      $('#wallet-net').dataset.sign = stats.netMinor > 0 ? 'win' : stats.netMinor < 0 ? 'loss' : 'flat';
       $('#wallet-dialog [data-t="resetNote"]').textContent = t(
         this.api.isPractice ? 'localResetNote' : 'resetNote',
       );
@@ -157,9 +215,8 @@ export class PortalDialogs {
     if (!append) {
       this.historyCursor = null;
       this.rounds.clear();
-      $('#history-list').innerHTML =
-        `<div class="empty-state">${icon('history')}<p>${t('noHistory')}</p></div>`;
       $('#history-more').hidden = true;
+      this.renderHistory();
     }
     $('#history-more').disabled = true;
     try {
@@ -170,23 +227,60 @@ export class PortalDialogs {
       for (const round of data.rounds) this.rounds.set(round.id, round);
       this.historyCursor = data.nextCursor;
       $('#history-more').hidden = !data.nextCursor;
-      if (!this.rounds.size) return;
-      $('#history-list').innerHTML = [...this.rounds.values()]
-        .map((round) => {
-          const date = new Intl.DateTimeFormat(preferences.lang, {
-            hour: '2-digit',
-            minute: '2-digit',
-            day: '2-digit',
-            month: 'short',
-          }).format(round.createdAt);
-          return `<button type="button" class="history-item ${round.netMinor > 0 ? 'win' : ''}" data-round-id="${round.id}">${icon(gameIcon[round.game])}<span><strong>${title(round.game)}</strong><small>${date} · ${t('bet')} ${money(round.betMinor)}</small></span><span class="history-return">${round.status === 'active' ? t('active') : signedMoney(round.netMinor)}<small>${round.status === 'settled' ? `${t('paid')} ${money(round.payoutMinor)}` : ''}</small></span>${icon('arrow')}</button>`;
-        })
-        .join('');
+      this.renderHistory();
     } catch (error) {
       this.onError(error);
     } finally {
       $('#history-more').disabled = false;
     }
+  }
+  renderHistory() {
+    const resultRank = (round) =>
+      round.status !== 'settled' ? 3 : round.netMinor > 0 ? 0 : round.netMinor < 0 ? 2 : 1;
+    const matches = (round) => {
+      if (this.historyGame !== 'all' && round.game !== this.historyGame) return false;
+      if (this.historyResult !== 'all') {
+        if (this.historyResult === 'win') return round.status === 'settled' && round.netMinor > 0;
+        if (this.historyResult === 'loss') return round.status === 'settled' && round.netMinor < 0;
+        if (this.historyResult === 'push')
+          return round.status === 'settled' && round.netMinor === 0 && round.game === 'blackjack';
+      }
+      return true;
+    };
+    const all = [...this.rounds.values()];
+    const rounds = all.filter(matches);
+    const count = $('#history-count');
+    if (count)
+      count.textContent =
+        this.historyGame === 'all' && this.historyResult === 'all'
+          ? t('roundsShown', { count: all.length })
+          : `${rounds.length} / ${t('roundsShown', { count: all.length })}`;
+    if (!all.length) {
+      $('#history-list').innerHTML =
+        `<div class="empty-state">${icon('history')}<p>${t('noHistory')}</p></div>`;
+      return;
+    }
+    if (!rounds.length) {
+      $('#history-list').innerHTML =
+        `<div class="empty-state">${icon('history')}<p>${t('noHistoryMatch')}</p></div>`;
+      return;
+    }
+    if (this.historySort === 'amount') rounds.sort((a, b) => b.betMinor - a.betMinor);
+    $('#history-list').innerHTML = rounds
+      .map((round) => {
+        const date = new Intl.DateTimeFormat(preferences.lang, {
+          hour: '2-digit',
+          minute: '2-digit',
+          day: '2-digit',
+          month: 'short',
+        }).format(round.createdAt);
+        const result =
+          round.status === 'active'
+            ? `<span class="history-return">${t('active')}</span>`
+            : `<span class="history-return ${round.netMinor > 0 ? 'won' : round.netMinor < 0 ? 'lost' : 'even'}">${signedMoney(round.netMinor)}<small>${t('paid')} ${money(round.payoutMinor)}</small></span>`;
+        return `<button type="button" class="history-item" data-round-id="${round.id}">${icon(gameIcon[round.game])}<span><strong>${title(round.game)}</strong><small>${date} · ${t('bet')} ${money(round.betMinor)}</small></span>${result}${icon('arrow')}</button>`;
+      })
+      .join('');
   }
   rules(opener) {
     const state = this.state(),
