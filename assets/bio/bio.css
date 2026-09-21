@@ -3630,6 +3630,7 @@ dialog.is-morphing {
   max-width: none !important;
   max-height: none !important;
   overflow: hidden !important;
+  contain: layout paint style;
   will-change: width, height, left, top, clip-path;
   box-shadow: 0 20px 80px #46205935;
 }
@@ -6293,8 +6294,7 @@ summary:focus-visible {
 [data-background='nebula'] .atmosphere::before {
   opacity: 0.16;
   background-image:
-    radial-gradient(#d9c8ff 1.2px, transparent 1.6px),
-    radial-gradient(#8fd8ff 1px, transparent 1.5px),
+    radial-gradient(#d9c8ff 1.2px, transparent 1.6px), radial-gradient(#8fd8ff 1px, transparent 1.5px),
     radial-gradient(#ff9ad2 1px, transparent 1.5px);
   background-size:
     83px 97px,
@@ -10073,7 +10073,31 @@ dialog.is-morphing {
 .is-window-entering {
   background: var(--morph-sheet);
 }
-body:has(dialog[open]) :is(.shell, .atmosphere) *,
+/* Pause only the animated scenery behind a dialog — the old `.shell *`
+   forced the browser to re-evaluate every element on open and close. */
+body:has(dialog[open])
+  :is(
+    .atmosphere,
+    .hero-skin,
+    .preview-window,
+    .signal-board,
+    .rail-brand,
+    .partner-monogram,
+    .project-grid,
+    .store-grid
+  )
+  :is(*, *::before, *::after),
+body:has(dialog[open])
+  :is(
+    .atmosphere,
+    .hero-skin,
+    .preview-window,
+    .signal-board,
+    .rail-brand,
+    .partner-monogram,
+    .project-grid,
+    .store-grid
+  ),
 body:has(.is-window-morphing) .atmosphere * {
   animation-play-state: paused !important;
 }
@@ -10091,7 +10115,11 @@ dialog.is-morphing::backdrop {
 body:has(.is-window-morphing) .shell {
   backdrop-filter: none !important;
 }
-body:has(.is-window-morphing) .shell * {
+body:has(.is-window-morphing)
+  :is(.atmosphere, .hero-skin, .preview-window, .signal-board, .project-grid, .store-grid)
+  :is(*, *::before, *::after),
+body:has(.is-window-morphing)
+  :is(.atmosphere, .hero-skin, .preview-window, .signal-board, .project-grid, .store-grid) {
   animation-play-state: paused !important;
 }
 .is-window-morphing

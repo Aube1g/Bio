@@ -9,6 +9,24 @@
   flex-direction: column;
   background: var(--bg, #050510);
   color: var(--ink, #e8e8ff);
+  font-family:
+    'Nunito',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+/* The loading caption uses the same Nunito voice as the rest of the site
+   (weight 800, tracked out) — never the browser fallback font. */
+.loader-label {
+  margin-top: 20px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--primary, #7000ff);
 }
 html[data-booting='true'] .app-preloader {
   display: flex;

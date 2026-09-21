@@ -2822,6 +2822,7 @@
         max-width: none !important;
         max-height: none !important;
         box-shadow: none;
+        contain: layout paint style;
         will-change: width, height, clip-path;
       }
       .portal-dialog.morphing::backdrop {
@@ -3303,7 +3304,33 @@
       body:has(dialog[open]) {
         overflow: hidden;
       }
-      body:has(dialog[open]) .site-wrap * {
+      /* Pause only the animated scenery behind a dialog — the old `.site-wrap *`
+         forced the browser to re-evaluate every element on open and close. */
+      body:has(dialog[open])
+        :is(
+          .ambient-orb,
+          .ambient-dots,
+          .garden-scene,
+          .ny-scene,
+          .nebula-scene,
+          .hero-playground,
+          .lobby-bento,
+          .game-collection,
+          .game-art
+        )
+        :is(*, *::before, *::after),
+      body:has(dialog[open])
+        :is(
+          .ambient-orb,
+          .ambient-dots,
+          .garden-scene,
+          .ny-scene,
+          .nebula-scene,
+          .hero-playground,
+          .lobby-bento,
+          .game-collection,
+          .game-art
+        ) {
         animation-play-state: paused !important;
       }
       .settings-dialog {
@@ -7166,6 +7193,24 @@
         flex-direction: column;
         background: var(--bg, #050510);
         color: var(--ink, #e8e8ff);
+        font-family:
+          "Nunito",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      /* The loading caption uses the same Nunito voice as the rest of the site
+         (weight 800, tracked out) — never the browser fallback font. */
+      .loader-label {
+        margin-top: 20px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--primary, #7000ff);
       }
       html[data-booting="true"] .app-preloader {
         display: flex;
@@ -9289,7 +9334,7 @@
           border-color 0.3s;
       }
       .carousel-btn:last-child {
-        border-radius: 999px 999px 6px 999px;
+        border-radius: 999px 999px 999px 6px;
       }
       .carousel-btn .icon {
         width: 16px;
@@ -9945,21 +9990,19 @@
          Caelestia-style entrances: springy shape pop-ins with a soft blur clear.
          ----------------------------------------------------------------------- */
       @keyframes caelestia-in {
+        /* Compositor-only: transform + opacity. Filter and border-radius were
+           repainting every frame and stuttering behind open dialogs. */
         0% {
           opacity: 0;
           transform: translateY(26px) scale(0.84);
-          filter: blur(10px);
-          border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
         }
         62% {
           opacity: 1;
           transform: translateY(-3px) scale(1.02);
-          filter: blur(0);
         }
         100% {
           opacity: 1;
           transform: translateY(0) scale(1);
-          filter: blur(0);
         }
       }
       html:not([data-motion="off"]) .lobby-bento > * {
@@ -10095,12 +10138,11 @@
       .carousel-side-next {
         right: clamp(6px, 1.4vw, 18px);
       }
-      /* The organic corner leans towards the travel direction. */
-      .carousel-side-prev {
-        border-radius: 18px 999px 999px 999px;
-      }
+      /* Both carousel arrows share the exact same shell — the left one's leaf corner.
+         Only their position and icon direction differ, never the shape. */
+      .carousel-side-prev,
       .carousel-side-next {
-        border-radius: 999px 999px 18px 999px;
+        border-radius: 18px 999px 999px 999px;
       }
       .carousel-side:hover {
         transform: scale(1.1);
@@ -10150,8 +10192,15 @@
             transparent 52%
           ),
           radial-gradient(140% 120% at 50% 50%, transparent 42%, rgba(6, 4, 12, 0.52) 100%), rgba(8, 6, 14, 0.58);
-        backdrop-filter: blur(16px) saturate(1.25) brightness(0.82);
-        -webkit-backdrop-filter: blur(16px) saturate(1.25) brightness(0.82);
+        /* One cheap blur pass — saturate+brightness tripled the backdrop cost. */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      /* While a dialog morphs, its backdrop stays fully static — no filter work
+         at all until the shape settles. */
+      .portal-dialog.morphing::backdrop {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
       }
       html:not([data-motion="off"]) .portal-dialog[open] .dialog-content > * {
         animation: caelestia-in 0.5s cubic-bezier(0.22, 1.24, 0.36, 1) backwards;
@@ -10337,14 +10386,13 @@
          Caelestia sheet for portal dialogs: organic shell, glow crown, pop entry.
          ----------------------------------------------------------------------- */
       @keyframes dialog-pop {
+        /* Compositor-only: animating filter here janked every dialog open. */
         0% {
           opacity: 0;
           transform: translateY(26px) scale(0.94);
-          filter: blur(8px);
         }
         62% {
           opacity: 1;
-          filter: blur(0);
         }
         100% {
           opacity: 1;
@@ -10446,6 +10494,149 @@
       [data-theme="light"] .bet-panel,
       [data-theme="light"] .lobby-hero {
         scrollbar-color: #8b6ee0a6 transparent;
+      }
+
+      /* --------------------------------------------------------------------------
+         Unusual shapes: every portal surface gets its own geometric identity.
+         The lobby hero is an arch window, the plinko rail is a tall leaf, each
+         game card owns a silhouette (arch / bowl / wave / leaf) that keeps gently
+         morphing, and the game scene + controls read as one split pill.
+         ----------------------------------------------------------------------- */
+      .portal-shell {
+        border-radius: 52px 24px 64px 28px / 36px 64px 30px 56px;
+      }
+      .lobby-hero {
+        border-radius: 96px 96px 30px 30px / 62px 62px 30px 30px;
+      }
+      .plinko-feature {
+        border-radius: 84px 26px 84px 26px / 26px 84px 26px 84px;
+      }
+      .game-card[data-card="blackjack"] {
+        border-radius: 68px 68px 22px 22px / 48px 48px 22px 22px;
+      }
+      .game-card[data-card="slots"] {
+        border-radius: 22px 22px 68px 68px / 22px 22px 48px 48px;
+      }
+      .game-card[data-card="dice"] {
+        border-radius: 24px 64px 24px 64px / 64px 24px 64px 24px;
+      }
+      .game-card[data-card="plinko"] {
+        border-radius: 64px 24px 64px 24px / 24px 64px 24px 64px;
+      }
+      @keyframes card-silhouette-arch {
+        from {
+          border-radius: 68px 68px 22px 22px / 48px 48px 22px 22px;
+        }
+        to {
+          border-radius: 56px 56px 30px 30px / 40px 40px 30px 30px;
+        }
+      }
+      @keyframes card-silhouette-bowl {
+        from {
+          border-radius: 22px 22px 68px 68px / 22px 22px 48px 48px;
+        }
+        to {
+          border-radius: 30px 30px 56px 56px / 30px 30px 40px 40px;
+        }
+      }
+      @keyframes card-silhouette-wave {
+        from {
+          border-radius: 24px 64px 24px 64px / 64px 24px 64px 24px;
+        }
+        to {
+          border-radius: 32px 52px 32px 52px / 52px 32px 52px 32px;
+        }
+      }
+      @keyframes card-silhouette-leaf {
+        from {
+          border-radius: 64px 24px 64px 24px / 24px 64px 24px 64px;
+        }
+        to {
+          border-radius: 52px 32px 52px 32px / 32px 52px 32px 52px;
+        }
+      }
+      html:not([data-motion="off"]) .game-card[data-card="blackjack"]:not(.is-selected) {
+        animation-name: card-silhouette-arch;
+      }
+      html:not([data-motion="off"]) .game-card[data-card="slots"]:not(.is-selected) {
+        animation-name: card-silhouette-bowl;
+      }
+      html:not([data-motion="off"]) .game-card[data-card="dice"]:not(.is-selected) {
+        animation-name: card-silhouette-wave;
+      }
+      html:not([data-motion="off"]) .game-card[data-card="plinko"]:not(.is-selected) {
+        animation-name: card-silhouette-leaf;
+      }
+      /* Hovering a card freezes its silhouette so the hover shape reads clearly. */
+      html:not([data-motion="off"]) .game-card[data-card]:hover {
+        animation-play-state: paused;
+      }
+      .game-card[data-card="blackjack"]:hover {
+        border-radius: 58px 58px 30px 30px / 40px 40px 30px 30px;
+      }
+      .game-card[data-card="slots"]:hover {
+        border-radius: 30px 30px 58px 58px / 30px 30px 40px 40px;
+      }
+      .game-card[data-card="dice"]:hover {
+        border-radius: 32px 54px 32px 54px / 54px 32px 54px 32px;
+      }
+      .game-card[data-card="plinko"]:hover {
+        border-radius: 54px 32px 54px 32px / 32px 54px 32px 54px;
+      }
+      /* The rotating accent inside each card echoes its silhouette. */
+      .game-card[data-card="blackjack"]::after {
+        border-radius: 58% 42% 40% 60% / 44% 56% 44% 56%;
+      }
+      .game-card[data-card="slots"]::after {
+        border-radius: 40% 60% 58% 42% / 56% 44% 56% 44%;
+      }
+      .game-card[data-card="dice"]::after {
+        border-radius: 44% 56% 44% 56% / 56% 44% 56% 44%;
+      }
+      .game-card[data-card="plinko"]::after {
+        border-radius: 56% 44% 56% 44% / 44% 56% 44% 56%;
+      }
+      /* Scene + controls are one split pill: round outer edges, tight inner seam. */
+      .game-scene {
+        border-radius: 16px 48px 48px 16px / 16px 48px 48px 16px;
+      }
+      .bet-panel,
+      .wallet-balance-panel {
+        border-radius: 48px 16px 16px 48px / 48px 16px 16px 48px;
+      }
+      /* The play button launches to the right: tight tail, round nose. */
+      .play-button {
+        border-radius: 20px 999px 999px 20px;
+      }
+      /* Session strip is a wave ticket with a diamond symbol. */
+      .session-strip {
+        border-radius: 26px 64px 26px 64px / 64px 26px 64px 26px;
+      }
+      .session-symbol {
+        border-radius: 32%;
+        transform: rotate(45deg);
+      }
+      .session-symbol .icon {
+        transform: rotate(-45deg);
+      }
+      /* The dock is a low wave the thumbs surf on. */
+      .game-dock {
+        border-radius: 30px 64px 30px 64px / 64px 30px 64px 30px;
+      }
+      /* Dialogs push the organic shell further. */
+      .portal-dialog {
+        border-radius: 60px 26px 66px 30px / 42px 58px 40px 62px;
+      }
+      .portal-dialog.wide-dialog {
+        border-radius: 30px 66px 34px 30px / 56px 40px 62px 36px;
+      }
+      @media (max-width: 700px) {
+        .lobby-hero {
+          border-radius: 56px 56px 24px 24px / 40px 40px 24px 24px;
+        }
+        .plinko-feature {
+          border-radius: 52px 22px 52px 22px / 22px 52px 22px 52px;
+        }
       }
     </style>
     <script>

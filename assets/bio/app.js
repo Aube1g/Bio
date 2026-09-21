@@ -546,14 +546,17 @@ import { BioSound } from './sound.js';
       this.statusKey = key;
       this.root.dataset.playback = done ? 'done' : paused ? 'paused' : 'playing';
       const label = $('[data-demo-status]', this.root);
+      /* Chat previews override these keys with messenger-style statuses
+         ("typing…", "online") while terminals keep the demo wording. */
+      const keys = this.root._statusKeys || {};
       if (label)
         label.textContent = done
-          ? tr('Готово')
+          ? tr(keys.done || 'Готово')
           : this.manualStepping
-            ? tr('Пошагово')
+            ? tr(keys.manual || 'Пошагово')
             : paused
-              ? tr('На паузе')
-              : tr('Воспроизведение');
+              ? tr(keys.paused || 'На паузе')
+              : tr(keys.playing || 'Воспроизведение');
       const pause = $('[data-demo-pause]', this.root);
       if (pause) {
         pause.hidden = !state.motion;
@@ -875,11 +878,52 @@ import { BioSound } from './sound.js';
 
   const CHAT_PROMPT = 'Сравни курс доллара за неделю и покажи график';
   const CHAT_VALUES = [89.6, 89.82, 89.71, 90.12, 90.42, 90.18, 90.85];
+  /* XGO Bot v2.0 identity, mirrored 1:1 from the bot source (SYM table,
+     format_header_tree, generate_button, SkillManager, GenerationParams). */
+  const XGO_VERSION = '2.0.0',
+    XGO_BUILD = '2000',
+    XGO_MODEL = 'gpt-5.5-free';
+  const XGO_SKILLS = [
+    { name: 'code_writer', icon: '⌘', desc: 'Писать чистый, документированный код на любых языках' },
+    { name: 'analyst', icon: '◎', desc: 'Анализировать данные, делать выводы, строить стратегии' },
+    { name: 'creative_writer', icon: '✎', desc: 'Писать креативные тексты, сценарии, истории, поэзию' },
+    { name: 'debugger', icon: '✗', desc: 'Находить баги, объяснять ошибки, предлагать фиксы' },
+    { name: 'architect', icon: '▲', desc: 'Проектировать системы, выбирать стек, планировать архитектуру' },
+    { name: 'teacher', icon: '◫', desc: 'Объяснять сложные темы простым языком, обучать' },
+  ];
+  const xgoStamp = () => {
+    const now = new Date();
+    return String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  };
   function chartMarkup() {
     return '<div class="chat-chart"><div class="chat-chart-label"><span>USD / RUB · DEMO</span><strong>+1,4%</strong></div><svg viewBox="0 0 280 100" role="img" aria-label="Демонстрационный график курса, не текущие котировки"><path class="chart-grid" d="M0 25H280M0 50H280M0 75H280"/><path class="chart-fill" d="M0 77C20 77 22 66 40 66S64 78 80 72S102 51 120 49S143 25 160 24S183 46 200 38S228 31 240 24S263 21 280 13V100H0Z"/><path class="chart-stroke" d="M0 77C20 77 22 66 40 66S64 78 80 72S102 51 120 49S143 25 160 24S183 46 200 38S228 31 240 24S263 21 280 13"/></svg><div class="chat-chart-axis"><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div></div>';
   }
   function chatFrame(id, compact = false) {
     return '<div id="' + id + '" data-chat' + (compact ? ' data-compact="true"' : '') + '></div>';
+  }
+  /* One true XGO phone: the same status bar, island notch, screen and home
+     bar on the home card, in the lab and inside the project dialog. */
+  function xgoStatusbarMarkup() {
+    return (
+      '<div class="xgo-statusbar" aria-hidden="true"><span class="xgo-clock">--:--</span><span class="xgo-status-side">' +
+      '<svg class="xgo-gsm" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="5" y="5" width="3" height="7" rx="0.5"/><rect x="10" y="3" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>' +
+      '<svg class="xgo-wifi" viewBox="0 0 16 12" fill="none" aria-hidden="true"><path d="M8 10.2c.6 0 1-.5 1-1s-.5-1-1-1-1 .5-1 1 .4 1 1 1z" fill="currentColor"/><path d="M4.5 7c1-1 2.2-1.5 3.5-1.5S10.5 6 11.5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 4.3c1.7-1.7 4-2.6 6-2.6s4.3.9 6 2.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
+      '<span class="xgo-battery"><i class="xgo-battery-fill"></i></span></span></div>'
+    );
+  }
+  function xgoDeviceMarkup(chatId, compact = false, extra = '') {
+    return (
+      '<div class="xgo-device' +
+      (extra ? ' ' + extra : '') +
+      '"><div class="xgo-device-frame">' +
+      xgoStatusbarMarkup() +
+      '<button class="xgo-notch" type="button" aria-pressed="false" aria-label="' +
+      tr('Состояние XGO: живое демо') +
+      '"><span class="xgo-notch-pill"><i class="xgo-notch-dot"></i><span class="xgo-notch-title">XGO LIVE</span></span></button>' +
+      '<div class="xgo-screen">' +
+      chatFrame(chatId, compact) +
+      '</div><span class="xgo-home-bar" aria-hidden="true"></span></div></div>'
+    );
   }
   function mountChat(root) {
     if (root.dataset.mounted) return;
@@ -887,6 +931,8 @@ import { BioSound } from './sound.js';
     const compact = root.dataset.compact === 'true';
     root.classList.add('chat-demo');
     root.classList.toggle('compact-chat', compact);
+    /* Messenger-style presence instead of demo wording, like the real bot. */
+    root._statusKeys = { done: 'в сети', playing: 'печатает…', paused: 'на паузе', manual: 'пошагово' };
     root.innerHTML =
       '<div class="chat-topbar"><span class="chat-avatar">' +
       icons('robot') +
@@ -939,7 +985,11 @@ import { BioSound } from './sound.js';
       const node = document.createElement('div');
       node.className = 'chat-message from-user tg-msg-user';
       node.innerHTML =
-        '<div class="chat-bubble tg-bubble-user" data-user-text>' + escapeHTML(prompt) + '</div>';
+        '<div class="chat-bubble tg-bubble-user" data-user-text>' +
+        escapeHTML(prompt) +
+        '<span class="chat-meta">' +
+        xgoStamp() +
+        ' ✓✓</span></div>';
       return node;
     };
     const botMessage = (html) => {
@@ -972,6 +1022,8 @@ import { BioSound } from './sound.js';
             'Пример исправления: process(job) → process(&job). Функция ожидает *Job, проверка go test проходит.',
           ),
           extra: '<div class="chat-data-note"><code>− process(job)<br>+ process(&amp;job)</code></div>',
+          elapsed: '5.6',
+          tokens: '2310',
         };
       if (/таблиц|инструмент|table|tools/i.test(prompt))
         return {
@@ -995,6 +1047,8 @@ import { BioSound } from './sound.js';
             '<br>GitHub → ' +
             tr('код и проверки') +
             '</div>',
+          elapsed: '3.1',
+          tokens: '1274',
         };
       if (/курс|доллар|usd|график|chart|currency|dollar/i.test(prompt))
         return {
@@ -1002,6 +1056,8 @@ import { BioSound } from './sound.js';
           steps: ORIGINAL_DEMOS.xgoReasoningScripts.map((s) => ({ text: s.text, tool: s.tool })),
           answer: tr('В примере USD вырос на 1,4% за неделю. Ниже — график дневных значений.'),
           extra: chartMarkup(),
+          elapsed: '4.2',
+          tokens: '1842',
         };
       return {
         kind: 'custom',
@@ -1014,6 +1070,8 @@ import { BioSound } from './sound.js';
           'Для этого предпросмотра доступны три сценария: «Курс + график», «Таблица инструментов» и «GitHub + код». Выбери один из них ниже.',
         ),
         extra: '',
+        elapsed: '1.8',
+        tokens: '640',
       };
     }
     function keyboard() {
@@ -1051,6 +1109,61 @@ import { BioSound } from './sound.js';
         '</span></button></div>'
       );
     }
+    function skillsMarkup() {
+      return (
+        '<p class="chat-panel-head">◆ ' +
+        tr('Скиллы') +
+        '</p><ul class="chat-panel-list">' +
+        XGO_SKILLS.map(
+          (skill) =>
+            '<li><span aria-hidden="true">' +
+            skill.icon +
+            '</span><code>' +
+            skill.name +
+            '</code><span>' +
+            tr(skill.desc) +
+            '</span></li>',
+        ).join('') +
+        '</ul>'
+      );
+    }
+    function paramsMarkup() {
+      const row = (label, value) => '<li><span>' + label + '</span><code>' + value + '</code></li>';
+      return (
+        '<p class="chat-panel-head">⚙ ' +
+        tr('Параметры') +
+        '</p><ul class="chat-panel-list chat-params-list">' +
+        row(tr('Модель'), XGO_MODEL) +
+        row(tr('Температура'), '0.7') +
+        row(tr('Макс. токенов'), '4096') +
+        row('Top-P', '0.9') +
+        row(tr('Активные тулы'), '10') +
+        '</ul>'
+      );
+    }
+    function headerCard(data, toolsUsed) {
+      const node = document.createElement('div');
+      node.className = 'chat-header-card';
+      node.innerHTML =
+        '<p class="chat-header-title">◈ <strong>XGO ' +
+        XGO_VERSION +
+        '-main.build:' +
+        XGO_BUILD +
+        '</strong> ◆ <code>' +
+        XGO_MODEL +
+        '</code></p>' +
+        '<p>├─ | ⚡ <strong>Reasoning</strong>: <code>tree</code> |</p>' +
+        '<p>├─ | ✧ <strong>Complete in</strong> <code>' +
+        data.elapsed +
+        ' sec</code> |</p>' +
+        '<p>├─ | ∞ <strong>Tokens</strong>: <code>' +
+        data.tokens +
+        '</code> |</p>' +
+        (toolsUsed > 0
+          ? '<p>└─ | ⚙ <strong>Tools</strong>: <code>' + toolsUsed + '</code> |</p>'
+          : '<p>└─ | ◉ <strong>Mode</strong>: <code>direct</code> |</p>');
+      return node;
+    }
     function replay(prompt = currentPrompt, remember = false) {
       player?.clear();
       releaseURLs();
@@ -1064,32 +1177,75 @@ import { BioSound } from './sound.js';
       const data = scenario(prompt),
         jobs = [],
         job = (run, delay = 160) => jobs.push({ run, delay });
-      const user = userMessage(prompt),
-        bot = botMessage(
-          '<div class="chat-tree tg-bubble-tree"><div class="chat-tree-header">' +
-            icons('nodes') +
-            '<span>' +
-            tr('Дерево действий') +
-            '</span></div><div class="chat-tree-lines"></div></div>',
-        ),
-        col = $('.tg-bubble-col', bot),
-        tree = $('.chat-tree', bot);
-      tree.hidden = !treeVisible;
+      const toolsUsed = data.steps.filter((step) => step.tool).length;
+      const user = userMessage(prompt);
       job(() => {
         feed.append(user);
         popMessage(user, player.instant);
       }, 40);
+      /* The real /ask flow: the bot echoes the prompt and waits for the
+         launch tap (Generate / Skills / Params). Auto-play taps it alone. */
+      const confirm = botMessage(
+        '<div class="chat-confirm tg-bubble-confirm"><div class="chat-confirm-head">✎ Prompt:</div>' +
+          '<blockquote class="chat-quote">' +
+          escapeHTML(prompt) +
+          '</blockquote>' +
+          '<p class="chat-confirm-hint">✦ ' +
+          tr('Нажмите кнопку для запуска:') +
+          '</p>' +
+          '<div class="chat-confirm-actions"><button type="button" data-chat-confirm="generate"><span aria-hidden="true">⚡</span><span data-label>' +
+          tr('Сгенерировать') +
+          '</span></button><button type="button" data-chat-confirm="skills" aria-expanded="false"><span aria-hidden="true">◆</span><span>' +
+          tr('Скиллы') +
+          '</span></button><button type="button" data-chat-confirm="params" aria-expanded="false"><span aria-hidden="true">⚙</span><span>' +
+          tr('Параметры') +
+          '</span></button></div>' +
+          '<div class="chat-confirm-panel" data-confirm-panel="skills" hidden>' +
+          skillsMarkup() +
+          '</div><div class="chat-confirm-panel" data-confirm-panel="params" hidden>' +
+          paramsMarkup() +
+          '</div></div>',
+      );
+      job(() => {
+        feed.append(confirm);
+        popMessage(confirm, player.instant);
+      }, 200);
+      job(() => {
+        const button = $('[data-chat-confirm="generate"]', confirm);
+        if (button && !button.disabled) {
+          button.disabled = true;
+          button.classList.add('is-running');
+          $('[data-label]', button).textContent = tr('Запуск…');
+        }
+      }, 900);
+      const bot = botMessage(''),
+        col = $('.tg-bubble-col', bot);
+      const tree = document.createElement('div');
+      tree.className = 'chat-tree tg-bubble-tree';
+      tree.innerHTML =
+        '<div class="chat-tree-header"><span aria-hidden="true">✧</span><span>Thinking Process</span></div><div class="chat-tree-lines"></div>';
+      tree.hidden = !treeVisible;
+      const typing = document.createElement('div');
+      typing.className = 'chat-typing';
+      typing.setAttribute('aria-hidden', 'true');
+      typing.innerHTML = '<span></span><span></span><span></span>';
       job(() => {
         feed.append(bot);
         popMessage(bot, player.instant);
-      }, 200);
+        col.append(typing);
+      }, 160);
+      job(() => {
+        typing.remove();
+        col.append(headerCard(data, toolsUsed), tree);
+        popMessage($('.chat-header-card', col), player.instant);
+      }, 480);
       const stepIcons = ['code', 'search', 'terminal', 'chart', 'check'];
       data.steps.forEach((step, i) => {
         const row = document.createElement('div');
         row.className = 'chat-tree-line is-active';
         row.innerHTML =
           '<span class="tree-connector" aria-hidden="true">' +
-          (i === data.steps.length - 1 ? '└' : '├') +
+          (i === data.steps.length - 1 ? '└─' : '├─') +
           '</span><span class="tree-symbol" aria-hidden="true">' +
           icons(stepIcons[i % stepIcons.length]) +
           '</span><span>' +
@@ -1108,9 +1264,24 @@ import { BioSound } from './sound.js';
           $('.tree-symbol', row).innerHTML = icons('check');
         }, 390);
       });
+      const toolLines = data.steps.filter((step) => step.tool);
+      if (toolLines.length) {
+        const tools = document.createElement('div');
+        tools.className = 'chat-tools';
+        tools.innerHTML =
+          '<div class="chat-tools-head">⚙ Tools Used</div>' +
+          toolLines.map((step) => '<p>✓ <code>' + escapeHTML(step.tool) + '</code></p>').join('');
+        job(() => {
+          col.append(tools);
+          popMessage(tools, player.instant);
+        }, 130);
+      }
       const answer = document.createElement('div');
       answer.className = 'chat-bubble chat-answer tg-bubble-answer';
-      answer.innerHTML = '<p class="chat-answer-text"></p><div class="chat-answer-extra"></div>';
+      answer.innerHTML =
+        '<div class="chat-answer-head">✦ Answer</div><p class="chat-answer-text"></p><div class="chat-answer-extra"></div><span class="chat-meta">' +
+        xgoStamp() +
+        ' ✓✓</span>';
       job(() => {
         col.append(answer);
         popMessage(answer, player.instant);
@@ -1213,6 +1384,29 @@ import { BioSound } from './sound.js';
         replay(history[Number(choice.dataset.chatHistoryIndex)]);
         return;
       }
+      const confirmButton = event.target.closest('[data-chat-confirm]');
+      if (confirmButton) {
+        if (!root.contains(confirmButton)) return;
+        const kind = confirmButton.dataset.chatConfirm;
+        if (kind === 'generate') {
+          if (confirmButton.disabled) return;
+          confirmButton.disabled = true;
+          confirmButton.classList.add('is-running');
+          $('[data-label]', confirmButton).textContent = tr('Запуск…');
+          /* Skip the auto-launch wait and continue the queue right away. */
+          player.clear();
+          player.remaining = 0;
+          player.sync();
+        } else {
+          const card = confirmButton.closest('.chat-confirm');
+          const panel = card && $('[data-confirm-panel="' + kind + '"]', card);
+          if (!panel) return;
+          const visible = panel.hidden;
+          confirmButton.setAttribute('aria-expanded', String(visible));
+          togglePanel(panel, visible);
+        }
+        return;
+      }
       const button = event.target.closest('[data-chat-action]');
       if (!button) return;
       const action = button.dataset.chatAction;
@@ -1227,7 +1421,7 @@ import { BioSound } from './sound.js';
         feed.replaceChildren();
         input.value = '';
         const welcome = botMessage(
-          '<div class="chat-bubble">' +
+          '<div class="chat-bubble">✓ ' +
             tr('Демо-чат очищен. Напиши тестовый запрос или выбери сценарий ниже.') +
             '</div><div class="chat-keyboard"><button type="button" data-chat-action="history" aria-expanded="false">' +
             icons('history') +
@@ -1240,7 +1434,7 @@ import { BioSound } from './sound.js';
         input.focus();
       } else if (action === 'continue') {
         const next = botMessage(
-          '<div class="chat-bubble">' +
+          '<div class="chat-bubble">➜ ' +
             tr(
               'Можно уточнить период, запросить таблицу или перейти к проверке кода. Выбери сценарий ниже.',
             ) +
@@ -2856,10 +3050,11 @@ import { BioSound } from './sound.js';
           ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ''}
           <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + richText(tr(feature)) + '</span></li>').join('')}</ul>
           <div class="info-callout">${icons('info')}<p class="dialog-note">${richText(tr(project.note))}</p></div>
-          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? '<div class="mock-phone mock-phone-dialog"><div class="mock-phone-frame"><span class="mock-phone-notch" aria-hidden="true"><i></i>XGO · LIVE</span><div class="mock-phone-screen">' + chatFrame('modal-chat', true) + '</div></div></div>' : ''}
+          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? xgoDeviceMarkup('modal-chat', true, 'xgo-device-dialog') : ''}
           ${projectExtra(id)}
           <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Терминалы и 14 подсистем' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
     mountDemos(dialog);
+    initializeXgoDevice(dialog);
     openDialog(dialog, opener);
   }
 
@@ -2929,7 +3124,9 @@ import { BioSound } from './sound.js';
     if (!targets.length) return;
     targets.forEach((element) => {
       const siblings = [...element.parentElement.children].filter((child) =>
-        child.matches?.('.tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card'),
+        child.matches?.(
+          '.tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card',
+        ),
       );
       element.style.setProperty('--cael-i', siblings.indexOf(element) % 5);
       element.classList.add('cael');
@@ -2971,65 +3168,80 @@ import { BioSound } from './sound.js';
   }
   initializeProjectTilt();
 
-  /* XGO live preview phone: clock, battery and the expanding island notch. */
-  function initializeXgoDevice() {
-    const device = $('#xgo-device');
-    if (!device) return;
-    const clock = $('#xgo-clock'),
-      fill = $('#xgo-battery-fill'),
-      notch = $('#xgo-notch');
+  /* XGO live preview phones: every instance shares one clock/battery ticker,
+     while the island notch and the wake-up entrance stay per-device. */
+  let xgoTicker = 0;
+  function initializeXgoDevice(scope = document) {
+    const devices = [...(scope.matches?.('.xgo-device') ? [scope] : []), ...$$('.xgo-device', scope)].filter(
+      (device) => !device.dataset.xgoInit,
+    );
+    if (!devices.length && xgoTicker) return;
     const paintTime = () => {
       const now = new Date();
-      clock.textContent =
-        String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      const text = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      $$('.xgo-device .xgo-clock').forEach((clock) => {
+        clock.textContent = text;
+      });
     };
-    paintTime();
-    let battery = 78;
-    const paintBattery = () => {
-      if (fill) fill.style.width = battery + '%';
-      device.style.setProperty('--battery', battery / 100);
+    const paintBattery = (device) => {
+      const level = Number(device.dataset.battery || 78);
+      const fill = $('.xgo-battery-fill', device);
+      if (fill) fill.style.width = level + '%';
+      device.style.setProperty('--battery', level / 100);
     };
-    paintBattery();
-    // One slow interval drives both the clock and the cosmetic battery cycle.
-    setInterval(() => {
-      if (document.hidden) return;
-      paintTime();
-      battery -= 1;
-      if (battery < 18) battery = 86;
-      paintBattery();
-    }, 30_000);
-    let collapse = 0;
-    notch.addEventListener('click', () => {
-      const open = notch.getAttribute('aria-pressed') !== 'true';
-      notch.setAttribute('aria-pressed', String(open));
-      device.classList.toggle('notch-open', open);
-      sound.play('pop');
-      clearTimeout(collapse);
-      if (open) {
-        const replay = $('[data-demo-replay]', device);
-        replay?.click();
-        collapse = setTimeout(() => {
-          notch.setAttribute('aria-pressed', 'false');
-          device.classList.remove('notch-open');
-        }, 3200);
-      }
+    devices.forEach((device) => {
+      device.dataset.xgoInit = 'true';
+      if (!device.dataset.battery) device.dataset.battery = '78';
+      paintBattery(device);
+      const notch = $('.xgo-notch', device);
+      let collapse = 0;
+      notch?.addEventListener('click', () => {
+        const open = notch.getAttribute('aria-pressed') !== 'true';
+        notch.setAttribute('aria-pressed', String(open));
+        device.classList.toggle('notch-open', open);
+        sound.play('pop');
+        clearTimeout(collapse);
+        if (open) {
+          const replay = $('[data-demo-replay]', device);
+          replay?.click();
+          collapse = setTimeout(() => {
+            notch.setAttribute('aria-pressed', 'false');
+            device.classList.remove('notch-open');
+          }, 3200);
+        }
+      });
     });
-    // Entrance: the device wakes when the card scrolls into view.
+    paintTime();
+    // One slow interval drives every clock and cosmetic battery cycle.
+    if (!xgoTicker) {
+      xgoTicker = setInterval(() => {
+        if (document.hidden) return;
+        paintTime();
+        $$('.xgo-device').forEach((device) => {
+          let level = Number(device.dataset.battery || 78) - 1;
+          if (level < 18) level = 86;
+          device.dataset.battery = String(level);
+          paintBattery(device);
+        });
+      }, 30_000);
+    }
+    // Entrance: each device wakes when it scrolls into view.
+    const sleeping = devices.filter((device) => !device.classList.contains('is-awake'));
+    if (!sleeping.length) return;
     if ('IntersectionObserver' in window) {
-      const host = $('#xgo-phone-window');
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              device.classList.add('is-awake');
-              observer.disconnect();
+              entry.target.classList.add('is-awake');
+              observer.unobserve(entry.target);
             }
           });
         },
-        { threshold: 0.35 },
+        { threshold: 0.2 },
       );
-      if (host) observer.observe(host);
-    } else device.classList.add('is-awake');
+      sleeping.forEach((device) => observer.observe(device));
+    } else sleeping.forEach((device) => device.classList.add('is-awake'));
   }
   /* Material-style expressive volume slider for interface sounds. */
   function initializeVolumeControl() {

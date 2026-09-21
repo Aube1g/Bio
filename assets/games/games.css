@@ -368,8 +368,7 @@ h3 {
 }
 [data-background='nebula'] .ambient-dots {
   background-image:
-    radial-gradient(#d9c8ff 1.2px, transparent 1.6px),
-    radial-gradient(#8fd8ff 1px, transparent 1.5px),
+    radial-gradient(#d9c8ff 1.2px, transparent 1.6px), radial-gradient(#8fd8ff 1px, transparent 1.5px),
     radial-gradient(#ff9ad2 1px, transparent 1.5px);
   background-size:
     83px 97px,
@@ -1705,12 +1704,16 @@ h3 {
     sans-serif;
   white-space: nowrap;
   border-bottom: 3px solid #0002;
-  transition: transform 0.2s var(--spring), box-shadow 0.2s ease;
+  transition:
+    transform 0.2s var(--spring),
+    box-shadow 0.2s ease;
 }
 .plinko-bin.hot {
   background: linear-gradient(160deg, #ffb28c 0%, #e07a4f 55%, #c65a38 100%);
   color: #2a0f0a;
-  box-shadow: 0 6px 14px #ff8a5a2e, inset 0 1px #ffd8c2;
+  box-shadow:
+    0 6px 14px #ff8a5a2e,
+    inset 0 1px #ffd8c2;
 }
 .plinko-bin.warm {
   background: linear-gradient(160deg, #f4d98a 0%, #d3ab52 55%, #b98a3c 100%);
@@ -2209,8 +2212,7 @@ h3 {
   position: absolute;
   inset: 0;
   border-radius: 26px;
-  background:
-    linear-gradient(160deg, #ffffff 0%, #efe7ff 45%, #cdb9ea 100%);
+  background: linear-gradient(160deg, #ffffff 0%, #efe7ff 45%, #cdb9ea 100%);
   border: 1px solid #ffffffd0;
   box-shadow:
     inset 3px 4px 8px #ffffffcc,
@@ -2773,6 +2775,7 @@ h3 {
   max-width: none !important;
   max-height: none !important;
   box-shadow: none;
+  contain: layout paint style;
   will-change: width, height, clip-path;
 }
 .portal-dialog.morphing::backdrop {
@@ -3254,7 +3257,33 @@ h3 {
 body:has(dialog[open]) {
   overflow: hidden;
 }
-body:has(dialog[open]) .site-wrap * {
+/* Pause only the animated scenery behind a dialog — the old `.site-wrap *`
+   forced the browser to re-evaluate every element on open and close. */
+body:has(dialog[open])
+  :is(
+    .ambient-orb,
+    .ambient-dots,
+    .garden-scene,
+    .ny-scene,
+    .nebula-scene,
+    .hero-playground,
+    .lobby-bento,
+    .game-collection,
+    .game-art
+  )
+  :is(*, *::before, *::after),
+body:has(dialog[open])
+  :is(
+    .ambient-orb,
+    .ambient-dots,
+    .garden-scene,
+    .ny-scene,
+    .nebula-scene,
+    .hero-playground,
+    .lobby-bento,
+    .game-collection,
+    .game-art
+  ) {
   animation-play-state: paused !important;
 }
 .settings-dialog {

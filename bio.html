@@ -3683,6 +3683,7 @@
         max-width: none !important;
         max-height: none !important;
         overflow: hidden !important;
+        contain: layout paint style;
         will-change: width, height, left, top, clip-path;
         box-shadow: 0 20px 80px #46205935;
       }
@@ -10125,7 +10126,31 @@
       .is-window-entering {
         background: var(--morph-sheet);
       }
-      body:has(dialog[open]) :is(.shell, .atmosphere) *,
+      /* Pause only the animated scenery behind a dialog — the old `.shell *`
+         forced the browser to re-evaluate every element on open and close. */
+      body:has(dialog[open])
+        :is(
+          .atmosphere,
+          .hero-skin,
+          .preview-window,
+          .signal-board,
+          .rail-brand,
+          .partner-monogram,
+          .project-grid,
+          .store-grid
+        )
+        :is(*, *::before, *::after),
+      body:has(dialog[open])
+        :is(
+          .atmosphere,
+          .hero-skin,
+          .preview-window,
+          .signal-board,
+          .rail-brand,
+          .partner-monogram,
+          .project-grid,
+          .store-grid
+        ),
       body:has(.is-window-morphing) .atmosphere * {
         animation-play-state: paused !important;
       }
@@ -10143,7 +10168,11 @@
       body:has(.is-window-morphing) .shell {
         backdrop-filter: none !important;
       }
-      body:has(.is-window-morphing) .shell * {
+      body:has(.is-window-morphing)
+        :is(.atmosphere, .hero-skin, .preview-window, .signal-board, .project-grid, .store-grid)
+        :is(*, *::before, *::after),
+      body:has(.is-window-morphing)
+        :is(.atmosphere, .hero-skin, .preview-window, .signal-board, .project-grid, .store-grid) {
         animation-play-state: paused !important;
       }
       .is-window-morphing
@@ -11991,6 +12020,24 @@
         flex-direction: column;
         background: var(--bg, #050510);
         color: var(--ink, #e8e8ff);
+        font-family:
+          "Nunito",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      /* The loading caption uses the same Nunito voice as the rest of the site
+         (weight 800, tracked out) — never the browser fallback font. */
+      .loader-label {
+        margin-top: 20px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--primary, #7000ff);
       }
       html[data-booting="true"] .app-preloader {
         display: flex;
@@ -13677,6 +13724,10 @@
         flex: 1 1 auto;
         height: auto !important;
         min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: #4b3a6b transparent;
         background-image: radial-gradient(#2c2534 0.8px, transparent 0.8px);
         background-size: 15px 15px;
       }
@@ -13763,20 +13814,19 @@
          Round "Caelestia": entrances, phone mockups, scrollbars, light theme.
          ========================================================================== */
       @keyframes caelestia-in {
+        /* Compositor-only: transform + opacity. The blur pass repainted every
+           frame and stuttered behind open dialogs. */
         0% {
           opacity: 0;
           transform: translateY(26px) scale(0.84);
-          filter: blur(10px);
         }
         62% {
           opacity: 1;
           transform: translateY(-3px) scale(1.02);
-          filter: blur(0);
         }
         100% {
           opacity: 1;
           transform: translateY(0) scale(1);
-          filter: blur(0);
         }
       }
       .cael {
@@ -13827,8 +13877,15 @@
         background:
           radial-gradient(120% 90% at 50% 8%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 52%),
           radial-gradient(140% 120% at 50% 50%, transparent 42%, rgba(7, 5, 13, 0.5) 100%), rgba(9, 7, 16, 0.56);
-        backdrop-filter: blur(15px) saturate(1.22) brightness(0.85);
-        -webkit-backdrop-filter: blur(15px) saturate(1.22) brightness(0.85);
+        /* One cheap blur pass — saturate+brightness tripled the backdrop cost. */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      /* While a dialog morphs, its backdrop stays fully static — no filter work
+         at all until the shape settles. */
+      dialog.is-morphing::backdrop {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
       }
       [data-glass="false"] dialog::backdrop,
       [data-glass-off] dialog::backdrop {
@@ -13896,90 +13953,28 @@
         box-shadow: inset 0 1px #ffdf8e22;
       }
 
-      /* Phone mockup (reusable): dialog + lab variants. */
-      .mock-phone {
-        --phone-bg: #171220;
-        --phone-line: #ffffff14;
-        width: min(320px, 100%);
-        margin: 18px auto 6px;
-        animation: caelestia-in 0.7s cubic-bezier(0.22, 1.28, 0.36, 1) backwards;
+      /* One true XGO phone: the lab and the project dialog reuse the exact same
+         device (status bar, island notch, screen, home bar). No second mockup. */
+      .xgo-device-lab .xgo-device-frame {
+        width: min(400px, 100%);
       }
-      html[data-motion="off"] .mock-phone {
-        animation: none;
+      .xgo-screen-lab {
+        height: 640px;
       }
-      .mock-phone-frame {
-        position: relative;
-        padding: 12px;
-        border-radius: 42px 42px 48px 48px / 36px 36px 52px 52px;
-        background: linear-gradient(160deg, #2a2338, #14101d 55%, #0e0b16);
-        border: 1px solid #ffffff1c;
-        box-shadow:
-          0 30px 60px #06030c66,
-          inset 0 1px #ffffff24,
-          inset 0 -2px #00000066;
+      .full-chat-layout .xgo-device {
+        margin-inline: auto;
+        width: 100%;
       }
-      .mock-phone-notch {
-        position: absolute;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 3;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        height: 22px;
-        padding: 0 12px;
-        border-radius: 999px;
-        background: #050308;
-        color: #cfc4e6;
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-        border: 1px solid #ffffff14;
+      .project-dialog-rich .xgo-device {
+        margin: 20px auto 8px;
       }
-      .mock-phone-notch i {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #8dffb0;
-        box-shadow: 0 0 8px #8dffb0;
-        animation: mock-pulse 2.2s ease-in-out infinite;
+      .xgo-device-dialog .xgo-screen {
+        height: 520px;
       }
-      @keyframes mock-pulse {
-        0%,
-        100% {
-          opacity: 1;
+      @media (max-width: 640px) {
+        .xgo-screen-lab {
+          height: 560px;
         }
-        50% {
-          opacity: 0.35;
-        }
-      }
-      html[data-motion="off"] .mock-phone-notch i {
-        animation: none;
-      }
-      .mock-phone-screen {
-        position: relative;
-        min-height: 430px;
-        border-radius: 32px / 40px;
-        overflow: hidden;
-        background: radial-gradient(120% 80% at 50% 0%, #241a33, #171120 60%), #171120;
-        color: #efe9fa;
-        display: flex;
-        flex-direction: column;
-      }
-      .mock-phone-dialog {
-        width: min(300px, 92%);
-      }
-      .mock-phone-dialog .mock-phone-screen {
-        min-height: 420px;
-      }
-      .mock-phone-screen .chat-demo {
-        flex: 1 1 auto;
-        min-height: 0;
-        height: auto !important;
-        border-radius: 0;
-        border: none;
-        background: transparent;
       }
 
       /* Project cards: pointer tilt + sheen sweep; the reveal already pops. */
@@ -14078,6 +14073,229 @@
       /* Home previews march in one rhythm: same head, aligned device, equal feel. */
       .xgo-phone-window .xgo-device {
         margin-inline: auto;
+      }
+
+      /* --------------------------------------------------------------------------
+         XGO chat, faithful to the bot: confirm card, header tree, tools, typing.
+         ----------------------------------------------------------------------- */
+      .chat-meta {
+        display: inline-block;
+        margin-left: 8px;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .tg-bubble-user .chat-meta {
+        color: rgba(255, 255, 255, 0.78);
+      }
+      .chat-answer .chat-meta {
+        float: right;
+        margin: 8px 0 2px 10px;
+      }
+      .chat-confirm {
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 16px 16px 16px 4px;
+        padding: 13px 14px;
+        width: 100%;
+      }
+      .chat-confirm-head {
+        color: var(--xgo);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+      .chat-quote {
+        border-left: 2px solid var(--xgo);
+        margin: 0 0 10px;
+        padding: 2px 0 2px 10px;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--ink);
+        opacity: 0.92;
+      }
+      .chat-confirm-hint {
+        font-size: 10px;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+      .chat-confirm-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .chat-confirm-actions button {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 6px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: var(--surface);
+        font-size: 10px;
+        line-height: 1.35;
+        font-weight: 800;
+        color: var(--muted);
+        min-height: 39px;
+      }
+      .chat-confirm-actions button:hover,
+      .chat-confirm-actions button[aria-expanded="true"] {
+        background: color-mix(in srgb, var(--xgo) 9%, var(--card-bg));
+        color: var(--xgo);
+        border-color: color-mix(in srgb, var(--xgo) 35%, var(--line));
+      }
+      .chat-confirm-actions [data-chat-confirm="generate"] {
+        grid-column: 1 / -1;
+        background: color-mix(in srgb, var(--xgo) 12%, var(--card-bg));
+        border-color: color-mix(in srgb, var(--xgo) 45%, var(--line));
+        color: var(--xgo);
+        font-weight: 900;
+      }
+      .chat-confirm-actions [data-chat-confirm="generate"].is-running {
+        opacity: 0.75;
+      }
+      .chat-confirm-actions button:disabled {
+        cursor: default;
+      }
+      .chat-confirm-panel {
+        margin-top: 8px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: var(--surface);
+      }
+      .chat-panel-head {
+        font-size: 10px;
+        font-weight: 900;
+        color: var(--xgo);
+        margin: 0 0 8px;
+      }
+      .chat-panel-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 7px;
+      }
+      .chat-panel-list li {
+        font-size: 10px;
+        line-height: 1.5;
+        color: var(--muted);
+        display: flex;
+        gap: 7px;
+        align-items: baseline;
+      }
+      .chat-panel-list code {
+        color: var(--xgo);
+        font-size: 9px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .chat-params-list li {
+        justify-content: space-between;
+      }
+      .chat-header-card {
+        background: color-mix(in srgb, var(--xgo) 5%, var(--card-bg));
+        border: 1px solid color-mix(in srgb, var(--xgo) 22%, var(--line));
+        border-radius: 16px 16px 16px 4px;
+        padding: 11px 13px;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 9.5px;
+        line-height: 1.8;
+        color: var(--muted);
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .chat-header-card::-webkit-scrollbar {
+        display: none;
+      }
+      .chat-header-card p {
+        margin: 0;
+        white-space: nowrap;
+      }
+      .chat-header-card strong {
+        color: var(--ink);
+      }
+      .chat-header-card code {
+        color: var(--xgo);
+      }
+      .chat-tools {
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 16px 16px 16px 4px;
+        padding: 11px 13px;
+        width: 100%;
+      }
+      .chat-tools-head {
+        color: var(--xgo);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+      .chat-tools p {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 9px;
+        line-height: 1.7;
+        color: var(--muted);
+        margin: 0 0 5px;
+        overflow-wrap: anywhere;
+      }
+      .chat-tools p:last-child {
+        margin-bottom: 0;
+      }
+      .chat-tools code {
+        color: var(--xgo);
+      }
+      .chat-answer-head {
+        color: var(--xgo);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+      }
+      .chat-typing {
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 16px 16px 16px 4px;
+        padding: 14px 16px;
+        width: max-content;
+      }
+      .chat-typing span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--xgo);
+        animation: chat-typing-blink 1.1s ease-in-out infinite;
+      }
+      .chat-typing span:nth-child(2) {
+        animation-delay: 0.18s;
+      }
+      .chat-typing span:nth-child(3) {
+        animation-delay: 0.36s;
+      }
+      @keyframes chat-typing-blink {
+        0%,
+        100% {
+          opacity: 0.25;
+          transform: translateY(0);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-2px);
+        }
+      }
+      html[data-motion="off"] .chat-typing span {
+        animation: none;
+        opacity: 0.8;
       }
     </style>
     <script>
@@ -15477,7 +15695,9 @@
                             stroke-linecap="round"
                           />
                         </svg>
-                        <span class="xgo-battery"><i id="xgo-battery-fill"></i></span>
+                        <span class="xgo-battery"
+                          ><i id="xgo-battery-fill" class="xgo-battery-fill"></i
+                        ></span>
                       </span>
                     </div>
                     <button
@@ -16013,10 +16233,58 @@
                       интерфейса. Котировки приведены для примера.
                     </p>
                   </div>
-                  <div id="lab-chat" data-chat>
-                    <p>
-                      XGO Bot: сравнение USD за неделю, дерево инструментов и график. Демонстрационные данные.
-                    </p>
+                  <div class="xgo-device xgo-device-lab">
+                    <div class="xgo-device-frame">
+                      <div class="xgo-statusbar" aria-hidden="true">
+                        <span class="xgo-clock">--:--</span>
+                        <span class="xgo-status-side">
+                          <svg class="xgo-gsm" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true">
+                            <rect x="0" y="7" width="3" height="5" rx="0.5" />
+                            <rect x="5" y="5" width="3" height="7" rx="0.5" />
+                            <rect x="10" y="3" width="3" height="9" rx="0.5" />
+                            <rect x="15" y="0" width="3" height="12" rx="0.5" />
+                          </svg>
+                          <svg class="xgo-wifi" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+                            <path
+                              d="M8 10.2c.6 0 1-.5 1-1s-.5-1-1-1-1 .5-1 1 .4 1 1 1z"
+                              fill="currentColor"
+                            />
+                            <path
+                              d="M4.5 7c1-1 2.2-1.5 3.5-1.5S10.5 6 11.5 7"
+                              stroke="currentColor"
+                              stroke-width="1.3"
+                              stroke-linecap="round"
+                            />
+                            <path
+                              d="M2 4.3c1.7-1.7 4-2.6 6-2.6s4.3.9 6 2.6"
+                              stroke="currentColor"
+                              stroke-width="1.3"
+                              stroke-linecap="round"
+                            />
+                          </svg>
+                          <span class="xgo-battery"><i class="xgo-battery-fill"></i></span>
+                        </span>
+                      </div>
+                      <button
+                        class="xgo-notch"
+                        type="button"
+                        aria-pressed="false"
+                        aria-label="Состояние XGO: живое демо"
+                      >
+                        <span class="xgo-notch-pill"
+                          ><i class="xgo-notch-dot"></i><span class="xgo-notch-title">XGO LIVE</span></span
+                        >
+                      </button>
+                      <div class="xgo-screen xgo-screen-lab">
+                        <div id="lab-chat" data-chat>
+                          <p>
+                            XGO Bot: сравнение USD за неделю, дерево инструментов и график. Демонстрационные
+                            данные.
+                          </p>
+                        </div>
+                      </div>
+                      <span class="xgo-home-bar" aria-hidden="true"></span>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -18281,7 +18549,30 @@
           Громкость: "Volume",
           "Уровень мягких сигналов переходов и действий.": "Level of soft transition and action cues.",
           "Живое демо: дерево, инструменты, кнопки": "Live demo: tree, tools, buttons",
-          "Состояние XGO: живое демо": "XGO status: live demo"
+          "Состояние XGO: живое демо": "XGO status: live demo",
+          "в сети": "online",
+          "печатает…": "typing…",
+          "на паузе": "paused",
+          пошагово: "step by step",
+          "Нажмите кнопку для запуска:": "Tap a button to launch:",
+          Сгенерировать: "Generate",
+          Скиллы: "Skills",
+          Параметры: "Parameters",
+          "Запуск…": "Launching…",
+          "Писать чистый, документированный код на любых языках": "Write clean, documented code in any language",
+          "Анализировать данные, делать выводы, строить стратегии": "Analyze data, draw conclusions, build strategies",
+          "Писать креативные тексты, сценарии, истории, поэзию": "Write creative copy, scripts, stories, poetry",
+          "Находить баги, объяснять ошибки, предлагать фиксы": "Find bugs, explain errors, suggest fixes",
+          "Проектировать системы, выбирать стек, планировать архитектуру": "Design systems, pick stacks, plan architecture",
+          "Объяснять сложные темы простым языком, обучать": "Explain complex topics simply, teach",
+          Модель: "Model",
+          Температура: "Temperature",
+          "Макс. токенов": "Max tokens",
+          "Активные скиллы": "Active skills",
+          "Активные тулы": "Active tools",
+          нет: "none",
+          "История очищена": "History cleared",
+          "статус сессии недоступен в предпросмотре": "session status is not available in the preview"
         };
 
         // assets/bio/demos.json
@@ -21124,8 +21415,9 @@
               this.statusKey = key;
               this.root.dataset.playback = done ? "done" : paused ? "paused" : "playing";
               const label = $2("[data-demo-status]", this.root);
+              const keys = this.root._statusKeys || {};
               if (label)
-                label.textContent = done ? tr("Готово") : this.manualStepping ? tr("Пошагово") : paused ? tr("На паузе") : tr("Воспроизведение");
+                label.textContent = done ? tr(keys.done || "Готово") : this.manualStepping ? tr(keys.manual || "Пошагово") : paused ? tr(keys.paused || "На паузе") : tr(keys.playing || "Воспроизведение");
               const pause = $2("[data-demo-pause]", this.root);
               if (pause) {
                 pause.hidden = !state.motion;
@@ -21407,11 +21699,30 @@
           }
           const CHAT_PROMPT = "Сравни курс доллара за неделю и покажи график";
           const CHAT_VALUES = [89.6, 89.82, 89.71, 90.12, 90.42, 90.18, 90.85];
+          const XGO_VERSION = "2.0.0", XGO_BUILD = "2000", XGO_MODEL = "gpt-5.5-free";
+          const XGO_SKILLS = [
+            { name: "code_writer", icon: "⌘", desc: "Писать чистый, документированный код на любых языках" },
+            { name: "analyst", icon: "◎", desc: "Анализировать данные, делать выводы, строить стратегии" },
+            { name: "creative_writer", icon: "✎", desc: "Писать креативные тексты, сценарии, истории, поэзию" },
+            { name: "debugger", icon: "✗", desc: "Находить баги, объяснять ошибки, предлагать фиксы" },
+            { name: "architect", icon: "▲", desc: "Проектировать системы, выбирать стек, планировать архитектуру" },
+            { name: "teacher", icon: "◫", desc: "Объяснять сложные темы простым языком, обучать" }
+          ];
+          const xgoStamp = () => {
+            const now = /* @__PURE__ */ new Date();
+            return String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+          };
           function chartMarkup() {
             return '<div class="chat-chart"><div class="chat-chart-label"><span>USD / RUB · DEMO</span><strong>+1,4%</strong></div><svg viewBox="0 0 280 100" role="img" aria-label="Демонстрационный график курса, не текущие котировки"><path class="chart-grid" d="M0 25H280M0 50H280M0 75H280"/><path class="chart-fill" d="M0 77C20 77 22 66 40 66S64 78 80 72S102 51 120 49S143 25 160 24S183 46 200 38S228 31 240 24S263 21 280 13V100H0Z"/><path class="chart-stroke" d="M0 77C20 77 22 66 40 66S64 78 80 72S102 51 120 49S143 25 160 24S183 46 200 38S228 31 240 24S263 21 280 13"/></svg><div class="chat-chart-axis"><span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span></div></div>';
           }
           function chatFrame(id, compact = false) {
             return '<div id="' + id + '" data-chat' + (compact ? ' data-compact="true"' : "") + "></div>";
+          }
+          function xgoStatusbarMarkup() {
+            return '<div class="xgo-statusbar" aria-hidden="true"><span class="xgo-clock">--:--</span><span class="xgo-status-side"><svg class="xgo-gsm" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="5" y="5" width="3" height="7" rx="0.5"/><rect x="10" y="3" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg><svg class="xgo-wifi" viewBox="0 0 16 12" fill="none" aria-hidden="true"><path d="M8 10.2c.6 0 1-.5 1-1s-.5-1-1-1-1 .5-1 1 .4 1 1 1z" fill="currentColor"/><path d="M4.5 7c1-1 2.2-1.5 3.5-1.5S10.5 6 11.5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 4.3c1.7-1.7 4-2.6 6-2.6s4.3.9 6 2.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span class="xgo-battery"><i class="xgo-battery-fill"></i></span></span></div>';
+          }
+          function xgoDeviceMarkup(chatId, compact = false, extra = "") {
+            return '<div class="xgo-device' + (extra ? " " + extra : "") + '"><div class="xgo-device-frame">' + xgoStatusbarMarkup() + '<button class="xgo-notch" type="button" aria-pressed="false" aria-label="' + tr("Состояние XGO: живое демо") + '"><span class="xgo-notch-pill"><i class="xgo-notch-dot"></i><span class="xgo-notch-title">XGO LIVE</span></span></button><div class="xgo-screen">' + chatFrame(chatId, compact) + '</div><span class="xgo-home-bar" aria-hidden="true"></span></div></div>';
           }
           function mountChat(root2) {
             if (root2.dataset.mounted) return;
@@ -21419,6 +21730,7 @@
             const compact = root2.dataset.compact === "true";
             root2.classList.add("chat-demo");
             root2.classList.toggle("compact-chat", compact);
+            root2._statusKeys = { done: "в сети", playing: "печатает…", paused: "на паузе", manual: "пошагово" };
             root2.innerHTML = '<div class="chat-topbar"><span class="chat-avatar">' + icons("robot") + '</span><div class="chat-topbar-title">XGO Bot<small data-demo-status>' + tr("Воспроизведение") + '</small></div><span class="demo-tag">PREVIEW</span>' + controls() + '</div><div class="chat-feed tg-demo" role="region" aria-label="' + tr("Предпросмотр XGO: сообщение, дерево, ответ и клавиатура") + '"></div><form class="chat-composer"><div class="chat-scenarios"><button type="button" data-chat-scenario="currency">' + tr("Курс + график") + '</button><button type="button" data-chat-scenario="table">' + tr("Таблица инструментов") + '</button><button type="button" data-chat-scenario="code">GitHub + ' + tr("код") + '</button></div><div class="chat-input-row"><input type="text" maxlength="400" aria-label="' + tr("Запрос для предпросмотра XGO") + '" placeholder="' + tr("Напиши тестовый запрос…") + '" autocomplete="off"><button class="chat-send" type="submit" aria-label="' + tr("Проиграть демо с этим запросом") + '">' + icons("telegram") + '</button></div><p class="chat-composer-note">' + tr("") + "</p></form>";
             const feed = $2(".chat-feed", root2), input = $2("input", root2), history = [];
             let chatFollow = true;
@@ -21437,7 +21749,7 @@
             const userMessage = (prompt) => {
               const node = document.createElement("div");
               node.className = "chat-message from-user tg-msg-user";
-              node.innerHTML = '<div class="chat-bubble tg-bubble-user" data-user-text>' + escapeHTML(prompt) + "</div>";
+              node.innerHTML = '<div class="chat-bubble tg-bubble-user" data-user-text>' + escapeHTML(prompt) + '<span class="chat-meta">' + xgoStamp() + " ✓✓</span></div>";
               return node;
             };
             const botMessage = (html) => {
@@ -21464,7 +21776,9 @@
                   answer: tr(
                     "Пример исправления: process(job) → process(&job). Функция ожидает *Job, проверка go test проходит."
                   ),
-                  extra: '<div class="chat-data-note"><code>− process(job)<br>+ process(&amp;job)</code></div>'
+                  extra: '<div class="chat-data-note"><code>− process(job)<br>+ process(&amp;job)</code></div>',
+                  elapsed: "5.6",
+                  tokens: "2310"
                 };
               if (/таблиц|инструмент|table|tools/i.test(prompt))
                 return {
@@ -21478,14 +21792,18 @@
                   answer: tr(
                     "В XGO есть инструменты поиска, расчётов, визуализаций, файлов и GitHub. В этом демо собрал небольшую таблицу возможностей."
                   ),
-                  extra: '<div class="chat-data-note">Web Search → ' + tr("поиск") + "<br>Exec Code → " + tr("расчёты") + "<br>Chart → " + tr("графики") + "<br>GitHub → " + tr("код и проверки") + "</div>"
+                  extra: '<div class="chat-data-note">Web Search → ' + tr("поиск") + "<br>Exec Code → " + tr("расчёты") + "<br>Chart → " + tr("графики") + "<br>GitHub → " + tr("код и проверки") + "</div>",
+                  elapsed: "3.1",
+                  tokens: "1274"
                 };
               if (/курс|доллар|usd|график|chart|currency|dollar/i.test(prompt))
                 return {
                   kind: "currency",
                   steps: ORIGINAL_DEMOS.xgoReasoningScripts.map((s) => ({ text: s.text, tool: s.tool })),
                   answer: tr("В примере USD вырос на 1,4% за неделю. Ниже — график дневных значений."),
-                  extra: chartMarkup()
+                  extra: chartMarkup(),
+                  elapsed: "4.2",
+                  tokens: "1842"
                 };
               return {
                 kind: "custom",
@@ -21497,11 +21815,28 @@
                 answer: tr(
                   "Для этого предпросмотра доступны три сценария: «Курс + график», «Таблица инструментов» и «GitHub + код». Выбери один из них ниже."
                 ),
-                extra: ""
+                extra: "",
+                elapsed: "1.8",
+                tokens: "640"
               };
             }
             function keyboard() {
               return '<div class="chat-keyboard tg-keyboard"><button type="button" data-chat-action="continue">' + icons("arrow-right") + "<span>" + tr("Продолжить") + '</span></button><button type="button" data-chat-action="edit">' + icons("edit") + "<span>" + tr("Реген с промптом") + '</span></button><button type="button" data-chat-action="regenerate">' + icons("replay") + "<span>" + tr("Регенерировать") + '</span></button><button type="button" data-chat-action="clear">' + icons("trash") + "<span>" + tr("Очистить") + '</span></button><button type="button" data-chat-action="history" aria-expanded="false">' + icons("history") + "<span>" + tr("История") + '</span></button><button type="button" data-chat-action="tree" aria-expanded="' + treeVisible + '">' + icons("nodes") + "<span>" + tr("Дерево") + '</span></button><button type="button" data-chat-action="files" aria-expanded="false">' + icons("file") + "<span>" + tr("Файлы") + "</span></button></div>";
+            }
+            function skillsMarkup() {
+              return '<p class="chat-panel-head">◆ ' + tr("Скиллы") + '</p><ul class="chat-panel-list">' + XGO_SKILLS.map(
+                (skill) => '<li><span aria-hidden="true">' + skill.icon + "</span><code>" + skill.name + "</code><span>" + tr(skill.desc) + "</span></li>"
+              ).join("") + "</ul>";
+            }
+            function paramsMarkup() {
+              const row = (label, value) => "<li><span>" + label + "</span><code>" + value + "</code></li>";
+              return '<p class="chat-panel-head">⚙ ' + tr("Параметры") + '</p><ul class="chat-panel-list chat-params-list">' + row(tr("Модель"), XGO_MODEL) + row(tr("Температура"), "0.7") + row(tr("Макс. токенов"), "4096") + row("Top-P", "0.9") + row(tr("Активные тулы"), "10") + "</ul>";
+            }
+            function headerCard(data, toolsUsed) {
+              const node = document.createElement("div");
+              node.className = "chat-header-card";
+              node.innerHTML = '<p class="chat-header-title">◈ <strong>XGO ' + XGO_VERSION + "-main.build:" + XGO_BUILD + "</strong> ◆ <code>" + XGO_MODEL + "</code></p><p>├─ | ⚡ <strong>Reasoning</strong>: <code>tree</code> |</p><p>├─ | ✧ <strong>Complete in</strong> <code>" + data.elapsed + " sec</code> |</p><p>├─ | ∞ <strong>Tokens</strong>: <code>" + data.tokens + "</code> |</p>" + (toolsUsed > 0 ? "<p>└─ | ⚙ <strong>Tools</strong>: <code>" + toolsUsed + "</code> |</p>" : "<p>└─ | ◉ <strong>Mode</strong>: <code>direct</code> |</p>");
+              return node;
             }
             function replay(prompt = currentPrompt, remember = false) {
               player?.clear();
@@ -21514,23 +21849,51 @@
                 if (history.length > 8) history.pop();
               }
               const data = scenario(prompt), jobs = [], job = (run, delay = 160) => jobs.push({ run, delay });
-              const user = userMessage(prompt), bot = botMessage(
-                '<div class="chat-tree tg-bubble-tree"><div class="chat-tree-header">' + icons("nodes") + "<span>" + tr("Дерево действий") + '</span></div><div class="chat-tree-lines"></div></div>'
-              ), col = $2(".tg-bubble-col", bot), tree = $2(".chat-tree", bot);
-              tree.hidden = !treeVisible;
+              const toolsUsed = data.steps.filter((step) => step.tool).length;
+              const user = userMessage(prompt);
               job(() => {
                 feed.append(user);
                 popMessage(user, player.instant);
               }, 40);
+              const confirm = botMessage(
+                '<div class="chat-confirm tg-bubble-confirm"><div class="chat-confirm-head">✎ Prompt:</div><blockquote class="chat-quote">' + escapeHTML(prompt) + '</blockquote><p class="chat-confirm-hint">✦ ' + tr("Нажмите кнопку для запуска:") + '</p><div class="chat-confirm-actions"><button type="button" data-chat-confirm="generate"><span aria-hidden="true">⚡</span><span data-label>' + tr("Сгенерировать") + '</span></button><button type="button" data-chat-confirm="skills" aria-expanded="false"><span aria-hidden="true">◆</span><span>' + tr("Скиллы") + '</span></button><button type="button" data-chat-confirm="params" aria-expanded="false"><span aria-hidden="true">⚙</span><span>' + tr("Параметры") + '</span></button></div><div class="chat-confirm-panel" data-confirm-panel="skills" hidden>' + skillsMarkup() + '</div><div class="chat-confirm-panel" data-confirm-panel="params" hidden>' + paramsMarkup() + "</div></div>"
+              );
+              job(() => {
+                feed.append(confirm);
+                popMessage(confirm, player.instant);
+              }, 200);
+              job(() => {
+                const button = $2('[data-chat-confirm="generate"]', confirm);
+                if (button && !button.disabled) {
+                  button.disabled = true;
+                  button.classList.add("is-running");
+                  $2("[data-label]", button).textContent = tr("Запуск…");
+                }
+              }, 900);
+              const bot = botMessage(""), col = $2(".tg-bubble-col", bot);
+              const tree = document.createElement("div");
+              tree.className = "chat-tree tg-bubble-tree";
+              tree.innerHTML = '<div class="chat-tree-header"><span aria-hidden="true">✧</span><span>Thinking Process</span></div><div class="chat-tree-lines"></div>';
+              tree.hidden = !treeVisible;
+              const typing = document.createElement("div");
+              typing.className = "chat-typing";
+              typing.setAttribute("aria-hidden", "true");
+              typing.innerHTML = "<span></span><span></span><span></span>";
               job(() => {
                 feed.append(bot);
                 popMessage(bot, player.instant);
-              }, 200);
+                col.append(typing);
+              }, 160);
+              job(() => {
+                typing.remove();
+                col.append(headerCard(data, toolsUsed), tree);
+                popMessage($2(".chat-header-card", col), player.instant);
+              }, 480);
               const stepIcons = ["code", "search", "terminal", "chart", "check"];
               data.steps.forEach((step, i) => {
                 const row = document.createElement("div");
                 row.className = "chat-tree-line is-active";
-                row.innerHTML = '<span class="tree-connector" aria-hidden="true">' + (i === data.steps.length - 1 ? "└" : "├") + '</span><span class="tree-symbol" aria-hidden="true">' + icons(stepIcons[i % stepIcons.length]) + "</span><span>" + escapeHTML(step.text) + (step.tool ? "<code>" + escapeHTML(step.tool) + "</code>" : "") + "</span>";
+                row.innerHTML = '<span class="tree-connector" aria-hidden="true">' + (i === data.steps.length - 1 ? "└─" : "├─") + '</span><span class="tree-symbol" aria-hidden="true">' + icons(stepIcons[i % stepIcons.length]) + "</span><span>" + escapeHTML(step.text) + (step.tool ? "<code>" + escapeHTML(step.tool) + "</code>" : "") + "</span>";
                 job(
                   () => {
                     $2(".chat-tree-lines", tree).append(row);
@@ -21543,9 +21906,19 @@
                   $2(".tree-symbol", row).innerHTML = icons("check");
                 }, 390);
               });
+              const toolLines = data.steps.filter((step) => step.tool);
+              if (toolLines.length) {
+                const tools = document.createElement("div");
+                tools.className = "chat-tools";
+                tools.innerHTML = '<div class="chat-tools-head">⚙ Tools Used</div>' + toolLines.map((step) => "<p>✓ <code>" + escapeHTML(step.tool) + "</code></p>").join("");
+                job(() => {
+                  col.append(tools);
+                  popMessage(tools, player.instant);
+                }, 130);
+              }
               const answer = document.createElement("div");
               answer.className = "chat-bubble chat-answer tg-bubble-answer";
-              answer.innerHTML = '<p class="chat-answer-text"></p><div class="chat-answer-extra"></div>';
+              answer.innerHTML = '<div class="chat-answer-head">✦ Answer</div><p class="chat-answer-text"></p><div class="chat-answer-extra"></div><span class="chat-meta">' + xgoStamp() + " ✓✓</span>";
               job(() => {
                 col.append(answer);
                 popMessage(answer, player.instant);
@@ -21622,6 +21995,28 @@
                 replay(history[Number(choice.dataset.chatHistoryIndex)]);
                 return;
               }
+              const confirmButton = event.target.closest("[data-chat-confirm]");
+              if (confirmButton) {
+                if (!root2.contains(confirmButton)) return;
+                const kind = confirmButton.dataset.chatConfirm;
+                if (kind === "generate") {
+                  if (confirmButton.disabled) return;
+                  confirmButton.disabled = true;
+                  confirmButton.classList.add("is-running");
+                  $2("[data-label]", confirmButton).textContent = tr("Запуск…");
+                  player.clear();
+                  player.remaining = 0;
+                  player.sync();
+                } else {
+                  const card = confirmButton.closest(".chat-confirm");
+                  const panel = card && $2('[data-confirm-panel="' + kind + '"]', card);
+                  if (!panel) return;
+                  const visible = panel.hidden;
+                  confirmButton.setAttribute("aria-expanded", String(visible));
+                  togglePanel(panel, visible);
+                }
+                return;
+              }
               const button = event.target.closest("[data-chat-action]");
               if (!button) return;
               const action = button.dataset.chatAction;
@@ -21636,14 +22031,14 @@
                 feed.replaceChildren();
                 input.value = "";
                 const welcome = botMessage(
-                  '<div class="chat-bubble">' + tr("Демо-чат очищен. Напиши тестовый запрос или выбери сценарий ниже.") + '</div><div class="chat-keyboard"><button type="button" data-chat-action="history" aria-expanded="false">' + icons("history") + "<span>" + tr("История") + '</span></button></div><div class="chat-history" hidden></div>'
+                  '<div class="chat-bubble">✓ ' + tr("Демо-чат очищен. Напиши тестовый запрос или выбери сценарий ниже.") + '</div><div class="chat-keyboard"><button type="button" data-chat-action="history" aria-expanded="false">' + icons("history") + "<span>" + tr("История") + '</span></button></div><div class="chat-history" hidden></div>'
                 );
                 feed.append(welcome);
                 popMessage(welcome);
                 input.focus();
               } else if (action === "continue") {
                 const next = botMessage(
-                  '<div class="chat-bubble">' + tr(
+                  '<div class="chat-bubble">➜ ' + tr(
                     "Можно уточнить период, запросить таблицу или перейти к проверке кода. Выбери сценарий ниже."
                   ) + "</div>"
                 );
@@ -23046,10 +23441,11 @@
                 ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ""}
                 <ul class="detail-features info-grid">${project.features.map((feature, index) => "<li>" + icons(["code", "nodes", "shield", "file"][index % 4]) + "<span>" + richText(tr(feature)) + "</span></li>").join("")}</ul>
                 <div class="info-callout">${icons("info")}<p class="dialog-note">${richText(tr(project.note))}</p></div>
-                ${id === "xli" ? terminalFrame("modal-cli", "bugfix") : id === "xgo" ? '<div class="mock-phone mock-phone-dialog"><div class="mock-phone-frame"><span class="mock-phone-notch" aria-hidden="true"><i></i>XGO · LIVE</span><div class="mock-phone-screen">' + chatFrame("modal-chat", true) + "</div></div></div>" : ""}
+                ${id === "xli" ? terminalFrame("modal-cli", "bugfix") : id === "xgo" ? xgoDeviceMarkup("modal-chat", true, "xgo-device-dialog") : ""}
                 ${projectExtra(id)}
                 <div class="dialog-actions">${id === "xli" || id === "xgo" ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === "xli" ? "Терминалы и 14 подсистем" : "Чат, инструменты и память") + arrow + "</a>" : ""}<a class="${id === "xli" || id === "xgo" ? "outline-button" : "solid-button"}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
             mountDemos(dialog);
+            initializeXgoDevice(dialog);
             openDialog(dialog, opener);
           }
           window.addEventListener("resize", () => {
@@ -23114,7 +23510,9 @@
             if (!targets.length) return;
             targets.forEach((element2) => {
               const siblings = [...element2.parentElement.children].filter(
-                (child) => child.matches?.(".tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card")
+                (child) => child.matches?.(
+                  ".tile,.project-card,.preview-window,.demo-card,.lab-section,.store-card,.partner-card"
+                )
               );
               element2.style.setProperty("--cael-i", siblings.indexOf(element2) % 5);
               element2.classList.add("cael");
@@ -23152,59 +23550,76 @@
             });
           }
           initializeProjectTilt();
-          function initializeXgoDevice() {
-            const device = $2("#xgo-device");
-            if (!device) return;
-            const clock2 = $2("#xgo-clock"), fill = $2("#xgo-battery-fill"), notch = $2("#xgo-notch");
+          let xgoTicker = 0;
+          function initializeXgoDevice(scope = document) {
+            const devices = [...scope.matches?.(".xgo-device") ? [scope] : [], ...$$2(".xgo-device", scope)].filter(
+              (device) => !device.dataset.xgoInit
+            );
+            if (!devices.length && xgoTicker) return;
             const paintTime = () => {
               const now = /* @__PURE__ */ new Date();
-              clock2.textContent = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+              const text = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+              $$2(".xgo-device .xgo-clock").forEach((clock2) => {
+                clock2.textContent = text;
+              });
             };
-            paintTime();
-            let battery = 78;
-            const paintBattery = () => {
-              if (fill) fill.style.width = battery + "%";
-              device.style.setProperty("--battery", battery / 100);
+            const paintBattery = (device) => {
+              const level = Number(device.dataset.battery || 78);
+              const fill = $2(".xgo-battery-fill", device);
+              if (fill) fill.style.width = level + "%";
+              device.style.setProperty("--battery", level / 100);
             };
-            paintBattery();
-            setInterval(() => {
-              if (document.hidden) return;
-              paintTime();
-              battery -= 1;
-              if (battery < 18) battery = 86;
-              paintBattery();
-            }, 3e4);
-            let collapse = 0;
-            notch.addEventListener("click", () => {
-              const open = notch.getAttribute("aria-pressed") !== "true";
-              notch.setAttribute("aria-pressed", String(open));
-              device.classList.toggle("notch-open", open);
-              sound.play("pop");
-              clearTimeout(collapse);
-              if (open) {
-                const replay = $2("[data-demo-replay]", device);
-                replay?.click();
-                collapse = setTimeout(() => {
-                  notch.setAttribute("aria-pressed", "false");
-                  device.classList.remove("notch-open");
-                }, 3200);
-              }
+            devices.forEach((device) => {
+              device.dataset.xgoInit = "true";
+              if (!device.dataset.battery) device.dataset.battery = "78";
+              paintBattery(device);
+              const notch = $2(".xgo-notch", device);
+              let collapse = 0;
+              notch?.addEventListener("click", () => {
+                const open = notch.getAttribute("aria-pressed") !== "true";
+                notch.setAttribute("aria-pressed", String(open));
+                device.classList.toggle("notch-open", open);
+                sound.play("pop");
+                clearTimeout(collapse);
+                if (open) {
+                  const replay = $2("[data-demo-replay]", device);
+                  replay?.click();
+                  collapse = setTimeout(() => {
+                    notch.setAttribute("aria-pressed", "false");
+                    device.classList.remove("notch-open");
+                  }, 3200);
+                }
+              });
             });
+            paintTime();
+            if (!xgoTicker) {
+              xgoTicker = setInterval(() => {
+                if (document.hidden) return;
+                paintTime();
+                $$2(".xgo-device").forEach((device) => {
+                  let level = Number(device.dataset.battery || 78) - 1;
+                  if (level < 18) level = 86;
+                  device.dataset.battery = String(level);
+                  paintBattery(device);
+                });
+              }, 3e4);
+            }
+            const sleeping = devices.filter((device) => !device.classList.contains("is-awake"));
+            if (!sleeping.length) return;
             if ("IntersectionObserver" in window) {
-              const host = $2("#xgo-phone-window");
               const observer = new IntersectionObserver(
                 (entries) => {
                   entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                      device.classList.add("is-awake");
-                      observer.disconnect();
+                      entry.target.classList.add("is-awake");
+                      observer.unobserve(entry.target);
                     }
                   });
                 },
-                { threshold: 0.35 }
+                { threshold: 0.2 }
               );
-              if (host) observer.observe(host);
-            } else device.classList.add("is-awake");
+              sleeping.forEach((device) => observer.observe(device));
+            } else sleeping.forEach((device) => device.classList.add("is-awake"));
           }
           function initializeVolumeControl() {
             const slider = $2("#sound-volume-slider"), output = $2("#sound-volume-value");
