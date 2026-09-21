@@ -3,6 +3,7 @@ import { LaunchQueue } from './launch-queue.js';
 import { GameFeedback } from './feedback.js';
 import { BlackjackRenderer } from './blackjack-renderer.js';
 import { finishBoot } from '../shared/boot-screen.js';
+import { initThemeWipe } from '../shared/theme-wipe.js';
 import { initializeTextMotion } from '../shared/text-motion.js';
 import { initializeMotionPicker } from '../shared/motion-picker.js';
 import { ExpandingIsland } from '../shared/island.js';
@@ -17,6 +18,7 @@ import {
   savePreferences,
 } from '../shared/preferences.js';
 import { transitionSurface, MorphDialogs, springGroups, kineticControls } from '../shared/motion.js';
+import { setupCarousel } from './carousel.js';
 import { diceOdds, plinkoTable, MIN_BET, MAX_BET } from '../shared/game-rules.js';
 import { t, money, signedMoney, translatePage } from './strings.js';
 import { GameApi, RequestError } from './api.js';
@@ -37,15 +39,31 @@ const games = {
     title: 'Blackjack',
     code: '01 / THE TABLE',
     description: 'blackjackCard',
+    meta: '3:2 BLACKJACK',
     play: 'deal',
     icon: 'spade',
   },
-  slots: { title: 'Slots', code: '02 / THE SPIN', description: 'slotsCard', play: 'spinReels', icon: 'slot' },
-  dice: { title: 'Dice', code: '03 / THE ROLL', description: 'diceCard', play: 'rollDice', icon: 'dice' },
+  slots: {
+    title: 'Slots',
+    code: '02 / THE SPIN',
+    description: 'slotsCard',
+    meta: '3 REELS · 8 SYMBOLS',
+    play: 'spinReels',
+    icon: 'slot',
+  },
+  dice: {
+    title: 'Dice',
+    code: '03 / THE ROLL',
+    description: 'diceCard',
+    meta: '6 SIDES · YOUR CALL',
+    play: 'rollDice',
+    icon: 'dice',
+  },
   plinko: {
     title: 'Plinko',
     code: '04 / THE DROP',
     description: 'plinkoCard',
+    meta: '3 RISKS · 3 HEIGHTS',
     play: 'dropBall',
     icon: 'plinko',
   },
@@ -151,7 +169,12 @@ function toastNotify(message) {
     toast.animate(
       [
         { opacity: 0, transform: 'translateX(-50%) scale(0.4) translateY(-12px)', borderRadius: '999px' },
-        { opacity: 1, transform: 'translateX(-50%) scale(1.05) translateY(0)', borderRadius: '20px', offset: 0.6 },
+        {
+          opacity: 1,
+          transform: 'translateX(-50%) scale(1.05) translateY(0)',
+          borderRadius: '20px',
+          offset: 0.6,
+        },
         { opacity: 1, transform: 'translateX(-50%) scale(1) translateY(0)', borderRadius: '999px' },
       ],
       { duration: 640, easing: 'cubic-bezier(0.22, 1.24, 0.36, 1)' },
@@ -395,6 +418,19 @@ function renderControls() {
     ((state.dice.target - Number(slider.min)) / (Number(slider.max) - Number(slider.min))) * 100 + '%',
   );
   $('#dice-target-value').textContent = state.dice.target;
+  const pips = $('#dice-pips');
+  if (pips) {
+    const min = Number(slider.min),
+      max = Number(slider.max);
+    pips.innerHTML = Array.from({ length: max - min + 1 }, (_, i) => {
+      const value = min + i;
+      return `<i class="${value === state.dice.target ? 'is-active' : ''}">${value}</i>`;
+    }).join('');
+  }
+  $('#dice-options').style.setProperty(
+    '--dice-fill',
+    ((state.dice.target - Number(slider.min)) / (Number(slider.max) - Number(slider.min))) * 100 + '%',
+  );
   const odds = diceOdds(state.dice.mode, state.dice.target);
   $('#dice-chance').textContent = (odds.chance * 100).toFixed(odds.successfulFaces === 3 ? 0 : 2) + '%';
   $('#dice-multiplier').textContent = Number(odds.multiplier.toFixed(3)) + '×';
@@ -593,7 +629,7 @@ function updateGame() {
       $('#result-detail').textContent = t('waitingForMove');
     }
   }
-  plinko.resize();
+  plinko.reveal();
   renderAll();
 }
 async function requestGame(game, source = null) {
@@ -626,11 +662,13 @@ function selectGame(game, source) {
     card.setAttribute('aria-pressed', String(on));
     card.closest('.game-card')?.classList.toggle('is-selected', on);
   });
-  const tray = $('#dock-launch'),
-    symbol = $('.launch-symbol use', tray);
+  carousel.scrollToGame(game);
+  const tray = $('#dock-launch');
   tray.dataset.game = game;
   $('#dock-launch-title').textContent = games[game].title;
-  if (symbol) symbol.setAttribute('href', '#i-' + games[game].icon);
+  const art = $('#dock-launch-art'),
+    cardArt = $(`.game-card[data-card='${game}'] .game-art img`);
+  if (art && cardArt) art.src = cardArt.src;
   tray.hidden = false;
   try {
     sound.unlock();
@@ -653,8 +691,14 @@ function selectGame(game, source) {
     tray.animate(
       [
         { boxShadow: '0 0 0 0 color-mix(in srgb, var(--tray-accent, var(--lime)) 0%, transparent)' },
-        { boxShadow: '0 0 0 14px color-mix(in srgb, var(--tray-accent, var(--lime)) 26%, transparent)', offset: 0.5 },
-        { boxShadow: '0 24px 60px #0006, 0 0 0 4px color-mix(in srgb, var(--tray-accent, var(--lime)) 10%, transparent)' },
+        {
+          boxShadow: '0 0 0 14px color-mix(in srgb, var(--tray-accent, var(--lime)) 26%, transparent)',
+          offset: 0.5,
+        },
+        {
+          boxShadow:
+            '0 24px 60px #0006, 0 0 0 4px color-mix(in srgb, var(--tray-accent, var(--lime)) 10%, transparent)',
+        },
       ],
       { duration: 900, easing: 'ease-out' },
     );
@@ -1057,6 +1101,18 @@ async function telegramLogin() {
   }
 }
 
+{
+  const now = new Date(),
+    day = $('#hero-date-day'),
+    month = $('#hero-date-month');
+  if (day && month) {
+    day.textContent = String(now.getDate());
+    month.textContent = now
+      .toLocaleDateString(preferences.lang === 'en' ? 'en-US' : 'ru-RU', { month: 'short' })
+      .replace('.', '')
+      .toUpperCase();
+  }
+}
 $('#hero-cube').innerHTML = cubeHTML();
 $('#mini-plinko').innerHTML =
   `<svg viewBox="0 0 248 220" fill="none">${Array.from({ length: 7 }, (_, r) => Array.from({ length: r + 1 }, (_, c) => `<circle cx="${124 + (c - r / 2) * 26}" cy="${54 + r * 26}" r="2.1" fill="#adb68b" opacity="${0.5 + r * 0.05}"/>`).join('')).join('')}${Array.from({ length: 8 }, (_, i) => `<rect x="${26 + i * 26}" y="210" width="19" height="7" rx="2" fill="${i === 0 || i === 7 ? '#dcbe8e' : '#939e6f'}"/>`).join('')}</svg><span class="mini-dot"></span>`;
@@ -1067,11 +1123,80 @@ $$('[data-go]').forEach((button) =>
     requestGame(button.dataset.go, button);
   }),
 );
-$$('.dock-games a').forEach((link, index) => link.setAttribute('aria-keyshortcuts', `Alt+${index + 1}`));
-window.addEventListener('hashchange', () => navigate(location.hash.slice(1) || 'lobby', null, false));
-$('#choose-game').addEventListener('click', () =>
-  $('#game-collection').scrollIntoView({ behavior: motionEnabled() ? 'smooth' : 'instant', block: 'start' }),
+initThemeWipe();
+const carousel = setupCarousel(games, { t, motionEnabled });
+
+/* Performance: freeze decorative motion that is not on screen or when the tab
+   itself is hidden. Layout-free class toggles only. */
+if ('IntersectionObserver' in window) {
+  const idleObserver = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((entry) => entry.target.classList.toggle('offscreen', !entry.isIntersecting)),
+    { rootMargin: '90px' },
+  );
+  $$('.ambient, .hero-playground, .hero-garden, .plinko-feature, .game-card, .dice-orbit').forEach((node) =>
+    idleObserver.observe(node),
+  );
+}
+document.addEventListener('visibilitychange', () =>
+  document.body.classList.toggle('tab-hidden', document.hidden),
 );
+$$('.dock-games a').forEach((link, index) => link.setAttribute('aria-keyshortcuts', `Alt+${index + 1}`));
+/* Fine tuning: a spring-animated collapsible instead of the raw <details> snap. */
+function wireSpringDetails(details) {
+  const summary = $('summary', details),
+    shell = $('.plinko-tune-shell', details);
+  if (!summary || !shell) return;
+  let animation = null;
+  summary.addEventListener('click', (event) => {
+    event.preventDefault();
+    animation?.cancel();
+    if (!motionEnabled()) {
+      details.open = !details.open;
+      return;
+    }
+    const startHeight = shell.offsetHeight;
+    if (details.open) {
+      details.classList.add('is-animating');
+      animation = shell.animate(
+        [
+          { height: startHeight + 'px', opacity: 1 },
+          { height: '0px', opacity: 0 },
+        ],
+        { duration: 300, easing: 'cubic-bezier(.33,1,.36,1)' },
+      );
+      animation.finished
+        .then(() => {
+          details.open = false;
+          details.classList.remove('is-animating');
+        })
+        .catch(() => {});
+    } else {
+      details.open = true;
+      details.classList.add('is-animating');
+      const endHeight = shell.offsetHeight;
+      animation = shell.animate(
+        [
+          { height: '0px', opacity: 0 },
+          { height: endHeight + 'px', opacity: 1 },
+        ],
+        { duration: 430, easing: 'cubic-bezier(.22,1.24,.36,1)' },
+      );
+      animation.finished.then(() => details.classList.remove('is-animating')).catch(() => {});
+    }
+    sound.play('select');
+  });
+}
+$$('.plinko-tune').forEach(wireSpringDetails);
+$('#history-dialog').addEventListener('close', () => plinko.reveal());
+window.addEventListener('hashchange', () => navigate(location.hash.slice(1) || 'lobby', null, false));
+$('#choose-game').addEventListener('click', () => {
+  $('#game-collection').scrollIntoView({
+    behavior: motionEnabled() ? 'smooth' : 'instant',
+    block: 'start',
+  });
+  carousel.tour();
+});
 $$('[data-favorite]').forEach((button) =>
   button.addEventListener('click', () => {
     const id = button.dataset.favorite;
@@ -1558,7 +1683,7 @@ function unlockNebula() {
     } catch {
       /* Sound is optional. */
     }
-      notify(t('luckySeven'));
+    notify(t('luckySeven'));
   });
   // Typing "aubeig" anywhere sends a quiet hello.
   let typed = '';

@@ -136,35 +136,6 @@ html[data-booting='true'] .app-preloader {
     transform: translateX(250%) skewX(-20deg);
   }
 }
-.loader-bar {
-  margin-top: 30px;
-  width: 176px;
-  height: 3px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--primary-text, #a98cff) 16%, transparent);
-  overflow: hidden;
-}
-.loader-bar > span {
-  display: block;
-  height: 100%;
-  width: 0%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #7b4bff, #4cdbea);
-  box-shadow: 0 0 12px #7b4bff66;
-  transition: width 120ms linear;
-}
-.loader-label {
-  margin-top: 17px;
-  letter-spacing: 0.22em;
-  font-size: 11px;
-  font-weight: 800;
-  background: linear-gradient(100deg, var(--primary, #7000ff) 40%, #fff 50%, var(--primary, #7000ff) 60%);
-  background-size: 300% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmerBg 2.2s ease-in-out infinite;
-}
 @keyframes shimmerBg {
   0% {
     background-position: 100% 0;
@@ -932,4 +903,12 @@ html[data-booting='true'] .app-preloader {
 .motion-preview-directions button[aria-pressed='true'] {
   color: #fff;
   background: var(--button-primary, var(--primary));
+}
+
+/* Theme iris wipe overlay (shared/theme-wipe.js). */
+.theme-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  pointer-events: none;
 }

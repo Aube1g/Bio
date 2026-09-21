@@ -84,6 +84,7 @@ export const ru = {
   chips: 'фишки',
   risk: 'Риск',
   tune: 'Тонкая настройка',
+  tunePeek: 'ряды · максимум',
   low: 'Низкий',
   medium: 'Средний',
   high: 'Высокий',
@@ -265,6 +266,10 @@ export const ru = {
   gamePlinko: 'Плинко',
   luckySeven: 'Счастливая семёрка!',
   close: 'Закрыть',
+  heroDate: 'Твой день',
+  prevGame: 'Предыдущая игра',
+  nextGame: 'Следующая игра',
+  carouselHint: 'Листай коллекцию: стрелки, колесо или свайп.',
 };
 export const en = {
   selectedGame: 'Selected game',
@@ -352,6 +357,7 @@ export const en = {
   chips: 'chips',
   risk: 'Risk',
   tune: 'Fine tuning',
+  tunePeek: 'rows · max',
   low: 'Low',
   medium: 'Medium',
   high: 'High',
@@ -531,6 +537,10 @@ export const en = {
   gamePlinko: 'Plinko',
   luckySeven: 'Lucky seven!',
   close: 'Close',
+  heroDate: 'Your day',
+  prevGame: 'Previous game',
+  nextGame: 'Next game',
+  carouselHint: 'Browse the collection: arrows, wheel or swipe.',
 };
 export function t(key, values = {}) {
   const value = (preferences.lang === 'en' ? en[key] : ru[key]) || ru[key] || key;
@@ -543,6 +553,9 @@ export function translatePage(scope = document) {
   scope
     .querySelectorAll('[data-t-label]')
     .forEach((element) => element.setAttribute('aria-label', t(element.dataset.tLabel)));
+  scope
+    .querySelectorAll('[data-t-placeholder]')
+    .forEach((element) => element.setAttribute('placeholder', t(element.dataset.tPlaceholder)));
 }
 export const money = (minor) =>
   new Intl.NumberFormat(preferences.lang === 'en' ? 'en-US' : 'ru-RU', { maximumFractionDigits: 2 }).format(

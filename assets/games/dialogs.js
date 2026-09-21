@@ -86,7 +86,10 @@ export class PortalDialogs {
         $$('[data-history-game]').forEach((item) =>
           item.setAttribute('aria-pressed', String(item === button)),
         );
-        try { this.sound?.unlock(); this.sound?.play('ping'); } catch {} 
+        try {
+          this.sound?.unlock();
+          this.sound?.play('ping');
+        } catch {}
         this.renderHistory();
       }),
     );
@@ -96,7 +99,10 @@ export class PortalDialogs {
         $$('[data-history-result]').forEach((item) =>
           item.setAttribute('aria-pressed', String(item === button)),
         );
-        try { this.sound?.unlock(); this.sound?.play('ping'); } catch {} 
+        try {
+          this.sound?.unlock();
+          this.sound?.play('ping');
+        } catch {}
         this.renderHistory();
       }),
     );
@@ -120,9 +126,27 @@ export class PortalDialogs {
       return;
     }
     if (id === 'account-dialog') this.account();
-    if (id === 'history-dialog') this.history();
+    if (id === 'history-dialog') {
+      const current = this.state().game;
+      if (opener?.dataset.historyContext === 'auto' || opener?.dataset.historyContext === 'game') {
+        this.historyResult = 'all';
+        this.historyGame = current && current !== 'lobby' ? current : 'all';
+        $$('[data-history-game]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item.dataset.historyGame === this.historyGame)),
+        );
+        $$('[data-history-result]').forEach((item) =>
+          item.setAttribute('aria-pressed', String(item.dataset.historyResult === 'all')),
+        );
+      }
+      this.history();
+    }
     if (id === 'wallet-dialog') {
       $('#wallet-amount').textContent = money(this.state().wallet.balanceMinor);
+      const stats = this.state().stats || { rounds: 0, wins: 0, netMinor: 0 };
+      $('#wallet-rounds').textContent = String(stats.rounds);
+      $('#wallet-wins').textContent = String(stats.wins);
+      $('#wallet-net').textContent = signedMoney(stats.netMinor);
+      $('#wallet-net').dataset.sign = stats.netMinor > 0 ? 'win' : stats.netMinor < 0 ? 'loss' : 'flat';
       $('#wallet-dialog [data-t="resetNote"]').textContent = t(
         this.api.isPractice ? 'localResetNote' : 'resetNote',
       );

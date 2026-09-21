@@ -625,5 +625,9 @@
   "Пошагово": "Step by step",
   "Следующий шаг": "Next step",
   "Повторять автоматически": "Loop playback",
-  "Скорость демонстрации": "Playback speed"
+  "Скорость демонстрации": "Playback speed",
+  "Громкость": "Volume",
+  "Уровень мягких сигналов переходов и действий.": "Level of soft transition and action cues.",
+  "Живое демо: дерево, инструменты, кнопки": "Live demo: tree, tools, buttons",
+  "Состояние XGO: живое демо": "XGO status: live demo"
 }

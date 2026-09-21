@@ -1,4 +1,6 @@
 import { finishBoot } from '../shared/boot-screen.js';
+import { initThemeWipe } from '../shared/theme-wipe.js';
+initThemeWipe();
 import { initializeTextMotion } from '../shared/text-motion.js';
 import { initializeMotionPicker } from '../shared/motion-picker.js';
 import './app.js';
