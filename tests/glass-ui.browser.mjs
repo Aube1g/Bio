@@ -201,6 +201,8 @@ try {
 
   await page.goto(base + '/bio.html');
   await page.waitForFunction(() => document.documentElement.dataset.ready === 'true');
+  await page.locator('#bio-welcome').waitFor({ state: 'visible' });
+  await page.locator('#welcome-explore').click();
   await page.locator('.bio-profile-open').click();
   assert.match(await page.locator('#bio-profile-title').textContent(), /Aubeig/);
   await audit('bio-profile-320');

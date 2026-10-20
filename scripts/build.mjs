@@ -89,6 +89,7 @@ for (const page of ['bio', 'games']) {
       end = template.indexOf('</svg>', start);
     template = template.slice(0, end) + extraIcons + template.slice(end);
     template = template.replace('{{bio-island}}', await read('templates/bio-island.html'));
+    template = template.replace('{{bio-welcome}}', await read('templates/bio-intro.html'));
   }
   template = template
     .replace('{{icons}}', sprite)

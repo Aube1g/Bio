@@ -17,7 +17,7 @@ import {
   savePreferences,
 } from '../shared/preferences.js';
 import { transitionSurface, MorphDialogs, springGroups, kineticControls } from '../shared/motion.js';
-import { diceOdds, plinkoTable, MIN_BET, MAX_BET } from '../shared/game-rules.js';
+import { diceOdds, plinkoTable, MIN_BET, MAX_BET, SLOT_SYMBOLS } from '../shared/game-rules.js';
 import { t, money, signedMoney, translatePage } from './strings.js';
 import { GameApi, RequestError } from './api.js';
 import { GameSound } from './sound.js';
@@ -28,6 +28,7 @@ import {
   cardHTML,
   cubeHTML,
   renderCardHand,
+  symbolHTML,
 } from './renderers.js';
 import { PortalDialogs } from './dialogs.js';
 import { bindSettings, renderSettings } from './settings.js';
@@ -226,7 +227,7 @@ const dialogs = new PortalDialogs({
   onData: ingest,
   onSession: setSession,
   finishVisuals,
-  onNavigate: requestGame,
+  onNavigate: (game, immediate = false) => requestGame(game, null, immediate),
   onServerLogin: openServerLogin,
 });
 
@@ -440,8 +441,26 @@ function resultDetail(round) {
     return t('slotsDetail', { combination: t(outcome.combination), multiplier: outcome.multiplier });
   return t(outcome.reason || 'handActive');
 }
+function renderSlotOutcome(round) {
+  const symbols = round.outcome.symbols;
+  if (round.game !== 'slots' || !Array.isArray(symbols) || symbols.length !== 3) return;
+  slots.show(symbols);
+  const outcome = $('#slot-outcome');
+  const names = symbols.map((index) =>
+    t(`slotSymbol${SLOT_SYMBOLS[index][0].toUpperCase()}${SLOT_SYMBOLS[index].slice(1)}`),
+  );
+  outcome.hidden = false;
+  outcome.setAttribute('aria-label', `${t('slotOutcome')}: ${names.join(', ')}`);
+  outcome.innerHTML = `<span class="slot-outcome-label">${escapeHTML(t('slotOutcome'))}</span>${symbols
+    .map(
+      (index, reel) =>
+        `<span class="slot-outcome-symbol" role="img" aria-label="${escapeHTML(`${t('reels')} ${reel + 1}: ${names[reel]}`)}">${symbolHTML(index)}<small>${escapeHTML(names[reel])}</small></span>`,
+    )
+    .join('')}`;
+}
 function showResult(round) {
   state.lastRound = round;
+  if (round.game === 'slots') renderSlotOutcome(round);
   if (state.game === round.game) {
     const type = round.netMinor > 0 ? 'win' : round.netMinor === 0 ? 'push' : 'loss';
     $('#result-strip').dataset.result = type;
@@ -544,11 +563,17 @@ function renderSelection() {
   }
   $('#launch-selected').disabled = state.authBusy || state.networkBusy || state.uncertain;
 }
-function requestGame(game, source = null) {
+function requestGame(game, source = null, immediate = false) {
   if (game === 'lobby' || !games[game]) {
     state.selectedGame = null;
     navigate('lobby', source);
     renderSelection();
+    return;
+  }
+  if (immediate) {
+    state.selectedGame = game;
+    sound.play('launch');
+    navigate(game, source);
     return;
   }
   if (state.game === game) return;
@@ -575,6 +600,70 @@ async function activateSelected() {
   sound.play('launch');
   navigate(selected, $('#launch-selected'));
 }
+const gameCarousel = $('#game-carousel');
+const carouselCards = $$('[data-card]', gameCarousel);
+const carouselDots = $$('[data-carousel-to]');
+let carouselIndex = 0;
+let carouselFrame = 0;
+function renderCarouselIndex(index) {
+  carouselIndex = (index + carouselCards.length) % carouselCards.length;
+  carouselCards.forEach((card, i) => card.classList.toggle('is-carousel-active', i === carouselIndex));
+  carouselDots.forEach((dot, i) => {
+    if (i === carouselIndex) dot.setAttribute('aria-current', 'true');
+    else dot.removeAttribute('aria-current');
+  });
+  $('#carousel-position').textContent =
+    `${String(carouselIndex + 1).padStart(2, '0')} / ${String(carouselCards.length).padStart(2, '0')}`;
+}
+function moveCarouselTo(index) {
+  renderCarouselIndex(index);
+  const card = carouselCards[carouselIndex];
+  if (!card) return;
+  const trackRect = gameCarousel.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const target =
+    gameCarousel.scrollLeft +
+    cardRect.left -
+    trackRect.left +
+    cardRect.width / 2 -
+    gameCarousel.clientWidth / 2;
+  gameCarousel.scrollTo({ left: Math.max(0, target), behavior: motionEnabled() ? 'smooth' : 'instant' });
+}
+function syncCarouselToScroll() {
+  if (carouselFrame) return;
+  carouselFrame = requestAnimationFrame(() => {
+    carouselFrame = 0;
+    const center = gameCarousel.getBoundingClientRect().left + gameCarousel.clientWidth / 2;
+    let closest = 0;
+    carouselCards.forEach((card, i) => {
+      const rect = card.getBoundingClientRect();
+      if (
+        Math.abs(rect.left + rect.width / 2 - center) <
+        Math.abs(
+          carouselCards[closest].getBoundingClientRect().left +
+            carouselCards[closest].getBoundingClientRect().width / 2 -
+            center,
+        )
+      )
+        closest = i;
+    });
+    renderCarouselIndex(closest);
+  });
+}
+$$('[data-carousel-step]').forEach((button) =>
+  button.addEventListener('click', () => moveCarouselTo(carouselIndex + Number(button.dataset.carouselStep))),
+);
+carouselDots.forEach((button) =>
+  button.addEventListener('click', () => moveCarouselTo(Number(button.dataset.carouselTo))),
+);
+gameCarousel.addEventListener('scroll', syncCarouselToScroll, { passive: true });
+gameCarousel.addEventListener('keydown', (event) => {
+  if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+  event.preventDefault();
+  moveCarouselTo(carouselIndex + (event.key === 'ArrowRight' ? 1 : -1));
+});
+window.addEventListener('resize', syncCarouselToScroll);
+renderCarouselIndex(0);
 function navigate(game, source = null, push = true, animate = true) {
   if (game !== 'lobby' && !games[game]) game = 'lobby';
   if (game === state.game && document.documentElement.dataset.ready) return;
@@ -660,6 +749,7 @@ async function animateRound(round, action = 'deal') {
     sound.play('diceLand');
     state.busy.dice = false;
   } else if (round.game === 'slots') {
+    $('#slot-outcome').hidden = true;
     state.busy.slots = true;
     renderControls();
     await slots.spin(round.outcome.symbols);

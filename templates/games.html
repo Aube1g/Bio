@@ -151,14 +151,42 @@
               <span class="eyebrow" data-t="collection">КОЛЛЕКЦИЯ / 04</span>
               <h2 data-t="pickMood">Во что сыграем?</h2>
             </div>
-            <div class="collection-legend">
-              <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
-                data-t="practiceShort"
-                >Играем на фишки</span
-              >
+            <div class="collection-tools">
+              <div class="collection-legend">
+                <img class="viola-icon" src="{{asset:assets/games/art/violas.webp}}" alt="" /><span
+                  data-t="practiceShort"
+                  >Играем на фишки</span
+                >
+              </div>
+              <div class="carousel-controls" role="group" aria-label="Выбор игры" data-t-label="gameCarousel">
+                <button
+                  type="button"
+                  data-carousel-step="-1"
+                  aria-label="Предыдущая игра"
+                  data-t-label="previousGame"
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+                </button>
+                <output id="carousel-position" aria-live="polite">01 / 04</output>
+                <button
+                  type="button"
+                  data-carousel-step="1"
+                  aria-label="Следующая игра"
+                  data-t-label="nextGame"
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+                </button>
+              </div>
             </div>
           </header>
-          <div class="game-collection">
+          <div
+            class="game-collection"
+            id="game-carousel"
+            role="region"
+            tabindex="0"
+            aria-label="Карусель выбора игр"
+            data-t-label="gameCarousel"
+          >
             <article class="game-card" data-card="blackjack">
               <button
                 class="favorite-button"
@@ -247,6 +275,15 @@
                 ></span>
               </button>
             </article>
+          </div>
+          <div class="game-carousel-footer">
+            <nav class="carousel-pagination" aria-label="Позиция в карусели" data-t-label="gameCarouselPages">
+              <button type="button" data-carousel-to="0" aria-label="Blackjack" aria-current="true"></button>
+              <button type="button" data-carousel-to="1" aria-label="Slots"></button>
+              <button type="button" data-carousel-to="2" aria-label="Dice"></button>
+              <button type="button" data-carousel-to="3" aria-label="Plinko"></button>
+            </nav>
+            <span class="carousel-hint" data-t="carouselHint">Листай, чтобы увидеть все игры</span>
           </div>
           <section class="session-strip">
             <div class="session-symbol">
@@ -352,6 +389,7 @@
                   <div class="reels" id="slot-reels"></div>
                   <span class="payline-pointer left">▸</span><span class="payline-pointer right">◂</span>
                 </div>
+                <div class="slot-outcome" id="slot-outcome" hidden aria-live="polite"></div>
                 <div class="slots-under">
                   <span class="small-pill">192× MAX</span
                   ><span data-t="slotsHint">Совпадения считаются слева направо</span

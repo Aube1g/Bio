@@ -3213,15 +3213,15 @@ body:has(dialog[open]) {
   animation: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-motion='on']) *,
+  html:not([data-motion='on']) *::before,
+  html:not([data-motion='on']) *::after {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
   }
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  html:not([data-motion='on'])::view-transition-old(root),
+  html:not([data-motion='on'])::view-transition-new(root) {
     animation: none !important;
   }
 }
@@ -6028,9 +6028,9 @@ dialog.is-morphing > .dialog-body {
   animation: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(bio-window),
-  ::view-transition-old(bio-window),
-  ::view-transition-new(bio-window) {
+  html:not([data-motion='on'])::view-transition-group(bio-window),
+  html:not([data-motion='on'])::view-transition-old(bio-window),
+  html:not([data-motion='on'])::view-transition-new(bio-window) {
     animation: none !important;
   }
 }
@@ -10076,4 +10076,42 @@ body:has(.is-window-morphing) .shell * {
 
 .chat-composer-note:empty {
   display: none;
+}
+
+/* The XLI / XGO selector gets the same elastic, liquid capsule as the dock. */
+.agent-tabs {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.agent-tabs .agent-fluid {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.agent-tabs .agent-fluid path {
+  fill: var(--button-primary);
+  stroke: #ffffff1c;
+  stroke-width: 1;
+  filter: drop-shadow(0 3px 8px #7000ff20);
+}
+.agent-tabs .agent-tab {
+  position: relative;
+  z-index: 1;
+  background: none !important;
+  transition: color 220ms ease;
+}
+.agent-tabs .agent-tab[aria-selected='true'] {
+  color: #fff;
+}
+.agent-tabs .agent-tab:focus-visible {
+  outline: 2px solid var(--primary-text);
+  outline-offset: 2px;
+}
+[data-motion='off'] .agent-tabs .agent-fluid path {
+  filter: none;
 }

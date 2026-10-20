@@ -9,8 +9,11 @@ export function renderSettings() {
         ? preferences.theme === 'light'
         : Boolean(preferences[input.dataset.preference]);
     if (input.dataset.preference === 'motion') {
-      input.disabled = reducedMotion.matches;
-      input.checked = preferences.motion && !reducedMotion.matches;
+      input.disabled = false;
+      input.checked = preferences.motion;
+      input.title = reducedMotion.matches
+        ? 'Система просит уменьшить анимацию — но ты можешь включить вручную'
+        : '';
     }
   });
   $$('[data-language]').forEach((button) =>

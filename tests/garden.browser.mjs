@@ -203,6 +203,8 @@ try {
 
   await page.goto(pathToFileURL(resolve('bio.html')).href);
   await ready();
+  await page.locator('#bio-welcome').waitFor({ state: 'visible' });
+  await page.locator('#welcome-explore').click();
   await page.locator('.rail-link[data-view="partners"]').click();
   assert.equal(await page.locator('[data-partner="firstplatform"]').getAttribute('aria-disabled'), 'true');
   assert.equal(

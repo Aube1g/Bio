@@ -34,7 +34,10 @@ export class ExpandingIsland {
     panel.hidden = !open;
     panel.inert = !open;
     const after = element.getBoundingClientRect();
-    if (document.documentElement.dataset.motion === 'off') return;
+    if (document.documentElement.dataset.motion === 'off') {
+      if (!open) element.scrollTop = 0;
+      return;
+    }
     // Keep the closing content painted while removing it from focus and hit testing.
     panel.hidden = false;
     element.dataset.resizing = 'true';
@@ -57,6 +60,7 @@ export class ExpandingIsland {
       if (settled) return;
       settled = true;
       panel.hidden = !open;
+      if (!open) element.scrollTop = 0;
       delete element.dataset.resizing;
       animation.cancel();
       content.cancel();

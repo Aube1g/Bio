@@ -11,6 +11,7 @@ import art2 from '../../assets/bio/bio-image-2.webp';
 import art1 from '../../assets/bio/bio-image-1.webp';
 import translations from './translations.json';
 import demos from './demos.json';
+import { BioSound } from './sound.js';
 
 (() => {
   'use strict';
@@ -41,7 +42,8 @@ import demos from './demos.json';
       }
     },
   };
-  const state = { view: 'home', motion: !reduced.matches && storage.get('motion', 'on') !== 'off' };
+  const storedMotion = storage.get('motion', null);
+  const state = { view: 'home', motion: storedMotion != null ? storedMotion !== 'off' : !reduced.matches };
   const preferences = {
     lang: storage.get('lang', 'ru') === 'en' ? 'en' : 'ru',
     background: ['constellation', 'aurora', 'plain'].includes(storage.get('background'))
@@ -51,6 +53,8 @@ import demos from './demos.json';
   };
   for (const key of ['ripple', 'particles', 'liquid', 'glass'])
     preferences[key] = !['off', 'false', false].includes(storage.get(key, 'on'));
+  preferences.sound = !['off', 'false', false].includes(storage.get('sound', 'on'));
+  const sound = new BioSound(preferences.sound);
   let renderer = null;
   const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
   const escapeHTML = (text) =>
@@ -62,21 +66,21 @@ import demos from './demos.json';
   // Real destinations from index.html. No simulated purchases, messages or API calls.
   const projects = {
     xli: {
-      title: 'XLI Ecosystem',
-      label: '01 / AI ECOSYSTEM · В РАЗРАБОТКЕ',
+      title: 'XLI — Python Coding Agent',
+      label: '01 / PYTHON AGENT · BRANCH 265F0A4',
       intro:
-        'Экосистема на Go вокруг XGO Agent: бот, плагин для Nvim и своя терминальная среда. Один агент — в привычном тебе интерфейсе.',
-      tags: ['Go', 'XGO Agent', 'Nvim', 'CLI'],
+        'Кодовый агент на Python с JSON-RPC-ядром и тремя клиентами: CLI/REPL, полноэкранный curses TUI и Lua-плагин для Neovim. XGO — отдельный Telegram-проект, не часть XLI.',
+      tags: ['Python 3.10+', 'JSON-RPC 2.0', 'CLI · TUI · Neovim', 'XPI API v1'],
       features: [
-        'XGO Agent — ядро экосистемы и работа с инструментами.',
-        'XLI Bot — Telegram-интерфейс к агенту.',
-        'XLI Nvim Plugin — помощь прямо в редакторе.',
-        'XLI CLI — терминальный интерфейс и система плагинов XPI.',
+        'Один kernel обслуживает CLI, TUI и Neovim через JSON-RPC; Neovim-клиент написан на Lua.',
+        'Режимы разрешений auto / confirm / readonly; shell-блоклист — дополнительная защита, не sandbox.',
+        'LayerStore хранит краткие заметки и проверяемые хешем полные слои контекста.',
+        'AutonomyMode: manual / assisted / autonomous; XPI — подключаемые доверенные Python-инструменты.',
       ],
       terminal: true,
-      url: 'https://t.me/Aubeig',
-      action: 'Узнать о проекте',
-      note: 'В разработке.',
+      url: 'https://github.com/ty4chka/xli/tree/arena/2bb12510-xli',
+      action: 'Открыть ветку XLI',
+      note: 'Сверено с веткой arena/2bb12510-xli, commit 265f0a45 (16 октября 2026). Проект находится в активной разработке; демонстрация на этой странице статическая.',
     },
     anonshare: {
       title: 'AnonShare',
@@ -196,48 +200,48 @@ import demos from './demos.json';
   const DEMO_DATA = demos;
   let ORIGINAL_DEMOS = DEMO_DATA[preferences.lang];
   const UI_MODES = {
-    headless: {
-      title: 'HeadlessUI',
-      tag: 'headless.py',
+    cli: {
+      title: 'CLI / REPL',
+      tag: 'xli run · xli repl',
       description:
-        'Безоконный режим для CI/CD и скриптов: задача из аргумента командной строки, без интерактива. Поддерживает многошаговое делегирование через TaskTool.',
+        'Командная строка для одиночных задач и построчного диалога. Списки и результаты можно получить в JSON для скриптов; режим run работает с политикой разрешений.',
       features: [
-        'TaskTool: @coder, @tester, @debugger, @optimizer, @reviewer',
-        'Обычная цепочка агентов через XliCore.run_chain',
-        'Вывод text / json / vim; max_steps = 15 на агента',
+        'xli run "задача" — выполнить один запрос',
+        'xli repl — интерактивный построчный интерфейс',
+        'xli run поддерживает --yes, --json и --no-session',
       ],
     },
     tui: {
-      title: 'XliTui',
-      tag: 'tui.py · Textual',
+      title: 'Full-screen TUI',
+      tag: 'Python · curses',
       description:
-        'Полноценная TUI на Textual: живая сетка из пяти агентов, прогресс-бары, статусы, лог активности и ввод задачи в одном экране.',
+        'Полноэкранный TUI на curses. Ввод и агент работают в одном asyncio loop; интерфейс сохраняет черновик, показывает сессии и перерисовывает историю при изменении размера терминала.',
       features: [
-        'Сетка 3×N: CODER · DEBUGGER · TESTER · OPTIMIZER · REVIEWER',
-        'Живой прогресс и статус каждого агента',
-        'c — очистить, f — ввод, m — MCP, q — skip questions, s — стриминг; MCP-счётчик в шапке',
+        'Подтверждение tool-вызовов: y / n / a; Esc — отказ',
+        'История запросов и сессий, отмена задачи, компактные статусы',
+        'Mind map и bar chart — ограниченный текстовый Markdown-поднабор',
       ],
     },
     nvim: {
-      title: 'NvimQuestionnaire',
-      tag: 'nvim.py · questionnaire.lua',
+      title: 'Neovim client',
+      tag: 'Lua · JSON-RPC · Unix socket',
       description:
-        'Уточняющие вопросы агента появляются прямо в Neovim. Контекст редактора не теряется: выбор решения, правка и diff остаются рядом с кодом.',
+        'Плагин — чистый Lua, без Python в рантайме Neovim. По требованию запускает xli serve --unix и общается с общим kernel по JSON-RPC.',
       features: [
-        'Вопросы с вариантами через vim.ui.select',
-        'Свободный текстовый ввод через vim.ui.input',
-        'Автоматический fallback в Terminal-режим, если Neovim недоступен',
+        ':Xli отправляет задачу в плавающее окно',
+        ':XliSelection и :XliDiagnostics передают выделение или диагностику строки',
+        'Neovim — клиент ядра, а не отдельная реализация агента',
       ],
     },
-    terminal: {
-      title: 'TerminalQuestionnaire',
-      tag: 'terminal.py · input()',
+    kernel: {
+      title: 'JSON-RPC kernel',
+      tag: 'xli serve · stdio / Unix socket',
       description:
-        'Простой универсальный режим уточнения задачи через стандартный input(). Без внешних UI-зависимостей; базовый fallback для остальных интерфейсов.',
+        'Общее ядро обслуживает цикл агента, инструменты, разрешения, сессии и конфигурацию. Протокол — newline-delimited JSON-RPC 2.0; начало сессии проверяет версию через hello.',
       features: [
-        'Варианты ответа и валидация выбора',
-        'Значения по умолчанию для необязательных полей',
-        'Retry-стратегия, логирование, правка кода и тесты',
+        'xli serve — stdio по умолчанию; --unix включает Unix socket',
+        'JSON-RPC методы для agent, tools, config, kernel, session и plugins',
+        'Опциональные Cython-модули используются только при совпадении хеша исходника',
       ],
     },
   };
@@ -646,12 +650,11 @@ import demos from './demos.json';
   }
   document.addEventListener('visibilitychange', syncDemos);
   const TERMINAL_TITLES = {
-    bugfix: 'xli — ~/go/src/worker',
-    headless: 'xli --headless · CI job #4821',
-    tui: 'XliTui — Textual · MCP: 6',
-    nvim: 'nvim — handler.go',
-    terminal: 'python3 -m xli.ui.terminal',
-    safety: 'SafeShell — blocked command',
+    cli: 'xli · CLI / REPL',
+    tui: 'xli tui · curses',
+    nvim: 'Neovim · xli serve --unix',
+    kernel: 'xli serve · JSON-RPC',
+    safety: 'XLI permission policy',
   };
   function terminalFrame(id, key, compact = false) {
     return (
@@ -701,11 +704,11 @@ import demos from './demos.json';
       const script = sub
         ? sub.demo
         : {
-            bugfix: ORIGINAL_DEMOS.xliTerminalScripts,
-            headless: ORIGINAL_DEMOS.headlessScripts,
+            cli: ORIGINAL_DEMOS.xliTerminalScripts,
+            tui: ORIGINAL_DEMOS.tuiScripts,
             nvim: ORIGINAL_DEMOS.nvimScripts,
-            terminal: ORIGINAL_DEMOS.terminalQnaScripts,
-            safety: ORIGINAL_DEMOS.safeShellScripts,
+            kernel: ORIGINAL_DEMOS.kernelScripts,
+            safety: ORIGINAL_DEMOS.policyScripts,
           }[key] || [];
       const jobs = [];
       const job = (run, delay = 150) => jobs.push({ run, delay });
@@ -737,40 +740,7 @@ import demos from './demos.json';
           follow();
         }, 90);
       };
-      if (key === 'tui') {
-        const t = ORIGINAL_DEMOS.tuiTexts;
-        append(escapeHTML(t.header1), 't-comment');
-        append('PLAN → CODER → DEBUGGER → TESTER → OPTIMIZER → REVIEWER', 't-agent');
-        const grid = document.createElement('div');
-        grid.className = 'tui-grid';
-        const agents = ['CODER', 'DEBUGGER', 'TESTER', 'OPTIMIZER', 'REVIEWER'];
-        agents.forEach((name) => {
-          const cell = document.createElement('div');
-          cell.className = 'tui-agent';
-          cell.innerHTML =
-            '<div class="tui-agent-head"><span>' +
-            name +
-            '</span><output>0%</output></div><div class="tui-progress"><span></span></div><small>WAITING</small>';
-          grid.append(cell);
-        });
-        job(() => {
-          output.append(grid);
-          follow();
-        }, 220);
-        [...grid.children].forEach((cell) => {
-          for (let n = 20; n <= 100; n += 20) {
-            job(() => {
-              $('output', cell).textContent = n + '%';
-              $('.tui-progress', cell).style.setProperty('--progress', n + '%');
-              $('small', cell).textContent = n === 100 ? 'DONE' : 'RUNNING';
-              cell.classList.toggle('is-done', n === 100);
-            }, 100);
-          }
-        });
-        append('LIVE LOG', 't-comment', 240);
-        t.logs.forEach((line) => append(escapeHTML(line.text), line.cls, 200));
-        append(escapeHTML(t.statusBar), 't-comment', 200);
-      } else {
+      {
         script.forEach((step) => {
           if (step.type === 'prompt') {
             type(
@@ -832,7 +802,7 @@ import demos from './demos.json';
           } else if (step.type === 'idle' || step.type === 'prompt-idle') {
             append(
               '<span class="t-prompt">➜ </span><span class="t-path">' +
-                escapeHTML(step.path || '~/go/src/worker') +
+                escapeHTML(step.path || '~/src/xli') +
                 '</span>',
               '',
               150,
@@ -1310,7 +1280,8 @@ import demos from './demos.json';
     $$('[data-system]').forEach((button) =>
       button.setAttribute('aria-pressed', String(button.dataset.system === id)),
     );
-    $('#system-counter').textContent = String(index + 1).padStart(2, '0') + ' / 14';
+    $('#system-counter').textContent =
+      String(index + 1).padStart(2, '0') + ' / ' + String(ORIGINAL_DEMOS.SUBSYSTEMS.length).padStart(2, '0');
     morphRegion($('#system-stage'), () => {
       $('#system-description').innerHTML = descriptionMarkup(ORIGINAL_DEMOS.SUBSYSTEMS[index]);
       const terminal = $('#lab-system');
@@ -1331,6 +1302,7 @@ import demos from './demos.json';
     $('#agent-panel-xli').hidden = agent !== 'xli';
     $('#agent-panel-xgo').hidden = agent !== 'xgo';
     if (animate && previous !== agent) morphRegion($('#agent-panel-' + agent), null, { duration: 590 });
+    syncAgentFluid(true);
     syncDemos();
   }
   async function openLab(agent, opener) {
@@ -1398,7 +1370,7 @@ import demos from './demos.json';
   function projectExtra(id) {
     if (id === 'anon') return anonVoiceMarkup();
     if (id === 'xli')
-      return '<div class="detail-extra"><h3>Интерфейс под задачу.</h3><p>HeadlessUI, Textual TUI с пятью агентами, Neovim, TerminalQuestionnaire, SafeShell и 14 подсистем. XPI поддерживает hot-reload и общий стейт между интерфейсами.</p></div>';
+      return '<div class="detail-extra"><h3>Последний срез репозитория</h3><p>Ветка arena/2bb12510-xli · commit 265f0a45 · 16.10.2026.</p><ul><li>Парсер tool-вызовов принимает несколько форматов без eval и не подменяет ошибку ложным успехом.</li><li>LayerStore отделяет межсессионную память от истории текущего запуска, хранит краткие заметки и проверяет полный контент по SHA-256.</li><li>AutonomyMode объединяет ручной, assisted и autonomous режимы; значение можно задать через XLI_AUTONOMY_MODE.</li><li>Реконсиляция проверяет слои, выбирает рабочую версию и архивирует устаревшее; мутации стора защищены блокировкой на POSIX.</li><li>XPI API v1 добавляет метаданные, lifecycle hooks, namespaced tools, настройки и состояние плагинов. Плагины — доверенный Python-код внутри процесса, не песочница.</li><li>Полноэкранный curses TUI получил историю сессий, отзывчивый ввод, корректный reflow и компактные отображения инструментов.</li></ul><p>Здесь показан статический UI-макет, а не подключение к агенту или выполнение команд.</p></div>';
     if (id === 'xgo')
       return '<div class="detail-extra"><h3>Больше, чем окно переписки.</h3><p>10 инструментов, сжатие контекста, история запросов и мультипровайдерный fallback. Всё необходимое для работы с длинными задачами.</p></div>';
     if (id === 'firstplatform')
@@ -1653,11 +1625,113 @@ import demos from './demos.json';
         });
     }
   }
+  let agentFluidFrame = 0,
+    agentFluidState = null,
+    agentFluidTarget = null,
+    agentFluidActive = null,
+    agentFluidSwitchTimer = 0;
+  function syncAgentFluid(animate = true) {
+    const group = $('.agent-tabs');
+    if (!group?.isConnected || !group.getClientRects().length) return;
+    const active = $('[data-agent][aria-selected="true"]', group);
+    if (!active) return;
+    if (agentFluidActive && agentFluidActive !== active.dataset.agent && state.motion) {
+      group.dataset.switching = 'true';
+      clearTimeout(agentFluidSwitchTimer);
+      agentFluidSwitchTimer = setTimeout(() => delete group.dataset.switching, 700);
+    }
+    agentFluidActive = active.dataset.agent;
+    let svg = $('.agent-fluid', group);
+    if (!svg) {
+      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('class', 'agent-fluid');
+      svg.setAttribute('aria-hidden', 'true');
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.id = 'agent-pill-gradient';
+      gradient.setAttribute('x1', '0%');
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('x2', '100%');
+      gradient.setAttribute('y2', '100%');
+      for (const [offset, color] of [
+        [0, '#a886f5'],
+        [0.52, '#d5a9ff'],
+        [1, '#8ce5d0'],
+      ]) {
+        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop.setAttribute('offset', String(offset));
+        stop.setAttribute('stop-color', color);
+        gradient.append(stop);
+      }
+      defs.append(gradient);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      svg.append(defs, path);
+      group.prepend(svg);
+    }
+    const box = group.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    agentFluidTarget = {
+      x: active.getBoundingClientRect().left - box.left - group.clientLeft,
+      y: active.getBoundingClientRect().top - box.top - group.clientTop,
+      w: active.offsetWidth,
+      h: active.offsetHeight,
+    };
+    const paint = (stretch = 0) => {
+      if (!agentFluidState) return;
+      $('.agent-fluid path', group)?.setAttribute(
+        'd',
+        capsulePath(
+          agentFluidState.x - stretch / 2,
+          agentFluidState.y,
+          agentFluidState.w + stretch,
+          agentFluidState.h,
+        ),
+      );
+    };
+    if (!agentFluidState || !animate || !state.motion) {
+      cancelAnimationFrame(agentFluidFrame);
+      agentFluidFrame = 0;
+      agentFluidState = { ...agentFluidTarget, vx: 0, vy: 0 };
+      paint();
+      return;
+    }
+    if (agentFluidFrame) return;
+    let last = 0;
+    const tick = (now) => {
+      agentFluidFrame = 0;
+      if (!agentFluidState || !agentFluidTarget || !state.motion) {
+        syncAgentFluid(false);
+        return;
+      }
+      const dt = last ? Math.min((now - last) / 1000, 0.035) : 1 / 60;
+      last = now;
+      for (const axis of ['x', 'y']) {
+        const velocity = 'v' + axis;
+        agentFluidState[velocity] +=
+          (330 * (agentFluidTarget[axis] - agentFluidState[axis]) - 24 * agentFluidState[velocity]) * dt;
+        agentFluidState[axis] += agentFluidState[velocity] * dt;
+      }
+      agentFluidState.w += (agentFluidTarget.w - agentFluidState.w) * Math.min(1, dt * 13);
+      agentFluidState.h = agentFluidTarget.h;
+      const stretch = Math.min(22, Math.abs(agentFluidState.vx) * 0.035);
+      paint(stretch);
+      const remaining =
+        Math.abs(agentFluidTarget.x - agentFluidState.x) + Math.abs(agentFluidTarget.y - agentFluidState.y);
+      const speed = Math.abs(agentFluidState.vx) + Math.abs(agentFluidState.vy);
+      if (remaining > 0.035 || speed > 0.08) agentFluidFrame = requestAnimationFrame(tick);
+      else {
+        agentFluidState = { ...agentFluidTarget, vx: 0, vy: 0 };
+        paint();
+      }
+    };
+    agentFluidFrame = requestAnimationFrame(tick);
+  }
   function syncPills(animate = false) {
     $$('.spring-group').forEach((group) => syncPill(group, animate));
+    syncAgentFluid(animate);
   }
   function initializePills() {
-    $$('.agent-tabs,.interface-picker,.filters').forEach((group) => group.classList.add('spring-group'));
+    $$('.interface-picker,.filters').forEach((group) => group.classList.add('spring-group'));
     const selectionObserver = new MutationObserver((changes) => {
       const groups = new Set(changes.map((change) => change.target.closest('.spring-group')).filter(Boolean));
       groups.forEach((group) => syncPill(group, true));
@@ -1674,7 +1748,19 @@ import demos from './demos.json';
     document.addEventListener('click', (event) => {
       const group = event.target.closest('.spring-group');
       if (group) queueMicrotask(() => syncPill(group, true));
+      if (event.target.closest('.agent-tabs')) queueMicrotask(() => syncAgentFluid(true));
     });
+    const agentTabs = $('.agent-tabs');
+    if (agentTabs) {
+      const agentSelectionObserver = new MutationObserver(() => syncAgentFluid(true));
+      agentSelectionObserver.observe(agentTabs, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['aria-selected'],
+      });
+      new ResizeObserver(() => syncAgentFluid(false)).observe(agentTabs);
+      syncAgentFluid(false);
+    }
     document.fonts?.ready.then(() => {
       syncPills(false);
       moveNav(false);
@@ -2032,7 +2118,8 @@ import demos from './demos.json';
     renderer?.refresh();
   }
   function setMotion() {
-    state.motion = !reduced.matches && storage.get('motion', 'on') !== 'off';
+    const stored = storage.get('motion', null);
+    state.motion = stored != null ? stored !== 'off' : !reduced.matches;
     root.dataset.motion = state.motion ? 'on' : 'off';
     if (!state.motion) {
       document.getAnimations?.().forEach((a) => a.cancel());
@@ -2043,9 +2130,11 @@ import demos from './demos.json';
       });
     }
     $('#motion-switch').checked = state.motion;
-    $('#motion-switch').disabled = reduced.matches;
+    $('#motion-switch').disabled = false;
     $('#motion-description').textContent = tr(
-      reduced.matches ? 'Движение уменьшено в настройках твоей системы.' : 'Переходы, пружины и живые демо.',
+      reduced.matches
+        ? 'Система рекомендует уменьшить движение — анимации можно включить вручную.'
+        : 'Переходы, пружины и живые демо.',
     );
     $('#motion-status').textContent = state.motion ? 'LIVE' : 'PAUSE';
     if (root.dataset.initialized === 'true') {
@@ -2057,10 +2146,14 @@ import demos from './demos.json';
     syncDemos();
   }
   function initializePreferences() {
+    const soundSwitch = $('[data-preference="sound"]');
+    if (soundSwitch) soundSwitch.checked = preferences.sound;
+    sound.setEnabled(preferences.sound);
     $$('[data-preference]').forEach((input) =>
       input.addEventListener('change', () => {
         preferences[input.dataset.preference] = input.checked;
         storage.set(input.dataset.preference, input.checked ? 'on' : 'off');
+        if (input.dataset.preference === 'sound') sound.setEnabled(input.checked);
         if (input.dataset.preference === 'liquid' && !input.checked)
           $$('svg.icon').forEach((icon) => icon.getAnimations().forEach((a) => a.cancel()));
         applyPreferences();
@@ -2109,7 +2202,7 @@ import demos from './demos.json';
       for (const [key, value] of Object.entries(preferences))
         storage.set(key, typeof value === 'boolean' ? (value ? 'on' : 'off') : value);
       storage.set('theme', 'dark');
-      storage.set('motion', 'on');
+      storage.set('motion', reduced.matches ? 'off' : 'on');
       setTheme('dark');
       setMotion();
       setLanguage('ru');
@@ -2819,9 +2912,9 @@ import demos from './demos.json';
           ${project.image ? '<img class="detail-image" src="' + project.image + '" alt="Интерфейс / графика ' + escapeHTML(project.title) + '">' : ''}
           <ul class="detail-features info-grid">${project.features.map((feature, index) => '<li>' + icons(['code', 'nodes', 'shield', 'file'][index % 4]) + '<span>' + richText(tr(feature)) + '</span></li>').join('')}</ul>
           <div class="info-callout">${icons('info')}<p class="dialog-note">${richText(tr(project.note))}</p></div>
-          ${id === 'xli' ? terminalFrame('modal-cli', 'bugfix') : id === 'xgo' ? chatFrame('modal-chat') : ''}
+          ${id === 'xli' ? terminalFrame('modal-cli', 'cli') : id === 'xgo' ? chatFrame('modal-chat') : ''}
           ${projectExtra(id)}
-          <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Терминалы и 14 подсистем' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
+          <div class="dialog-actions">${id === 'xli' || id === 'xgo' ? '<a class="solid-button" href="#lab" data-lab="' + id + '">' + (id === 'xli' ? 'Последние изменения XLI' : 'Чат, инструменты и память') + arrow + '</a>' : ''}<a class="${id === 'xli' || id === 'xgo' ? 'outline-button' : 'solid-button'}" href="${project.url}" target="_blank" rel="noopener noreferrer">${escapeHTML(project.action)}${arrow}</a><button class="outline-button" type="button" data-close>Закрыть</button></div>`;
     mountDemos(dialog);
     openDialog(dialog, opener);
   }
@@ -2870,6 +2963,13 @@ import demos from './demos.json';
     setTimeout(() => {
       $('#copy-label').textContent = 'Скопировать контакт';
     }, 3000);
+  });
+
+  document.addEventListener('pointerdown', () => sound.unlock(), { once: true, passive: true });
+  document.addEventListener('click', (event) => {
+    const control = event.target.closest('button,a,[role="button"]');
+    if (!control || control.disabled || control.dataset.sound === 'off') return;
+    sound.play(control.matches('[aria-pressed]') ? 'toggle' : 'tap');
   });
 
   root.dataset.initialized = 'true';

@@ -333,7 +333,7 @@ export function createApp(config, root = resolve('.')) {
           const hashes = [...content.toString().matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)]
             .map((m) => `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`)
             .join(' ');
-          csp = `default-src 'self'; script-src 'self' ${hashes} https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self' https://oauth.telegram.org`;
+          csp = `default-src 'self'; script-src 'self' ${hashes} https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://lrclib.net; frame-src https://oauth.telegram.org https://telegram.org; object-src 'none'; base-uri 'self'; form-action 'self' https://oauth.telegram.org`;
           htmlCache.clear();
           htmlCache.set(cacheKey, csp);
         }

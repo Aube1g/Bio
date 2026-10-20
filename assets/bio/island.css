@@ -319,3 +319,303 @@
     width: 100%;
   }
 }
+
+/* Media and weather extensions keep the compact repository island silhouette. */
+.bio-island[data-open='true'] {
+  width: min(358px, calc(100vw - 36px));
+}
+.island-now-playing {
+  padding: 13px;
+  border: 1px solid #ffffff10;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #292237, #1c1925 72%);
+}
+.island-media-heading,
+.island-media-actions,
+.island-weather-heading,
+.island-weather-controls,
+.island-lyrics-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.island-media-heading > div,
+.island-weather-heading > div {
+  min-width: 0;
+  flex: 1;
+}
+.island-overline {
+  display: block;
+  margin-bottom: 4px;
+  color: #bca8e3;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.island-track-title {
+  display: block;
+  overflow: hidden;
+  color: #f2edff;
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.island-track-subtitle {
+  display: block;
+  margin-top: 2px;
+  color: #b9aecb;
+  font-size: 9px;
+}
+.island-file-picker,
+.island-small-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid #ffffff18;
+  border-radius: 11px;
+  color: #dfd1f6;
+  background: #ffffff08;
+  font-size: 10px;
+  cursor: pointer;
+}
+.island-file-picker:hover,
+.island-small-action:hover {
+  background: #ffffff14;
+}
+.island-file-picker input,
+.island-small-action input {
+  display: none;
+}
+.island-file-picker,
+.island-small-action {
+  cursor: pointer;
+}
+.island-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 24px;
+  margin: 10px 0 7px;
+}
+.island-waveform i {
+  width: 3px;
+  height: calc(3px + var(--level, 0.22) * 18px);
+  border-radius: 4px;
+  background: linear-gradient(#d8baff, #8e72d2);
+  transition: height 120ms ease;
+}
+.bio-island[data-playing='true'] .island-waveform i {
+  animation: island-wave 760ms ease-in-out infinite alternate;
+}
+.bio-island[data-playing='true'] .island-waveform i:nth-child(3n) {
+  animation-delay: -430ms;
+}
+@keyframes island-wave {
+  to {
+    height: 4px;
+    opacity: 0.65;
+  }
+}
+.island-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.island-player-controls button {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  border-radius: 50%;
+  color: #d7c6f2;
+  background: #ffffff0a;
+  font-size: 12px;
+}
+.island-player-controls button:hover {
+  background: #ffffff18;
+}
+.island-player-controls #island-play {
+  width: 35px;
+  height: 35px;
+  color: #211a2d;
+  background: linear-gradient(135deg, #e4c9ff, #b99ae8);
+  font-weight: 900;
+}
+.island-player-controls input[type='range'] {
+  min-width: 0;
+  flex: 1;
+  height: 3px;
+  accent-color: #c9a9f1;
+}
+.island-player-time {
+  color: #a99bb9;
+  font:
+    8px ui-monospace,
+    monospace;
+}
+.island-lyrics-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #ffffff08;
+}
+.island-lyrics-card > div {
+  min-width: 0;
+  flex: 1;
+}
+.island-lyrics-line {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #f1e8ff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.island-lyrics-note {
+  display: block;
+  margin-top: 3px;
+  color: #a99bb9;
+  font-size: 8px;
+}
+.island-lyrics-tools {
+  display: flex;
+  gap: 5px;
+}
+.island-lyrics-search {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-top: 8px;
+}
+.island-lyrics-search input,
+.island-weather-city input {
+  min-width: 0;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ffffff17;
+  border-radius: 10px;
+  outline: none;
+  color: #f2edff;
+  background: #ffffff08;
+  font-size: 10px;
+}
+.island-lyrics-results {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+}
+.island-lyrics-results button {
+  padding: 7px 9px;
+  border-radius: 9px;
+  text-align: left;
+  color: #e6dbf6;
+  background: #ffffff0a;
+  font-size: 9px;
+}
+.island-inline-status {
+  min-height: 12px;
+  margin: 5px 1px 0;
+  color: #b9aecb;
+  font-size: 8px;
+}
+.island-weather-card {
+  margin-top: 10px;
+  padding: 12px 13px;
+  border: 1px solid #ffffff10;
+  border-radius: 17px;
+  background: linear-gradient(120deg, #24303b, #22202b 72%);
+}
+.island-weather-heading .icon {
+  width: 19px;
+  height: 19px;
+  color: #f3d998;
+}
+.island-weather-heading strong {
+  color: #f1ebfa;
+  font-size: 11px;
+}
+.island-weather-temperature {
+  color: #f4e9ff;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.island-weather-condition {
+  margin-top: 3px;
+  color: #b9aecb;
+  font-size: 9px;
+}
+.island-weather-city {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-top: 8px;
+}
+.island-weather-controls {
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.island-weather-controls button {
+  padding: 7px 9px;
+  border: 1px solid #ffffff14;
+  border-radius: 10px;
+  color: #ddd0ef;
+  background: #ffffff08;
+  font-size: 9px;
+}
+.island-weather-controls button:hover {
+  background: #ffffff15;
+}
+.island-weather-status {
+  min-height: 13px;
+  margin: 6px 1px 0;
+  color: #b9aecb;
+  font-size: 8px;
+}
+.island-extension-divider {
+  height: 1px;
+  margin: 13px 0;
+  background: #ffffff14;
+}
+.island-quick-grid a {
+  min-height: 76px;
+}
+.island-quick-grid a .icon {
+  color: #d7baff;
+}
+.bio-island [hidden] {
+  display: none !important;
+}
+@media (max-width: 700px) {
+  .bio-island[data-open='true'] {
+    width: min(352px, calc(100vw - 36px));
+  }
+  .island-weather-city input,
+  .island-lyrics-search input {
+    font-size: 16px;
+  }
+}
+[data-motion='off'] .bio-island *,
+[data-motion='off'] .bio-island *::before,
+[data-motion='off'] .bio-island *::after {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on']) .bio-island *,
+  html:not([data-motion='on']) .bio-island *::before,
+  html:not([data-motion='on']) .bio-island *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

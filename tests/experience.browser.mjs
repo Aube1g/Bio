@@ -21,7 +21,7 @@ await context.addInitScript(() => {
   const sample = () =>
     window.experienceTrace.push({
       boot: document.documentElement?.dataset.booting,
-      hands: document.querySelectorAll('.loader-clock-hand').length,
+      marks: document.querySelectorAll('.preloader-mark').length,
       text: document.querySelectorAll('[data-text-motion]').length,
     });
   document.addEventListener('DOMContentLoaded', sample);
@@ -66,8 +66,9 @@ try {
   await ready();
   await page.waitForFunction(() => window.experienceTrace.some((item) => item.text > 0));
   const trace = await page.evaluate(() => window.experienceTrace);
-  assert(trace.some((item) => item.boot === 'true' && item.hands === 3));
-  console.log('PASS original clock preloader is visible, finishes, and hands off to text reveals');
+  assert(trace.some((item) => item.boot === 'true' && item.marks === 1));
+  assert.equal(await page.locator('.loader-clock-hand').count(), 0);
+  console.log('PASS full-screen morph preloader is visible, ring-free, and hands off to text reveals');
   await page.locator('.game-dock [data-open="game-settings-dialog"]').click();
   await rest('game-settings-dialog');
   const lens = await page.locator('#pref-ripple').evaluate((input) => {
@@ -158,6 +159,8 @@ try {
 
   await page.goto('file://' + resolve('bio.html'));
   await ready();
+  await page.locator('#bio-welcome').waitFor({ state: 'visible' });
+  await page.locator('#welcome-explore').click();
   await page.locator('.bio-profile-open').click();
   await audit('bio-profile-pills-320');
   await close('bio-profile-dialog');

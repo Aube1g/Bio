@@ -1,8 +1,9 @@
 import { TRANSITION_STYLES, normalizeTransition } from './desktop-motion.js';
+export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const defaults = {
   theme: 'dark',
   lang: 'ru',
-  motion: true,
+  motion: !reducedMotion.matches,
   ripple: true,
   particles: true,
   liquid: true,
@@ -58,8 +59,7 @@ export function readPreferences() {
   return result;
 }
 export let preferences = readPreferences();
-export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-export const motionEnabled = () => preferences.motion && !reducedMotion.matches;
+export const motionEnabled = () => preferences.motion;
 export function applyPreferences() {
   const root = document.documentElement;
   root.lang = preferences.lang;
@@ -79,9 +79,24 @@ export function savePreferences(patch) {
     safeStorage.set('bio.' + key, typeof value === 'boolean' ? (value ? 'on' : 'off') : String(value));
   applyPreferences();
 }
-export const resetPreferences = () => savePreferences(defaults);
+export const resetPreferences = () => savePreferences({ ...defaults, motion: !reducedMotion.matches });
 export function installPreferenceListeners() {
-  reducedMotion.addEventListener('change', applyPreferences);
+  reducedMotion.addEventListener('change', () => {
+    // Авто-подстройка под систему только если юзер не трогал переключатель явно
+    const explicit =
+      safeStorage.get('bio.motion') != null ||
+      (() => {
+        try {
+          return JSON.parse(safeStorage.get('aubeig.preferences') || '{}').hasOwnProperty('motion');
+        } catch {
+          return false;
+        }
+      })();
+    if (!explicit) {
+      preferences.motion = !reducedMotion.matches;
+      applyPreferences();
+    }
+  });
   window.addEventListener('storage', (event) => {
     if (event.key === 'aubeig.preferences') {
       memory.delete(event.key);

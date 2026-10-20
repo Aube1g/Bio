@@ -118,8 +118,11 @@ try {
   watch(ui);
   await ui.goto(base + '/bio.html');
   await ui.waitForFunction(() => document.documentElement.dataset.ready === 'true');
-  await ui.locator('.bio-island-trigger').click();
-  assert.equal(await ui.locator('.bio-island-trigger').getAttribute('aria-expanded'), 'true');
+  await ui.locator('#bio-welcome').waitFor({ state: 'visible' });
+  await ui.locator('#welcome-explore').click();
+  await ui.locator('#bio-welcome').waitFor({ state: 'hidden' });
+  await ui.locator('#bio-island-trigger').click();
+  assert.equal(await ui.locator('#bio-island-trigger').getAttribute('aria-expanded'), 'true');
   await ui.screenshot({ path: `${output}/bio-island.png` });
   await ui.keyboard.press('Escape');
   await ui.locator('.rail-action[data-dialog="settings-dialog"]').click();
@@ -158,9 +161,9 @@ try {
   await ui.keyboard.press('Escape');
   await ui.setViewportSize({ width: 390, height: 844 });
   await ui.evaluate(() => scrollTo(0, 400));
-  const fixed = await ui.locator('.bio-island-trigger').boundingBox();
+  const fixed = await ui.locator('#bio-island-trigger').boundingBox();
   assert(fixed.y >= 0 && fixed.y < 35);
-  await ui.locator('.bio-island-trigger').click();
+  await ui.locator('#bio-island-trigger').click();
   const expanded = await ui.locator('#bio-island').boundingBox();
   assert(expanded.x >= 0 && expanded.x + expanded.width <= 390);
   await ui.screenshot({ path: `${output}/bio-island-mobile.png` });
@@ -215,7 +218,7 @@ try {
     assert.equal(await ui.locator('.morph-card-copy').count(), 0);
   }
   await ui.evaluate(() => {
-    const t = document.querySelector('.bio-island-trigger');
+    const t = document.querySelector('#bio-island-trigger');
     t.click();
     setTimeout(() => t.click(), 60);
     setTimeout(() => t.click(), 120);

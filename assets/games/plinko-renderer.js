@@ -211,14 +211,7 @@ export class PlinkoRenderer {
     context.setTransform(this.ratio, 0, 0, this.ratio, 0, 0);
     context.clearRect(0, 0, geometry.width, geometry.height);
     const light = preferences.theme === 'light';
-    context.strokeStyle = light ? '#8771b11a' : '#c3a0ff0c';
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(geometry.width / 2 - geometry.gap * 1.45, geometry.top - 10);
-    context.lineTo(geometry.width / 2 - ((this.rows + 2) / 2) * geometry.gap, geometry.bins[0].y - 18);
-    context.moveTo(geometry.width / 2 + geometry.gap * 1.45, geometry.top - 10);
-    context.lineTo(geometry.width / 2 + ((this.rows + 2) / 2) * geometry.gap, geometry.bins[0].y - 18);
-    context.stroke();
+    // Guard pegs show the actual outer edge. Avoid decorative diagonal strokes that read as stray bars.
     for (const peg of [...geometry.pegs.flat(), ...geometry.guidePegs]) {
       context.fillStyle = light ? '#8b77ad' : '#75628f';
       context.beginPath();
