@@ -185,7 +185,7 @@
   transition: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .glass-switch-lens {
+  html:not([data-motion='on']) .glass-switch-lens {
     scale: 1 !important;
     transition: none !important;
   }
@@ -314,8 +314,8 @@
   transition: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  .setting-row *,
-  .setting-row *::after {
+  html:not([data-motion='on']) .setting-row *,
+  html:not([data-motion='on']) .setting-row *::after {
     transition: none !important;
   }
 }

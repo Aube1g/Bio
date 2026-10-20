@@ -105,15 +105,18 @@ export class SlotsRenderer {
       let frame,
         done = false;
       const start = performance.now();
-      const positions = [31, 39, 47];
-      const stops = [2100, 2550, 3050];
+      const positions = [34, 44, 56];
+      const stops = [1900, 2470, 3100];
+      const spinDuration = Math.max(...stops);
       this.element.dataset.spinning = 'true';
       this.element.innerHTML = symbols
         .map((symbol, i) => {
-          const values = Array.from({ length: positions[i] + 3 }, (_, j) =>
-            j === positions[i] ? symbol : (j * 3 + i * 5) % 8,
+          // This strip is presentation only; the server-authoritative symbols are shown on the payline.
+          const values = Array.from({ length: positions[i] + 3 }, () =>
+            Math.floor(Math.random() * SLOT_SYMBOLS.length),
           );
           values[positions[i] - 1] = (symbol + 1) % 8;
+          values[positions[i]] = symbol;
           values[positions[i] + 1] = (symbol + 7) % 8;
           return `<div class="reel-window"><div class="reel-strip">${values.map((s) => `<div class="reel-cell">${symbolHTML(s)}</div>`).join('')}</div><div class="reel-payline"></div></div>`;
         })
@@ -137,7 +140,7 @@ export class SlotsRenderer {
           if (t === 1 && !window.classList.contains('stopped')) this.onStop(index);
           window.classList.toggle('stopped', t === 1);
         });
-        if (now - start < 3050 && motionEnabled()) frame = requestAnimationFrame(tick);
+        if (now - start < spinDuration && motionEnabled()) frame = requestAnimationFrame(tick);
         else this.finish?.();
       };
       frame = requestAnimationFrame(tick);

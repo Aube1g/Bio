@@ -1,42 +1,452 @@
-<div class="bio-island-wrap">
-  <div class="bio-island" id="bio-island" data-open="false">
-    <button
-      class="bio-island-trigger"
-      type="button"
-      aria-expanded="false"
-      aria-controls="bio-island-panel"
-      aria-label="Открыть быстрые действия"
+<div class="bio-island" id="bio-island" data-open="false" data-mode="idle">
+  <button
+    class="island-trigger"
+    id="bio-island-trigger"
+    type="button"
+    aria-expanded="false"
+    aria-controls="bio-island-panel"
+    aria-label="Открыть Aubeig Island"
+  >
+    <span class="island-trigger-mark"
+      ><svg class="brand-mark" aria-hidden="true"><use href="#i-mark" /></svg
+    ></span>
+    <span class="island-trigger-copy"
+      ><strong id="island-trigger-title">Aubeig Island</strong
+      ><small id="island-trigger-subtitle">Медиа · таймер · файлы</small></span
     >
-      <span class="bio-island-dot" aria-hidden="true"></span>
-      <strong id="bio-island-status">Открыт к идеям</strong>
-      <span class="island-mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <svg class="icon island-expand-icon" aria-hidden="true"><use href="#i-plus" /></svg>
-    </button>
-    <div class="bio-island-panel" id="bio-island-panel" hidden>
-      <div class="bio-island-identity">
-        <img src="{{asset:assets/bio/bio-image-0.webp}}" alt="" width="42" height="42" />
-        <div><strong>Aubeig</strong><span>Code. Create. Play.</span></div>
-        <time class="bio-island-time"></time>
+    <span class="island-trigger-meter" id="island-trigger-meter" aria-hidden="true"
+      ><i></i><i></i><i></i><i></i><i></i
+    ></span>
+    <span class="island-trigger-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <section class="island-panel" id="bio-island-panel" aria-label="Aubeig Island" hidden inert>
+    <header class="island-panel-head">
+      <div class="island-head-copy">
+        <span class="island-eyebrow">AUBEIG <i></i> ISLAND</span>
+        <h2 id="island-panel-title">Твоё пространство рядом</h2>
       </div>
-      <div class="bio-island-context">
-        <span>Сейчас в пространстве</span><strong id="bio-island-section">Обзор</strong>
-      </div>
-      <div class="island-quick-grid">
-        <a href="https://t.me/Aubeig" target="_blank" rel="noopener noreferrer">
-          <svg class="icon" aria-hidden="true"><use href="#i-telegram" /></svg><span>Написать мне</span>
-        </a>
-        <a href="games.html">
-          <svg class="icon" aria-hidden="true"><use href="#i-gamepad" /></svg><span>Поиграем?</span>
-        </a>
-      </div>
-      <div class="island-bottom-actions">
-        <button type="button" id="island-copy-contact">
-          <svg class="icon" aria-hidden="true"><use href="#i-copy" /></svg><span>@Aubeig</span>
-        </button>
-        <button type="button" data-dialog="settings-dialog">
-          <svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg><span>Настройки</span>
+      <div class="island-head-actions">
+        <span class="island-live-status"><i></i><span id="island-live-label">ГОТОВ</span></span>
+        <button
+          type="button"
+          class="island-icon-button"
+          id="island-close"
+          aria-label="Свернуть остров"
+          title="Свернуть"
+        >
+          ×
         </button>
       </div>
+    </header>
+    <div class="island-tabs" role="tablist" aria-label="Разделы острова">
+      <button
+        class="island-tab is-active"
+        type="button"
+        role="tab"
+        id="island-tab-player"
+        aria-controls="island-page-player"
+        aria-selected="true"
+        data-island-tab="player"
+      >
+        <span class="island-tab-icon">♫</span><span data-i18n-ru="Медиа" data-i18n-en="Media">Медиа</span>
+      </button>
+      <button
+        class="island-tab"
+        type="button"
+        role="tab"
+        id="island-tab-timer"
+        aria-controls="island-page-timer"
+        aria-selected="false"
+        data-island-tab="timer"
+      >
+        <span class="island-tab-icon">◷</span><span data-i18n-ru="Таймер" data-i18n-en="Timer">Таймер</span>
+      </button>
+      <button
+        class="island-tab"
+        type="button"
+        role="tab"
+        id="island-tab-shelf"
+        aria-controls="island-page-shelf"
+        aria-selected="false"
+        data-island-tab="shelf"
+      >
+        <span class="island-tab-icon">▧</span><span data-i18n-ru="Полка" data-i18n-en="Shelf">Полка</span>
+      </button>
+      <button
+        class="island-tab"
+        type="button"
+        role="tab"
+        id="island-tab-tools"
+        aria-controls="island-page-tools"
+        aria-selected="false"
+        data-island-tab="tools"
+      >
+        <span class="island-tab-icon">⌘</span
+        ><span data-i18n-ru="Инструменты" data-i18n-en="Tools">Инструменты</span>
+      </button>
     </div>
-  </div>
+    <div class="island-content">
+      <section
+        class="island-page is-active"
+        id="island-page-player"
+        role="tabpanel"
+        aria-labelledby="island-tab-player"
+        data-island-page="player"
+      >
+        <div class="island-player-card">
+          <div class="island-cover" id="island-cover" aria-hidden="true">
+            <span>AI</span><i></i><i></i><i></i>
+          </div>
+          <div class="island-track-meta">
+            <span class="island-section-kicker" data-i18n-ru="СЕЙЧАС ЗВУЧИТ" data-i18n-en="NOW PLAYING"
+              >СЕЙЧАС ЗВУЧИТ</span
+            >
+            <strong id="island-track-title">Добавь свою музыку</strong>
+            <span id="island-track-artist">Файлы остаются только в этом браузере</span>
+            <div class="island-wave" id="island-wave" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+              ><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+              ><i></i><i></i><i></i><i></i><i></i>
+            </div>
+          </div>
+        </div>
+        <div class="island-audio-controls">
+          <span class="island-time" id="island-current-time">0:00</span>
+          <input
+            class="island-seek"
+            id="island-seek"
+            type="range"
+            min="0"
+            max="1000"
+            value="0"
+            aria-label="Позиция воспроизведения"
+          />
+          <span class="island-time" id="island-duration">0:00</span>
+        </div>
+        <div class="island-player-actions">
+          <button
+            type="button"
+            class="island-secondary-button"
+            id="island-prev"
+            aria-label="Предыдущий трек"
+            title="Предыдущий"
+          >
+            |‹
+          </button>
+          <button type="button" class="island-play-button" id="island-play" aria-label="Воспроизвести">
+            ▶
+          </button>
+          <button
+            type="button"
+            class="island-secondary-button"
+            id="island-next"
+            aria-label="Следующий трек"
+            title="Следующий"
+          >
+            ›|
+          </button>
+          <label class="island-volume" title="Громкость"
+            ><span>♪</span
+            ><input
+              id="island-volume"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.8"
+              aria-label="Громкость"
+          /></label>
+          <label class="island-file-button" for="island-audio-input"
+            ><span>＋</span><span data-i18n-ru="Музыка" data-i18n-en="Add music">Музыка</span></label
+          >
+          <input
+            id="island-audio-input"
+            type="file"
+            accept="audio/*,.m4a,.mp3,.wav,.ogg,.flac,.aac"
+            multiple
+            hidden
+          />
+        </div>
+        <details class="island-lyrics-details">
+          <summary>
+            <span data-i18n-ru="Синхронные тексты (.lrc)" data-i18n-en="Synced lyrics (.lrc)"
+              >Синхронные тексты (.lrc)</span
+            ><span id="island-lyrics-state">＋</span>
+          </summary>
+          <label
+            class="island-file-button island-lyrics-upload"
+            for="island-lyrics-input"
+            data-i18n-ru="Загрузить .lrc для текущего трека"
+            data-i18n-en="Add an .lrc file for this track"
+            >Загрузить .lrc для текущего трека</label
+          >
+          <input id="island-lyrics-input" type="file" accept=".lrc,text/plain" hidden />
+          <div class="island-lyrics-search">
+            <input
+              id="island-lyrics-query"
+              type="search"
+              autocomplete="off"
+              placeholder="Исполнитель и название"
+              aria-label="Поиск синхронного текста"
+            />
+            <button
+              type="button"
+              id="island-lyrics-search-button"
+              data-i18n-ru="Найти онлайн"
+              data-i18n-en="Search online"
+            >
+              Найти онлайн
+            </button>
+          </div>
+          <div class="island-lyrics-results" id="island-lyrics-results" aria-live="polite"></div>
+          <div class="island-lyrics" id="island-lyrics" aria-live="polite">Текст песни появится здесь.</div>
+          <small
+            class="island-lyrics-privacy"
+            data-i18n-ru="Поиск отправляет введённое название в LRCLIB только после нажатия."
+            data-i18n-en="Search sends your query to LRCLIB only after you press the button."
+            >Поиск отправляет введённое название в LRCLIB только после нажатия.</small
+          >
+        </details>
+        <div class="island-privacy-note">
+          <span>◈</span
+          ><span
+            data-i18n-ru="Локальное воспроизведение · файлы не загружаются на сервер"
+            data-i18n-en="Local playback · files are never uploaded"
+            >Локальное воспроизведение · файлы не загружаются на сервер</span
+          >
+        </div>
+      </section>
+      <section
+        class="island-page"
+        id="island-page-timer"
+        role="tabpanel"
+        aria-labelledby="island-tab-timer"
+        data-island-page="timer"
+        hidden
+      >
+        <div class="island-tool-heading">
+          <span class="island-tool-icon">◷</span>
+          <div>
+            <span class="island-section-kicker" data-i18n-ru="ФОКУС И ПАУЗЫ" data-i18n-en="FOCUS & BREAKS"
+              >ФОКУС И ПАУЗЫ</span
+            >
+            <h3 data-i18n-ru="Таймер рядом" data-i18n-en="A timer, always close">Таймер рядом</h3>
+          </div>
+        </div>
+        <p
+          class="island-help"
+          data-i18n-ru="Отсчёт продолжится, даже если свернуть остров или перейти на другую вкладку."
+          data-i18n-en="The countdown keeps running when the island is closed or you switch tabs."
+        >
+          Отсчёт продолжится, даже если свернуть остров или перейти на другую вкладку.
+        </p>
+        <div class="island-timer-display" id="island-timer-display">05:00</div>
+        <div class="island-timer-preset-row">
+          <button type="button" data-timer-preset="5">5 мин</button
+          ><button type="button" data-timer-preset="15">15 мин</button
+          ><button type="button" data-timer-preset="25">25 мин</button
+          ><button type="button" data-timer-preset="45">45 мин</button>
+        </div>
+        <label class="island-slider-label"
+          ><span data-i18n-ru="Длительность" data-i18n-en="Duration">Длительность</span
+          ><span id="island-timer-minutes-label">5 мин</span
+          ><input
+            id="island-timer-minutes"
+            type="range"
+            min="1"
+            max="90"
+            step="1"
+            value="5"
+            aria-label="Минуты таймера"
+        /></label>
+        <div class="island-timer-actions">
+          <button type="button" class="island-play-button" id="island-timer-toggle">▶</button
+          ><button
+            type="button"
+            class="island-secondary-button"
+            id="island-timer-reset"
+            data-i18n-ru="Сбросить"
+            data-i18n-en="Reset"
+          >
+            Сбросить</button
+          ><button
+            type="button"
+            class="island-secondary-button"
+            id="island-notification-permission"
+            data-i18n-ru="Разрешить уведомления"
+            data-i18n-en="Allow notifications"
+          >
+            Разрешить уведомления
+          </button>
+        </div>
+        <p class="island-inline-status" id="island-timer-status" aria-live="polite"></p>
+      </section>
+      <section
+        class="island-page"
+        id="island-page-shelf"
+        role="tabpanel"
+        aria-labelledby="island-tab-shelf"
+        data-island-page="shelf"
+        hidden
+      >
+        <div class="island-tool-heading">
+          <span class="island-tool-icon">▧</span>
+          <div>
+            <span class="island-section-kicker" data-i18n-ru="ТВОИ МАТЕРИАЛЫ" data-i18n-en="YOUR LOCAL FILES"
+              >ТВОИ МАТЕРИАЛЫ</span
+            >
+            <h3 data-i18n-ru="Файловая полка" data-i18n-en="File shelf">Файловая полка</h3>
+          </div>
+        </div>
+        <p
+          class="island-help"
+          data-i18n-ru="Перетащи файлы сюда или добавь с устройства. Они хранятся в IndexedDB этого браузера и не отправляются в сеть."
+          data-i18n-en="Drop files here or choose them from your device. They stay in this browser's IndexedDB and are never uploaded."
+        >
+          Перетащи файлы сюда или добавь с устройства. Они хранятся в IndexedDB этого браузера и не
+          отправляются в сеть.
+        </p>
+        <label class="island-dropzone" id="island-dropzone" for="island-shelf-input"
+          ><span class="island-drop-icon">＋</span
+          ><strong data-i18n-ru="Добавить файлы" data-i18n-en="Add files">Добавить файлы</strong
+          ><small
+            data-i18n-ru="Изображения, видео, документы и аудио"
+            data-i18n-en="Images, video, documents and audio"
+            >Изображения, видео, документы и аудио</small
+          ><input id="island-shelf-input" type="file" multiple hidden
+        /></label>
+        <div class="island-shelf-toolbar">
+          <strong
+            ><span data-i18n-ru="На полке" data-i18n-en="On the shelf">На полке</span>
+            <span id="island-shelf-count">0</span></strong
+          ><button
+            type="button"
+            class="island-text-button"
+            id="island-shelf-clear"
+            data-i18n-ru="Очистить"
+            data-i18n-en="Clear"
+          >
+            Очистить
+          </button>
+        </div>
+        <div class="island-shelf-list" id="island-shelf-list" aria-live="polite"></div>
+        <p class="island-inline-status" id="island-shelf-status" aria-live="polite"></p>
+      </section>
+      <section
+        class="island-page"
+        id="island-page-tools"
+        role="tabpanel"
+        aria-labelledby="island-tab-tools"
+        data-island-page="tools"
+        hidden
+      >
+        <div class="island-tool-heading">
+          <span class="island-tool-icon">⌘</span>
+          <div>
+            <span
+              class="island-section-kicker"
+              data-i18n-ru="БРАУЗЕРНЫЕ ИНСТРУМЕНТЫ"
+              data-i18n-en="BROWSER TOOLS"
+              >БРАУЗЕРНЫЕ ИНСТРУМЕНТЫ</span
+            >
+            <h3 data-i18n-ru="Полезное по соседству" data-i18n-en="Handy tools nearby">
+              Полезное по соседству
+            </h3>
+          </div>
+        </div>
+        <div class="island-tools-grid">
+          <article class="island-mini-tool">
+            <div class="island-mini-tool-head">
+              <span class="island-tool-icon small">⌗</span>
+              <div>
+                <strong data-i18n-ru="QR-сканер" data-i18n-en="QR scanner">QR-сканер</strong
+                ><small data-i18n-ru="Камера или изображение" data-i18n-en="Camera or image"
+                  >Камера или изображение</small
+                >
+              </div>
+            </div>
+            <div class="island-qr-actions">
+              <button
+                type="button"
+                class="island-secondary-button"
+                id="island-qr-camera"
+                data-i18n-ru="Открыть камеру"
+                data-i18n-en="Open camera"
+              >
+                Открыть камеру</button
+              ><label
+                class="island-file-button"
+                for="island-qr-input"
+                data-i18n-ru="Выбрать изображение"
+                data-i18n-en="Choose image"
+                >Выбрать изображение</label
+              ><input id="island-qr-input" type="file" accept="image/*" hidden />
+            </div>
+            <video id="island-qr-video" playsinline muted hidden></video>
+            <p
+              class="island-qr-result"
+              id="island-qr-result"
+              aria-live="polite"
+              data-i18n-ru="Сканирование запускается только по твоему запросу."
+              data-i18n-en="Scanning starts only when you ask."
+            >
+              Сканирование запускается только по твоему запросу.
+            </p>
+          </article>
+          <article class="island-mini-tool">
+            <div class="island-mini-tool-head">
+              <span class="island-tool-icon small">☼</span>
+              <div>
+                <strong data-i18n-ru="Погода рядом" data-i18n-en="Weather nearby">Погода рядом</strong
+                ><small
+                  data-i18n-ru="Только после разрешения геолокации"
+                  data-i18n-en="Only after location permission"
+                  >Только после разрешения геолокации</small
+                >
+              </div>
+            </div>
+            <button
+              type="button"
+              class="island-secondary-button"
+              id="island-weather-refresh"
+              data-i18n-ru="Узнать погоду"
+              data-i18n-en="Check weather"
+            >
+              Узнать погоду
+            </button>
+            <div
+              class="island-weather-result"
+              id="island-weather-result"
+              aria-live="polite"
+              data-i18n-ru="Местоположение не запрашивалось."
+              data-i18n-en="Location has not been requested."
+            >
+              Местоположение не запрашивалось.
+            </div>
+          </article>
+        </div>
+        <p
+          class="island-compatibility-note"
+          data-i18n-ru="Доступность QR-сканирования зависит от браузера; погода использует Open-Meteo. Интеграции с системным звуком Windows и OBS недоступны веб-странице."
+          data-i18n-en="QR scanning depends on browser support; weather uses Open-Meteo. Windows system-audio and OBS integrations are not available to a web page."
+        >
+          Доступность QR-сканирования зависит от браузера; погода использует Open-Meteo. Интеграции с
+          системным звуком Windows и OBS недоступны веб-странице.
+        </p>
+      </section>
+    </div>
+    <footer class="island-panel-foot">
+      <span>ПЕРЕТЯНИ ВНИЗ, ЧТОБЫ ОТКРЫТЬ <i>·</i> ВЛЕВО / ВПРАВО — ТРЕК</span
+      ><button
+        type="button"
+        id="island-welcome-replay"
+        data-i18n-ru="Знакомство ↗"
+        data-i18n-en="Welcome ↗"
+      >
+        Знакомство ↗</button
+      ><a href="https://github.com/mihailkotovski/DynamicIsland" target="_blank" rel="noreferrer"
+        >Вдохновлено DynamicIsland ↗</a
+      >
+    </footer>
+  </section>
 </div>

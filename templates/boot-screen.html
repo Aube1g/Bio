@@ -1,11 +1,25 @@
 <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
-  <div class="loader-clock" aria-hidden="true">
-    <div class="loader-clock-blob"><div class="loader-shimmer"></div></div>
-    <div class="loader-clock-ticks"></div>
-    <span class="loader-clock-hand hour" id="loader-hour"></span>
-    <span class="loader-clock-hand minute" id="loader-minute"></span>
-    <span class="loader-clock-hand second" id="loader-second"></span>
-    <span class="loader-clock-center"></span>
+  <div class="preloader-orbit" aria-hidden="true">
+    <span class="preloader-shape shape-a"></span>
+    <span class="preloader-shape shape-b"></span>
+    <span class="preloader-shape shape-c"></span>
+    <div class="preloader-mark">
+      <svg class="brand-mark"><use href="#i-mark" /></svg>
+    </div>
+    <div class="preloader-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
-  <span class="loader-label" id="loader-label">ЗАГРУЗКА…</span>
+  <div class="preloader-copy">
+    <span class="preloader-eyebrow">AUBEIG <i></i> PERSONAL SPACE</span>
+    <span class="loader-label" id="loader-label">СОБИРАЮ ПРОСТРАНСТВО…</span>
+    <span class="preloader-subline">Проекты, идеи и инструменты — на одной орбите.</span>
+  </div>
+  <div
+    class="preloader-progress"
+    role="progressbar"
+    aria-label="Загрузка"
+    aria-valuemin="0"
+    aria-valuemax="100"
+  >
+    <span id="preloader-progress"></span>
+  </div>
 </div>

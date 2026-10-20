@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { GameStore } from '../server/store.js';
 import { FairRandom, seedHash } from '../server/random.js';
 import { validateWidget, validateMiniApp } from '../server/telegram.js';
@@ -69,10 +70,22 @@ test('Slots: independent reels, one payout, all 512 outcomes and exact theoretic
         const values = [a, b, c];
         const outcome = slotsOutcome({ int: () => values.shift() });
         total += outcome.multiplier;
-        if (a !== b) assert.equal(outcome.multiplier, 0);
+        const triple = a === b && b === c;
+        const adjacentPair = a === b || b === c;
+        assert.equal(outcome.combination, triple ? 'triple' : adjacentPair ? 'pair' : 'none');
+        assert.equal(outcome.multiplier > 0, adjacentPair);
       }
   assert.equal(total / 512, SLOT_RTP);
   assert.equal(SLOT_RTP, 0.96484375);
+});
+
+test('Slots: animated centre payline and settled symbols stay bound to the authoritative outcome', () => {
+  const renderer = readFileSync(new URL('../assets/games/renderers.js', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../assets/games/app.js', import.meta.url), 'utf8');
+  assert.match(renderer, /values\[positions\[i\]\]\s*=\s*symbol/);
+  assert.match(renderer, /this\.show\(symbols\)/);
+  assert.match(app, /function renderSlotOutcome\(round\)[\s\S]*?slots\.show\(symbols\)/);
+  assert.match(app, /slot-outcome-symbol[\s\S]*?symbolHTML\(index\)/);
 });
 
 test('Plinko: rows + 1 bins, symmetric tables, normalized risk, reachable corners', () => {

@@ -2,9 +2,10 @@ export const GAME_IDS = ['blackjack', 'slots', 'dice', 'plinko'];
 export const MIN_BET = 500;
 export const MAX_BET = 50_000;
 export const SLOT_SYMBOLS = ['cherry', 'lemon', 'bell', 'clover', 'star', 'gem', 'seven', 'meteor'];
-export const SLOT_TRIPLES = [6, 8, 10, 16, 24, 40, 100, 192];
+export const SLOT_TRIPLES = [5, 6, 8, 12, 18, 30, 75, 144];
 export const SLOT_PAIR = 1.75;
-export const SLOT_RTP = (SLOT_TRIPLES.reduce((a, b) => a + b, 0) + 56 * SLOT_PAIR) / 512;
+// Three reels have two adjacent paylines: left-middle and middle-right.
+export const SLOT_RTP = (SLOT_TRIPLES.reduce((a, b) => a + b, 0) + 112 * SLOT_PAIR) / 512;
 
 export function diceOdds(mode, target) {
   const successfulFaces = mode === 'under' ? target - 1 : 6 - target;
@@ -24,7 +25,7 @@ export function diceOutcome(random, mode, target) {
 export function slotsOutcome(random) {
   const symbols = Array.from({ length: 3 }, () => random.int(SLOT_SYMBOLS.length));
   const triple = symbols.every((symbol) => symbol === symbols[0]);
-  const pair = symbols[0] === symbols[1];
+  const pair = symbols[0] === symbols[1] || symbols[1] === symbols[2];
   const multiplier = triple ? SLOT_TRIPLES[symbols[0]] : pair ? SLOT_PAIR : 0;
   return { symbols, multiplier, combination: triple ? 'triple' : pair ? 'pair' : 'none' };
 }

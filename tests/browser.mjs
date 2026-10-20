@@ -217,8 +217,10 @@ try {
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
   assert.equal(await page.locator('[data-mounted]').count(), 7);
   assert.equal(await page.locator('nav').count(), 1);
-  await page.locator('.bio-island-trigger').click();
-  assert.equal(await page.locator('.bio-island-trigger').getAttribute('aria-expanded'), 'true');
+  await page.locator('#welcome-explore').click();
+  await page.locator('#bio-welcome').waitFor({ state: 'hidden' });
+  await page.locator('#bio-island-trigger').click();
+  assert.equal(await page.locator('#bio-island-trigger').getAttribute('aria-expanded'), 'true');
   await page.keyboard.press('Escape');
   await page.locator('.rail-action[data-dialog="settings-dialog"]').click();
   await page.locator('[data-language="ru"]').click();

@@ -5,6 +5,7 @@ import { preferences, safeStorage } from '../shared/preferences.js';
 import {
   SLOT_SYMBOLS,
   SLOT_TRIPLES,
+  SLOT_PAIR,
   plinkoTable,
   plinkoRtp,
   binomial,
@@ -60,7 +61,7 @@ export class PortalDialogs {
       if (event.target.closest('#server-login-action')) this.onServerLogin();
       const launch = event.target.closest('[data-profile-game]');
       if (launch)
-        this.morph.close($('#account-dialog')).then(() => this.onNavigate(launch.dataset.profileGame));
+        this.morph.close($('#account-dialog')).then(() => this.onNavigate(launch.dataset.profileGame, true));
       if (event.target.closest('#copy-account-id') && this.state().user) {
         copyText(this.state().user.id).then((copied) => this.notify(t(copied ? 'idCopied' : 'copyFailed')));
       }
@@ -219,7 +220,7 @@ export class PortalDialogs {
               ];
     let html = `<section class="modal-section-card"><div class="info-card-heading">${icon(gameIcon[game])}<h3>${t('howToPlay')}</h3></div><p>${richText(t('rules' + game[0].toUpperCase() + game.slice(1)))}</p></section><div class="rule-facts">${facts.map(([label, value]) => `<div class="info-card"><span>${escapeHTML(label)}</span><strong>${escapeHTML(value)}</strong></div>`).join('')}</div>`;
     if (game === 'slots')
-      html += `<div class="table-card"><table class="payout-table"><thead><tr><th>${t('slotSymbols')}</th><th>${t('threeSame')}</th><th>${t('twoSame')}</th></tr></thead><tbody>${SLOT_SYMBOLS.map((name, i) => `<tr><td>${name === 'seven' ? '<strong>7</strong>' : icon(name)} ${name.toUpperCase()}</td><td>${SLOT_TRIPLES[i]}×</td><td>1.75×</td></tr>`).join('')}</tbody></table></div>`;
+      html += `<div class="table-card"><table class="payout-table"><thead><tr><th>${t('slotSymbols')}</th><th>${t('threeSame')}</th><th>${t('twoSame')}</th></tr></thead><tbody>${SLOT_SYMBOLS.map((name, i) => `<tr><td>${name === 'seven' ? '<strong>7</strong>' : icon(name)} ${name.toUpperCase()}</td><td>${SLOT_TRIPLES[i]}×</td><td>${SLOT_PAIR.toFixed(2)}×</td></tr>`).join('')}</tbody></table></div>`;
     if (game === 'plinko') {
       const { rows, risk } = state.plinko;
       html += `<h3>${t('rowsRisk', { rows, risk: t(risk) })}</h3><div class="table-card"><table class="payout-table"><thead><tr><th>${t('cell')}</th><th>${t('multiplier')}</th><th>${t('probability')}</th></tr></thead><tbody>${plinkoTable(

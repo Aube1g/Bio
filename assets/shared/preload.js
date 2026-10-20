@@ -20,10 +20,15 @@
       (saved.lang || localStorage.getItem('bio.lang') || localStorage.getItem('ab_lang')) === 'en'
         ? 'en'
         : 'ru';
+    const explicitMotion = localStorage.getItem('bio.motion') ?? localStorage.getItem('ab_motion');
     root.dataset.motion =
-      matchMedia('(prefers-reduced-motion: reduce)').matches || localStorage.getItem('bio.motion') === 'off'
-        ? 'off'
-        : 'on';
+      explicitMotion != null
+        ? ['off', 'false'].includes(explicitMotion)
+          ? 'off'
+          : 'on'
+        : matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'off'
+          : 'on';
   } catch {
     root.dataset.theme = 'dark';
   }

@@ -6,78 +6,102 @@ import { $, $$ } from '../shared/dom.js';
 import { readPreferences, safeStorage } from '../shared/preferences.js';
 import { ExpandingIsland } from '../shared/island.js';
 import { initializeSwitches } from '../shared/controls.js';
+import { initializeDynamicIsland } from './dynamic-island.js';
 
 const element = $('#bio-island');
-const trigger = $('.bio-island-trigger');
+const trigger = $('#bio-island-trigger');
 const island = new ExpandingIsland(element, trigger, $('#bio-island-panel'));
+initializeDynamicIsland(island);
 initializeSwitches();
 initializeMotionPicker(document.getElementById('transition-select'));
 $$('.rail-link').forEach((link, index) => link.setAttribute('aria-keyshortcuts', `Alt+${index + 1}`));
 
 function updateIsland() {
   const english = document.documentElement.lang === 'en';
-  $('#bio-island-section').textContent = $('#view-label').textContent;
-  const transitioning = $('#view-stage').getAttribute('aria-busy') === 'true';
+  const transitioning = $('#view-stage')?.getAttribute('aria-busy') === 'true';
   element.dataset.activity = transitioning ? 'transition' : 'idle';
-  $('#bio-island-status').textContent = transitioning
-    ? $('#view-label').textContent
-    : english
-      ? 'Open to ideas'
-      : 'Открыт к идеям';
-  $('.bio-island-time').textContent = new Intl.DateTimeFormat(document.documentElement.lang, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(new Date());
+  const status = document.getElementById('island-live-label');
+  if (status && !element.matches('[data-playing="true"]'))
+    status.textContent = transitioning ? (english ? 'CHANGING' : 'ПЕРЕХОД') : english ? 'READY' : 'ГОТОВ';
 }
 new MutationObserver(updateIsland).observe($('#view-stage'), {
   attributes: true,
   attributeFilter: ['aria-busy'],
 });
-new MutationObserver(updateIsland).observe($('#view-label'), { childList: true });
 new MutationObserver(updateIsland).observe(document.documentElement, {
   attributes: true,
   attributeFilter: ['lang'],
 });
 updateIsland();
-setInterval(updateIsland, 60_000);
 
-document.addEventListener('click', (event) => {
-  if (event.target.closest('.bio-island-panel [data-dialog],.bio-island-panel a')) island.toggle(false);
-});
-let copyTimer;
-$('#island-copy-contact').addEventListener('click', async () => {
-  let copied = false;
-  try {
-    await navigator.clipboard.writeText('@Aubeig');
-    copied = true;
-  } catch {
-    const input = Object.assign(document.createElement('textarea'), { value: '@Aubeig' });
-    input.style.cssText = 'position:fixed;left:-9999px;top:0';
-    document.body.append(input);
-    input.select();
-    try {
-      copied = document.execCommand('copy');
-    } catch {
-      /* Keep the contact visible. */
-    }
-    input.remove();
-    $('#island-copy-contact').focus({ preventScroll: true });
+// Small bilingual labels in the island and welcome screen follow the site's language setting.
+function translateInline() {
+  const english = document.documentElement.lang === 'en';
+  document.querySelectorAll('[data-i18n-ru][data-i18n-en]').forEach((node) => {
+    node.textContent = english ? node.dataset.i18nEn : node.dataset.i18nRu;
+  });
+  const welcomeCopy = english
+    ? {
+        'welcome-kicker': 'YOUR DIGITAL ORBIT',
+        'welcome-title': 'Everything that matters.<br><em>On your own orbit.</em>',
+        'welcome-description':
+          'Bio is your personal hub: projects, games, and tools in one living space. Start with your profile or open the compact island above.',
+        'welcome-step-one': 'Explore',
+        'welcome-hint-one': 'choose games and projects',
+        'welcome-step-two': 'Personalize',
+        'welcome-hint-two': 'make the space yours',
+        'welcome-step-three': 'Discover',
+        'welcome-hint-three': 'quick tools in the island',
+        'welcome-remember-copy': 'Do not show again',
+        'welcome-explore': 'Explore Bio <span>↗</span>',
+        'welcome-island': 'Open the island <span>↓</span>',
+        'welcome-foot-copy': 'MADE FOR YOU <i>✳</i> RUNS IN YOUR BROWSER',
+      }
+    : {
+        'welcome-kicker': 'ТВОЯ ЦИФРОВАЯ ОРБИТА',
+        'welcome-title': 'Всё важное.<br><em>На своей орбите.</em>',
+        'welcome-description':
+          'Bio — твой личный центр: проекты, игры и инструменты собраны в одном живом пространстве. Начни с профиля или загляни в компактный остров сверху.',
+        'welcome-step-one': 'Исследуй',
+        'welcome-hint-one': 'выбирай игры и проекты',
+        'welcome-step-two': 'Персонализируй',
+        'welcome-hint-two': 'собери своё оформление',
+        'welcome-step-three': 'Открывай',
+        'welcome-hint-three': 'остров — быстрые инструменты',
+        'welcome-remember-copy': 'Больше не показывать',
+        'welcome-explore': 'Исследовать Bio <span>↗</span>',
+        'welcome-island': 'Открыть остров <span>↓</span>',
+        'welcome-foot-copy': 'СОЗДАНО ДЛЯ ТЕБЯ <i>✳</i> РАБОТАЕТ В ТВОЁМ БРАУЗЕРЕ',
+      };
+  for (const [id, text] of Object.entries(welcomeCopy)) {
+    const node = document.getElementById(id);
+    if (node)
+      id.includes('title') || id.includes('foot') || id.includes('explore') || id.includes('island')
+        ? (node.innerHTML = text)
+        : (node.textContent = text);
   }
-  const text = $('#island-copy-contact span');
-  text.textContent = copied ? (document.documentElement.lang === 'en' ? 'Copied' : 'Скопировано') : '@Aubeig';
-  clearTimeout(copyTimer);
-  copyTimer = setTimeout(() => {
-    text.textContent = '@Aubeig';
-  }, 1800);
+  const skip = document.getElementById('welcome-skip');
+  if (skip) skip.setAttribute('aria-label', english ? 'Close' : 'Закрыть');
+  const lyricsQuery = document.getElementById('island-lyrics-query');
+  if (lyricsQuery) {
+    lyricsQuery.placeholder = english ? 'Artist and title' : 'Исполнитель и название';
+    lyricsQuery.setAttribute('aria-label', english ? 'Search synced lyrics' : 'Поиск синхронного текста');
+  }
+  updateIsland();
+}
+new MutationObserver(translateInline).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['lang'],
 });
+translateInline();
 
 function synchronizePreferences() {
   const root = document.documentElement;
   const current = readPreferences();
   Object.assign(current, { theme: root.dataset.theme, lang: root.lang, background: root.dataset.background });
   for (const key of ['ripple', 'particles', 'liquid', 'glass']) current[key] = root.dataset[key] === 'true';
-  current.transition = $('#transition-select').value;
+  const transition = document.getElementById('transition-select');
+  if (transition) current.transition = transition.value;
   current.motion = safeStorage.get('bio.motion') !== 'off';
   safeStorage.set('aubeig.preferences', JSON.stringify(current));
 }
@@ -104,7 +128,6 @@ document.addEventListener('keydown', (event) => {
     link.click();
   }
 });
-document.documentElement.dataset.ready = 'true';
 
 document.querySelectorAll('[data-profile-view]').forEach((button) =>
   button.addEventListener('click', async () => {
@@ -117,4 +140,5 @@ document.querySelectorAll('[data-profile-view]').forEach((button) =>
 );
 
 initializeTextMotion();
+document.documentElement.dataset.ready = 'true';
 finishBoot();

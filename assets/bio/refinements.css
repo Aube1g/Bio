@@ -86,3 +86,63 @@
 [data-theme='light'] .clawback-card .eyebrow {
   color: var(--muted);
 }
+
+/* XLI / XGO: a quiet dark rail with a single, unmistakable active capsule. */
+.agent-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 4px;
+  min-width: min(270px, 100%);
+  padding: 5px;
+  border: 1px solid #ffffff15;
+  border-radius: 17px;
+  background: #171820;
+  box-shadow:
+    inset 0 1px #ffffff08,
+    0 8px 24px #0002;
+}
+.agent-tabs .agent-fluid path {
+  fill: #c8a9ff;
+  stroke: #ffffffa6;
+  stroke-width: 1.2;
+  filter: drop-shadow(0 3px 9px #ad8bf455);
+}
+.agent-tabs .agent-tab {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 13px;
+  border-radius: 12px;
+  color: #a6a5b0;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.015em;
+  text-align: center;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+.agent-tabs .agent-tab:hover {
+  color: #f3edf9;
+}
+.agent-tabs .agent-tab[aria-selected='true'] {
+  color: #20192c;
+  text-shadow: none;
+}
+.agent-tabs .agent-tab:active {
+  transform: scale(0.97);
+}
+@media (max-width: 700px) {
+  .lab-heading-right {
+    align-items: stretch;
+    width: 100%;
+  }
+  .agent-tabs {
+    width: 100%;
+    min-width: 0;
+  }
+  .agent-tabs .agent-tab {
+    min-height: 39px;
+    padding: 8px 7px;
+    font-size: 10px;
+  }
+}
