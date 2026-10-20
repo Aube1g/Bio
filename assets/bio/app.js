@@ -11,6 +11,7 @@ import art2 from '../../assets/bio/bio-image-2.webp';
 import art1 from '../../assets/bio/bio-image-1.webp';
 import translations from './translations.json';
 import demos from './demos.json';
+import { BioSound } from './sound.js';
 
 (() => {
   'use strict';
@@ -52,6 +53,8 @@ import demos from './demos.json';
   };
   for (const key of ['ripple', 'particles', 'liquid', 'glass'])
     preferences[key] = !['off', 'false', false].includes(storage.get(key, 'on'));
+  preferences.sound = !['off', 'false', false].includes(storage.get('sound', 'on'));
+  const sound = new BioSound(preferences.sound);
   let renderer = null;
   const arrow = '<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg>';
   const escapeHTML = (text) =>
@@ -1277,7 +1280,8 @@ import demos from './demos.json';
     $$('[data-system]').forEach((button) =>
       button.setAttribute('aria-pressed', String(button.dataset.system === id)),
     );
-    $('#system-counter').textContent = String(index + 1).padStart(2, '0') + ' / ' + String(ORIGINAL_DEMOS.SUBSYSTEMS.length).padStart(2, '0');
+    $('#system-counter').textContent =
+      String(index + 1).padStart(2, '0') + ' / ' + String(ORIGINAL_DEMOS.SUBSYSTEMS.length).padStart(2, '0');
     morphRegion($('#system-stage'), () => {
       $('#system-description').innerHTML = descriptionMarkup(ORIGINAL_DEMOS.SUBSYSTEMS[index]);
       const terminal = $('#lab-system');
@@ -2116,10 +2120,14 @@ import demos from './demos.json';
     syncDemos();
   }
   function initializePreferences() {
+    const soundSwitch = $('[data-preference="sound"]');
+    if (soundSwitch) soundSwitch.checked = preferences.sound;
+    sound.setEnabled(preferences.sound);
     $$('[data-preference]').forEach((input) =>
       input.addEventListener('change', () => {
         preferences[input.dataset.preference] = input.checked;
         storage.set(input.dataset.preference, input.checked ? 'on' : 'off');
+        if (input.dataset.preference === 'sound') sound.setEnabled(input.checked);
         if (input.dataset.preference === 'liquid' && !input.checked)
           $$('svg.icon').forEach((icon) => icon.getAnimations().forEach((a) => a.cancel()));
         applyPreferences();
@@ -2929,6 +2937,13 @@ import demos from './demos.json';
     setTimeout(() => {
       $('#copy-label').textContent = 'Скопировать контакт';
     }, 3000);
+  });
+
+  document.addEventListener('pointerdown', () => sound.unlock(), { once: true, passive: true });
+  document.addEventListener('click', (event) => {
+    const control = event.target.closest('button,a,[role="button"]');
+    if (!control || control.disabled || control.dataset.sound === 'off') return;
+    sound.play(control.matches('[aria-pressed]') ? 'toggle' : 'tap');
   });
 
   root.dataset.initialized = 'true';

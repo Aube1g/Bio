@@ -12,25 +12,43 @@ test('LRC lyrics parse hundredths, millisecond fractions, multiple timestamps, a
   ]);
 });
 
-test('Bio ships the browser-safe island features and the ring-free morph preloader', async () => {
-  const html = await readFile(new URL('../bio.html', import.meta.url), 'utf8');
+test('Bio island follows the compact reference shell and keeps only media, lyrics, and weather', async () => {
+  const template = await readFile(new URL('../templates/bio-island.html', import.meta.url), 'utf8');
+  const implementation = await readFile(new URL('../assets/bio/dynamic-island.js', import.meta.url), 'utf8');
+  const intro = await readFile(new URL('../templates/bio-intro.html', import.meta.url), 'utf8');
+  const boot = await readFile(new URL('../templates/boot-screen.html', import.meta.url), 'utf8');
+  const bootScript = await readFile(new URL('../assets/shared/boot-screen.js', import.meta.url), 'utf8');
+  const bioApp = await readFile(new URL('../assets/bio/app.js', import.meta.url), 'utf8');
+  const settings = await readFile(new URL('../templates/bio.html', import.meta.url), 'utf8');
+  const html = template + implementation + intro + boot + bootScript + settings;
   for (const marker of [
-    'bio-island-trigger',
-    'data-island-tab="player"',
-    'data-island-tab="timer"',
-    'data-island-tab="shelf"',
-    'data-island-tab="tools"',
+    'bio-island-wrap',
+    'class="bio-island-trigger"',
+    'bio-island-identity',
+    'island-quick-grid',
     'island-audio-input',
     'island-lyrics-input',
     'island-lyrics-search-button',
     'lrclib.net',
-    'island-qr-camera',
-    'island-weather-refresh',
+    'island-weather-location',
+    'island-weather-search',
+    'api.open-meteo.com',
+    'geocoding-api.open-meteo.com',
     'bio-welcome',
+    'sound-switch',
     'preloader-mark',
     'apprevealed',
   ])
     assert(html.includes(marker), `Missing Bio experience feature: ${marker}`);
+  assert.match(bioApp, /import \{ BioSound \} from '\.\/sound\.js'/);
+  assert.match(bioApp, /sound\.play\(control\.matches/);
+  for (const removed of [
+    'island-timer-',
+    'island-shelf-',
+    'island-qr-',
+    'data-island-tab="timer"',
+    'data-island-tab="shelf"',
+  ])
+    assert(!html.includes(removed), `Unrequested island feature remains: ${removed}`);
   assert(!html.includes('class="loader-clock-hand'));
-  assert(html.includes('api.open-meteo.com'));
 });

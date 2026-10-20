@@ -660,7 +660,9 @@
                 <div id="home-cli" data-terminal="cli" data-compact="true">
                   <p>XLI: xli run → tool calls → result.</p>
                 </div>
-                <p class="demo-note">Статический UI-предпросмотр: сайт не запускает XLI, shell-команды или тесты.</p>
+                <p class="demo-note">
+                  Статический UI-предпросмотр: сайт не запускает XLI, shell-команды или тесты.
+                </p>
                 <div class="terminal-context">
                   <h4>Не просто ответ. Рабочий процесс.</h4>
                   <ol>
@@ -674,7 +676,10 @@
                     </li>
                     <li>
                       <span>03</span>
-                      <div><strong>Проверить результат</strong>При необходимости запустить проверку и сообщить итог.</div>
+                      <div>
+                        <strong>Проверить результат</strong>При необходимости запустить проверку и сообщить
+                        итог.
+                      </div>
                     </li>
                   </ol>
                 </div>
@@ -937,8 +942,8 @@
                     <p class="eyebrow">01 / Архитектура XLI</p>
                     <h2>Один Python-kernel.<br />Три клиента.</h2>
                     <p>
-                      CLI/REPL, полноэкранный curses TUI и Neovim-клиент работают с общим агентным ядром.
-                      XPI расширяет его доверенными Python-плагинами; XGO в эту архитектуру не входит.
+                      CLI/REPL, полноэкранный curses TUI и Neovim-клиент работают с общим агентным ядром. XPI
+                      расширяет его доверенными Python-плагинами; XGO в эту архитектуру не входит.
                     </p>
                   </div>
                   <span class="section-number" aria-label="Три клиента и ядро">03 + 01</span>
@@ -971,8 +976,8 @@
                   </article>
                 </div>
                 <p class="architecture-note">
-                  Клиенты говорят с ядром по JSON-RPC 2.0. Ядро можно собрать в Cython-расширения, но без сборки
-                  проект продолжает работать на обычном Python.
+                  Клиенты говорят с ядром по JSON-RPC 2.0. Ядро можно собрать в Cython-расширения, но без
+                  сборки проект продолжает работать на обычном Python.
                 </p>
               </section>
               <section class="lab-section">
@@ -1011,17 +1016,14 @@
                   <div>
                     <p class="eyebrow">03 / Клиенты и протокол</p>
                     <h2>Три клиента. Одно ядро.</h2>
-                    <p>CLI/REPL, curses TUI и Neovim работают с одним kernel; JSON-RPC показывает способ связи.</p>
+                    <p>
+                      CLI/REPL, curses TUI и Neovim работают с одним kernel; JSON-RPC показывает способ связи.
+                    </p>
                   </div>
                   <span class="section-number" aria-label="Четыре интерфейса">04</span>
                 </header>
                 <div class="interface-picker" role="group" aria-label="Интерфейс терминальной демонстрации">
-                  <button
-                    class="interface-button"
-                    type="button"
-                    data-interface="cli"
-                    aria-pressed="true"
-                  >
+                  <button class="interface-button" type="button" data-interface="cli" aria-pressed="true">
                     <svg class="icon" aria-hidden="true"><use href="#i-code" /></svg
                     ><span>CLI / REPL<small>run · repl · JSON</small></span>
                   </button>
@@ -1033,12 +1035,7 @@
                     <svg class="icon" aria-hidden="true"><use href="#i-terminal" /></svg
                     ><span>Neovim<small>Lua · JSON-RPC</small></span>
                   </button>
-                  <button
-                    class="interface-button"
-                    type="button"
-                    data-interface="kernel"
-                    aria-pressed="false"
-                  >
+                  <button class="interface-button" type="button" data-interface="kernel" aria-pressed="false">
                     <svg class="icon" aria-hidden="true"><use href="#i-cursor" /></svg
                     ><span>JSON-RPC<small>stdio · Unix socket</small></span>
                   </button>
@@ -1091,7 +1088,8 @@
                     </ul>
                     <p class="demo-note">
                       <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>Shell guard —
-                      эвристический blocklist, не полноценная изоляция. XPI запускает доверенный Python-код внутри процесса.
+                      эвристический blocklist, не полноценная изоляция. XPI запускает доверенный Python-код
+                      внутри процесса.
                     </p>
                   </div>
                   <div id="lab-safety" data-terminal="safety">
@@ -1105,8 +1103,8 @@
                     <p class="eyebrow">05 / Изменения в ветке</p>
                     <h2>Что обновлено к 265f0a4.</h2>
                     <p>
-                      Шесть функций, сверенных с README, CHANGES и исходниками ветки arena/2bb12510-xli.
-                      Демо в карточках — иллюстративные UI-макеты.
+                      Шесть функций, сверенных с README, CHANGES и исходниками ветки arena/2bb12510-xli. Демо
+                      в карточках — иллюстративные UI-макеты.
                     </p>
                   </div>
                   <span class="system-counter" id="system-counter">01 / 06</span>
@@ -1123,7 +1121,8 @@
                   ><button class="system-button" type="button" data-system="xpi" aria-pressed="false">
                     <span>05 / xpi api v1</span><strong>Plugin SDK</strong></button
                   ><button class="system-button" type="button" data-system="tui" aria-pressed="false">
-                    <span>06 / curses</span><strong>TUI & sessions</strong></button>
+                    <span>06 / curses</span><strong>TUI & sessions</strong>
+                  </button>
                 </div>
                 <div class="demo-split system-detail" id="system-stage">
                   <div class="demo-description" id="system-description">
@@ -1557,6 +1556,29 @@
             </div>
             <label class="switch"
               ><input id="glass-switch" data-preference="glass" type="checkbox" checked /><span
+                class="switch-track"
+                aria-hidden="true"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-row">
+            <div>
+              <label class="setting-title" for="sound-switch"
+                ><svg class="icon" aria-hidden="true"><use href="#i-volume" /></svg
+                ><span data-i18n-ru="Звуки интерфейса" data-i18n-en="Interface sounds"
+                  >Звуки интерфейса</span
+                ></label
+              >
+              <p
+                class="setting-description"
+                data-i18n-ru="Мягкие звуки нажатий и переходов."
+                data-i18n-en="Soft feedback for clicks and transitions."
+              >
+                Мягкие звуки нажатий и переходов.
+              </p>
+            </div>
+            <label class="switch"
+              ><input id="sound-switch" data-preference="sound" type="checkbox" checked /><span
                 class="switch-track"
                 aria-hidden="true"
               ></span
