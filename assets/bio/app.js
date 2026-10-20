@@ -1627,19 +1627,45 @@ import { BioSound } from './sound.js';
   }
   let agentFluidFrame = 0,
     agentFluidState = null,
-    agentFluidTarget = null;
+    agentFluidTarget = null,
+    agentFluidActive = null,
+    agentFluidSwitchTimer = 0;
   function syncAgentFluid(animate = true) {
     const group = $('.agent-tabs');
     if (!group?.isConnected || !group.getClientRects().length) return;
     const active = $('[data-agent][aria-selected="true"]', group);
     if (!active) return;
+    if (agentFluidActive && agentFluidActive !== active.dataset.agent && state.motion) {
+      group.dataset.switching = 'true';
+      clearTimeout(agentFluidSwitchTimer);
+      agentFluidSwitchTimer = setTimeout(() => delete group.dataset.switching, 700);
+    }
+    agentFluidActive = active.dataset.agent;
     let svg = $('.agent-fluid', group);
     if (!svg) {
       svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('class', 'agent-fluid');
       svg.setAttribute('aria-hidden', 'true');
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.id = 'agent-pill-gradient';
+      gradient.setAttribute('x1', '0%');
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('x2', '100%');
+      gradient.setAttribute('y2', '100%');
+      for (const [offset, color] of [
+        [0, '#a886f5'],
+        [0.52, '#d5a9ff'],
+        [1, '#8ce5d0'],
+      ]) {
+        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop.setAttribute('offset', String(offset));
+        stop.setAttribute('stop-color', color);
+        gradient.append(stop);
+      }
+      defs.append(gradient);
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      svg.append(path);
+      svg.append(defs, path);
       group.prepend(svg);
     }
     const box = group.getBoundingClientRect();

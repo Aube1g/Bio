@@ -159,6 +159,8 @@ try {
 
   await page.goto('file://' + resolve('bio.html'));
   await ready();
+  await page.locator('#bio-welcome').waitFor({ state: 'visible' });
+  await page.locator('#welcome-explore').click();
   await page.locator('.bio-profile-open').click();
   await audit('bio-profile-pills-320');
   await close('bio-profile-dialog');

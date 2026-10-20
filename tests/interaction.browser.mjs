@@ -118,6 +118,7 @@ try {
   watch(ui);
   await ui.goto(base + '/bio.html');
   await ui.waitForFunction(() => document.documentElement.dataset.ready === 'true');
+  await ui.locator('#bio-welcome').waitFor({ state: 'visible' });
   await ui.locator('#welcome-explore').click();
   await ui.locator('#bio-welcome').waitFor({ state: 'hidden' });
   await ui.locator('#bio-island-trigger').click();

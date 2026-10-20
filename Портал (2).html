@@ -6596,8 +6596,49 @@
         position: relative;
         display: grid;
         place-items: center;
-        width: 174px;
-        height: 152px;
+        width: 214px;
+        height: 190px;
+        perspective: 720px;
+      }
+      .preloader-orbit-path {
+        position: absolute;
+        display: block;
+        border: 1px solid #d8c5ff30;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .preloader-orbit-path.path-a {
+        width: 186px;
+        height: 186px;
+        box-shadow:
+          0 0 32px #b794ff12,
+          inset 0 0 22px #b794ff0a;
+        animation: orbit-turn 17s linear infinite;
+      }
+      .preloader-orbit-path.path-b {
+        width: 202px;
+        height: 104px;
+        border-color: #9be7d42a;
+        transform: rotateX(66deg) rotateZ(-24deg);
+        animation: orbit-tilt 11s linear infinite reverse;
+      }
+      .preloader-orbit-path i {
+        position: absolute;
+        top: 13%;
+        left: 13%;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #e0caff;
+        box-shadow: 0 0 14px 4px #ba92ff80;
+      }
+      .path-b i {
+        top: 50%;
+        left: -3px;
+        width: 5px;
+        height: 5px;
+        background: #a2f0d8;
+        box-shadow: 0 0 14px 4px #85e7cc80;
       }
       .preloader-shape {
         position: absolute;
@@ -6642,7 +6683,9 @@
         color: #17131e;
         background: linear-gradient(145deg, #fcf8ff, #d1b9ff);
         box-shadow: 0 12px 40px #1e102e55;
-        animation: preloader-mark-in 800ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+        animation:
+          preloader-mark-in 800ms cubic-bezier(0.2, 0.9, 0.2, 1) both,
+          preloader-mark-float 3.8s 850ms ease-in-out infinite;
       }
       .preloader-mark .brand-mark {
         width: 36px;
@@ -6695,6 +6738,7 @@
         gap: 12px;
         margin-top: 22px;
         text-align: center;
+        animation: preloader-copy-in 760ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
       }
       .preloader-eyebrow {
         color: #aaa5b5;
@@ -6729,13 +6773,23 @@
         background: #ffffff14;
       }
       .preloader-progress span {
+        position: relative;
         display: block;
         width: 100%;
         height: 100%;
+        overflow: hidden;
         background: linear-gradient(90deg, #8c72c8, #d0b6ff, #91dfc3);
         transform: scaleX(0);
         transform-origin: left;
         will-change: transform;
+      }
+      .preloader-progress span::after {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, #ffffffd9, transparent);
+        content: "";
+        transform: translateX(-100%);
+        animation: preloader-sheen 1.2s ease-in-out infinite;
       }
       @keyframes preloader-glow {
         from {
@@ -6745,6 +6799,46 @@
         to {
           transform: scale(1.08);
           opacity: 0.95;
+        }
+      }
+      @keyframes orbit-turn {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+      @keyframes orbit-tilt {
+        from {
+          transform: rotateX(66deg) rotateZ(-24deg);
+        }
+        to {
+          transform: rotateX(66deg) rotateZ(336deg);
+        }
+      }
+      @keyframes preloader-mark-float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-5px) rotate(2deg);
+        }
+      }
+      @keyframes preloader-copy-in {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+          filter: blur(5px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+          filter: blur(0);
+        }
+      }
+      @keyframes preloader-sheen {
+        60%,
+        100% {
+          transform: translateX(110%);
         }
       }
       @keyframes preloader-morph {
@@ -6785,10 +6879,20 @@
       [data-theme="light"] .loader-label {
         color: #24202d;
       }
+      [data-motion="off"] .app-preloader *,
+      [data-motion="off"] .app-preloader *::before,
+      [data-motion="off"] .app-preloader *::after,
+      [data-motion="off"] .app-preloader::before {
+        animation: none !important;
+        transition: none !important;
+      }
       @media (prefers-reduced-motion: reduce) {
+        .preloader-orbit-path,
         .preloader-shape,
         .preloader-mark,
         .preloader-meter i,
+        .preloader-copy,
+        .preloader-progress span::after,
         .app-preloader::before {
           animation-duration: 1ms !important;
           animation-iteration-count: 1 !important;
@@ -8467,6 +8571,8 @@
     </div>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
       <div class="preloader-orbit" aria-hidden="true">
+        <span class="preloader-orbit-path path-a"><i></i></span>
+        <span class="preloader-orbit-path path-b"><i></i></span>
         <span class="preloader-shape shape-a"></span>
         <span class="preloader-shape shape-b"></span>
         <span class="preloader-shape shape-c"></span>

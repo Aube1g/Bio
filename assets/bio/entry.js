@@ -95,6 +95,71 @@ new MutationObserver(translateInline).observe(document.documentElement, {
 });
 translateInline();
 
+const welcome = document.getElementById('bio-welcome');
+let welcomeReturnFocus = null;
+function dismissWelcome({ remember = false, openIsland = false } = {}) {
+  if (!welcome || welcome.hidden) return;
+  const finish = () => {
+    welcome.hidden = true;
+    if (remember && document.getElementById('welcome-remember').checked)
+      safeStorage.set('bio.welcome.dismissed', 'true');
+    welcomeReturnFocus?.focus?.({ preventScroll: true });
+    welcomeReturnFocus = null;
+    if (openIsland) island.toggle(true);
+  };
+  if (
+    document.documentElement.dataset.motion === 'off' ||
+    matchMedia('(prefers-reduced-motion: reduce)').matches ||
+    !welcome.animate
+  ) {
+    finish();
+    return;
+  }
+  const card = welcome.querySelector('.welcome-card');
+  const animation = card.animate(
+    [
+      { opacity: 1, transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
+      { opacity: 0, transform: 'translateY(12px) scale(.97)', filter: 'blur(5px)' },
+    ],
+    { duration: 240, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' },
+  );
+  animation.finished.then(finish).catch(finish);
+}
+function showWelcome() {
+  if (!welcome || safeStorage.get('bio.welcome.dismissed') === 'true') return;
+  welcomeReturnFocus = document.activeElement;
+  welcome.hidden = false;
+  requestAnimationFrame(() => document.getElementById('welcome-explore')?.focus({ preventScroll: true }));
+}
+if (welcome) {
+  window.addEventListener('apprevealed', showWelcome, { once: true });
+  document.getElementById('welcome-skip').addEventListener('click', () => dismissWelcome({ remember: true }));
+  document
+    .getElementById('welcome-explore')
+    .addEventListener('click', () => dismissWelcome({ remember: true }));
+  document
+    .getElementById('welcome-island')
+    .addEventListener('click', () => dismissWelcome({ remember: true, openIsland: true }));
+  welcome.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      dismissWelcome({ remember: true });
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = [...welcome.querySelectorAll('button:not([disabled]),input:not([disabled])')];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+}
+
 function synchronizePreferences() {
   const root = document.documentElement;
   const current = readPreferences();

@@ -12305,8 +12305,49 @@
         position: relative;
         display: grid;
         place-items: center;
-        width: 174px;
-        height: 152px;
+        width: 214px;
+        height: 190px;
+        perspective: 720px;
+      }
+      .preloader-orbit-path {
+        position: absolute;
+        display: block;
+        border: 1px solid #d8c5ff30;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .preloader-orbit-path.path-a {
+        width: 186px;
+        height: 186px;
+        box-shadow:
+          0 0 32px #b794ff12,
+          inset 0 0 22px #b794ff0a;
+        animation: orbit-turn 17s linear infinite;
+      }
+      .preloader-orbit-path.path-b {
+        width: 202px;
+        height: 104px;
+        border-color: #9be7d42a;
+        transform: rotateX(66deg) rotateZ(-24deg);
+        animation: orbit-tilt 11s linear infinite reverse;
+      }
+      .preloader-orbit-path i {
+        position: absolute;
+        top: 13%;
+        left: 13%;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #e0caff;
+        box-shadow: 0 0 14px 4px #ba92ff80;
+      }
+      .path-b i {
+        top: 50%;
+        left: -3px;
+        width: 5px;
+        height: 5px;
+        background: #a2f0d8;
+        box-shadow: 0 0 14px 4px #85e7cc80;
       }
       .preloader-shape {
         position: absolute;
@@ -12351,7 +12392,9 @@
         color: #17131e;
         background: linear-gradient(145deg, #fcf8ff, #d1b9ff);
         box-shadow: 0 12px 40px #1e102e55;
-        animation: preloader-mark-in 800ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+        animation:
+          preloader-mark-in 800ms cubic-bezier(0.2, 0.9, 0.2, 1) both,
+          preloader-mark-float 3.8s 850ms ease-in-out infinite;
       }
       .preloader-mark .brand-mark {
         width: 36px;
@@ -12404,6 +12447,7 @@
         gap: 12px;
         margin-top: 22px;
         text-align: center;
+        animation: preloader-copy-in 760ms 120ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
       }
       .preloader-eyebrow {
         color: #aaa5b5;
@@ -12438,13 +12482,23 @@
         background: #ffffff14;
       }
       .preloader-progress span {
+        position: relative;
         display: block;
         width: 100%;
         height: 100%;
+        overflow: hidden;
         background: linear-gradient(90deg, #8c72c8, #d0b6ff, #91dfc3);
         transform: scaleX(0);
         transform-origin: left;
         will-change: transform;
+      }
+      .preloader-progress span::after {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, #ffffffd9, transparent);
+        content: "";
+        transform: translateX(-100%);
+        animation: preloader-sheen 1.2s ease-in-out infinite;
       }
       @keyframes preloader-glow {
         from {
@@ -12454,6 +12508,46 @@
         to {
           transform: scale(1.08);
           opacity: 0.95;
+        }
+      }
+      @keyframes orbit-turn {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+      @keyframes orbit-tilt {
+        from {
+          transform: rotateX(66deg) rotateZ(-24deg);
+        }
+        to {
+          transform: rotateX(66deg) rotateZ(336deg);
+        }
+      }
+      @keyframes preloader-mark-float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-5px) rotate(2deg);
+        }
+      }
+      @keyframes preloader-copy-in {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+          filter: blur(5px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+          filter: blur(0);
+        }
+      }
+      @keyframes preloader-sheen {
+        60%,
+        100% {
+          transform: translateX(110%);
         }
       }
       @keyframes preloader-morph {
@@ -12494,10 +12588,20 @@
       [data-theme="light"] .loader-label {
         color: #24202d;
       }
+      [data-motion="off"] .app-preloader *,
+      [data-motion="off"] .app-preloader *::before,
+      [data-motion="off"] .app-preloader *::after,
+      [data-motion="off"] .app-preloader::before {
+        animation: none !important;
+        transition: none !important;
+      }
       @media (prefers-reduced-motion: reduce) {
+        .preloader-orbit-path,
         .preloader-shape,
         .preloader-mark,
         .preloader-meter i,
+        .preloader-copy,
+        .preloader-progress span::after,
         .app-preloader::before {
           animation-duration: 1ms !important;
           animation-iteration-count: 1 !important;
@@ -12941,10 +13045,25 @@
           0 8px 24px #0002;
       }
       .agent-tabs .agent-fluid path {
-        fill: #c8a9ff;
+        fill: url(#agent-pill-gradient);
         stroke: #ffffffa6;
         stroke-width: 1.2;
         filter: drop-shadow(0 3px 9px #ad8bf455);
+        transform-origin: center;
+      }
+      .agent-tabs[data-switching="true"] .agent-fluid path {
+        animation: agent-pill-arrive 620ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+      }
+      @keyframes agent-pill-arrive {
+        0% {
+          filter: brightness(1.35) drop-shadow(0 0 17px #caa5ffbb);
+        }
+        58% {
+          filter: brightness(1.16) drop-shadow(0 2px 13px #c49aff9c);
+        }
+        100% {
+          filter: brightness(1) drop-shadow(0 3px 9px #ad8bf455);
+        }
       }
       .agent-tabs .agent-tab {
         min-width: 0;
@@ -13332,6 +13451,93 @@
         color: #c0a4f1;
         font-style: normal;
       }
+      .bio-welcome:not([hidden]) .welcome-card {
+        animation: welcome-panel-in 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-art-card.card-one {
+        animation: welcome-card-left 760ms 90ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-art-card.card-two {
+        animation: welcome-card-right 760ms 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-art-island {
+        animation: welcome-island-in 620ms 310ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-copy {
+        animation: welcome-rise-in 560ms 210ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-steps > div {
+        animation: welcome-rise-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .bio-welcome:not([hidden]) .welcome-steps > div:nth-child(1) {
+        animation-delay: 320ms;
+      }
+      .bio-welcome:not([hidden]) .welcome-steps > div:nth-child(2) {
+        animation-delay: 400ms;
+      }
+      .bio-welcome:not([hidden]) .welcome-steps > div:nth-child(3) {
+        animation-delay: 480ms;
+      }
+      .bio-welcome:not([hidden]) .welcome-actions,
+      .bio-welcome:not([hidden]) .welcome-foot {
+        animation: welcome-rise-in 460ms 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes welcome-panel-in {
+        from {
+          opacity: 0;
+          transform: translateY(18px) scale(0.96);
+          filter: blur(12px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+          filter: blur(0);
+        }
+      }
+      @keyframes welcome-card-left {
+        from {
+          opacity: 0;
+          transform: translate(-38px, 18px) rotate(-3deg) scale(0.82);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-85px, 8px) rotate(-11deg) scale(1);
+        }
+      }
+      @keyframes welcome-card-right {
+        from {
+          opacity: 0;
+          transform: translate(38px, 18px) rotate(3deg) scale(0.82);
+        }
+        to {
+          opacity: 1;
+          transform: translate(81px, 8px) rotate(10deg) scale(1);
+        }
+      }
+      @keyframes welcome-island-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.72);
+        }
+        72% {
+          opacity: 1;
+          transform: translateY(-16px) scale(1.04);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(-12px) scale(1);
+        }
+      }
+      @keyframes welcome-rise-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
       @keyframes welcome-float {
         to {
           transform: translate(9vw, 5vh) rotate(25deg) scale(1.14);
@@ -13342,11 +13548,57 @@
           transform: rotate(12deg) scale(1.08);
         }
       }
-      [data-motion="off"] .welcome-backdrop span,
-      .bio-welcome * {
+      [data-motion="off"] .bio-welcome *,
+      [data-motion="off"] .bio-welcome *::before,
+      [data-motion="off"] .bio-welcome *::after {
         animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html:not([data-motion="on"]) .bio-welcome *,
+        html:not([data-motion="on"]) .bio-welcome *::before,
+        html:not([data-motion="on"]) .bio-welcome *::after {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
       }
       @media (max-width: 600px) {
+        @keyframes welcome-card-left {
+          from {
+            opacity: 0;
+            transform: translate(-30px, 14px) rotate(-3deg) scale(0.82);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-65px, 6px) rotate(-11deg) scale(1);
+          }
+        }
+        @keyframes welcome-card-right {
+          from {
+            opacity: 0;
+            transform: translate(30px, 14px) rotate(3deg) scale(0.82);
+          }
+          to {
+            opacity: 1;
+            transform: translate(62px, 6px) rotate(10deg) scale(1);
+          }
+        }
+        @keyframes welcome-island-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.72);
+          }
+          72% {
+            opacity: 1;
+            transform: translateY(-11px) scale(0.94);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(-8px) scale(0.9);
+          }
+        }
         .bio-welcome {
           padding: 12px;
         }
@@ -13449,6 +13701,8 @@
   <body>
     <div class="app-preloader" id="app-preloader" role="status" aria-label="Загрузка">
       <div class="preloader-orbit" aria-hidden="true">
+        <span class="preloader-orbit-path path-a"><i></i></span>
+        <span class="preloader-orbit-path path-b"><i></i></span>
         <span class="preloader-shape shape-a"></span>
         <span class="preloader-shape shape-b"></span>
         <span class="preloader-shape shape-c"></span>
@@ -19147,11 +19401,11 @@
                 releaseURLs();
                 feed.replaceChildren();
                 input.value = "";
-                const welcome = botMessage(
+                const welcome2 = botMessage(
                   '<div class="chat-bubble">' + tr("Демо-чат очищен. Напиши тестовый запрос или выбери сценарий ниже.") + '</div><div class="chat-keyboard"><button type="button" data-chat-action="history" aria-expanded="false">' + icons("history") + "<span>" + tr("История") + '</span></button></div><div class="chat-history" hidden></div>'
                 );
-                feed.append(welcome);
-                popMessage(welcome);
+                feed.append(welcome2);
+                popMessage(welcome2);
                 input.focus();
               } else if (action === "continue") {
                 const next = botMessage(
@@ -19502,19 +19756,43 @@
               });
             }
           }
-          let agentFluidFrame = 0, agentFluidState = null, agentFluidTarget = null;
+          let agentFluidFrame = 0, agentFluidState = null, agentFluidTarget = null, agentFluidActive = null, agentFluidSwitchTimer = 0;
           function syncAgentFluid(animate = true) {
             const group = $2(".agent-tabs");
             if (!group?.isConnected || !group.getClientRects().length) return;
             const active2 = $2('[data-agent][aria-selected="true"]', group);
             if (!active2) return;
+            if (agentFluidActive && agentFluidActive !== active2.dataset.agent && state.motion) {
+              group.dataset.switching = "true";
+              clearTimeout(agentFluidSwitchTimer);
+              agentFluidSwitchTimer = setTimeout(() => delete group.dataset.switching, 700);
+            }
+            agentFluidActive = active2.dataset.agent;
             let svg = $2(".agent-fluid", group);
             if (!svg) {
               svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
               svg.setAttribute("class", "agent-fluid");
               svg.setAttribute("aria-hidden", "true");
+              const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+              const gradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+              gradient.id = "agent-pill-gradient";
+              gradient.setAttribute("x1", "0%");
+              gradient.setAttribute("y1", "0%");
+              gradient.setAttribute("x2", "100%");
+              gradient.setAttribute("y2", "100%");
+              for (const [offset, color] of [
+                [0, "#a886f5"],
+                [0.52, "#d5a9ff"],
+                [1, "#8ce5d0"]
+              ]) {
+                const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                stop.setAttribute("offset", String(offset));
+                stop.setAttribute("stop-color", color);
+                gradient.append(stop);
+              }
+              defs.append(gradient);
               const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-              svg.append(path);
+              svg.append(defs, path);
               group.prepend(svg);
             }
             const box = group.getBoundingClientRect();
@@ -21566,6 +21844,62 @@
           attributeFilter: ["lang"]
         });
         translateInline();
+        var welcome = document.getElementById("bio-welcome");
+        var welcomeReturnFocus = null;
+        function dismissWelcome({ remember = false, openIsland = false } = {}) {
+          if (!welcome || welcome.hidden) return;
+          const finish = () => {
+            welcome.hidden = true;
+            if (remember && document.getElementById("welcome-remember").checked)
+              safeStorage.set("bio.welcome.dismissed", "true");
+            welcomeReturnFocus?.focus?.({ preventScroll: true });
+            welcomeReturnFocus = null;
+            if (openIsland) island.toggle(true);
+          };
+          if (document.documentElement.dataset.motion === "off" || matchMedia("(prefers-reduced-motion: reduce)").matches || !welcome.animate) {
+            finish();
+            return;
+          }
+          const card = welcome.querySelector(".welcome-card");
+          const animation = card.animate(
+            [
+              { opacity: 1, transform: "translateY(0) scale(1)", filter: "blur(0)" },
+              { opacity: 0, transform: "translateY(12px) scale(.97)", filter: "blur(5px)" }
+            ],
+            { duration: 240, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards" }
+          );
+          animation.finished.then(finish).catch(finish);
+        }
+        function showWelcome() {
+          if (!welcome || safeStorage.get("bio.welcome.dismissed") === "true") return;
+          welcomeReturnFocus = document.activeElement;
+          welcome.hidden = false;
+          requestAnimationFrame(() => document.getElementById("welcome-explore")?.focus({ preventScroll: true }));
+        }
+        if (welcome) {
+          window.addEventListener("apprevealed", showWelcome, { once: true });
+          document.getElementById("welcome-skip").addEventListener("click", () => dismissWelcome({ remember: true }));
+          document.getElementById("welcome-explore").addEventListener("click", () => dismissWelcome({ remember: true }));
+          document.getElementById("welcome-island").addEventListener("click", () => dismissWelcome({ remember: true, openIsland: true }));
+          welcome.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              dismissWelcome({ remember: true });
+              return;
+            }
+            if (event.key !== "Tab") return;
+            const focusable = [...welcome.querySelectorAll("button:not([disabled]),input:not([disabled])")];
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          });
+        }
         function synchronizePreferences() {
           const root = document.documentElement;
           const current = readPreferences();

@@ -18,9 +18,11 @@ test('Bio island follows the compact reference shell and keeps only media, lyric
   const intro = await readFile(new URL('../templates/bio-intro.html', import.meta.url), 'utf8');
   const boot = await readFile(new URL('../templates/boot-screen.html', import.meta.url), 'utf8');
   const bootScript = await readFile(new URL('../assets/shared/boot-screen.js', import.meta.url), 'utf8');
+  const bootStyles = await readFile(new URL('../assets/shared/experience.css', import.meta.url), 'utf8');
   const bioApp = await readFile(new URL('../assets/bio/app.js', import.meta.url), 'utf8');
+  const bioEntry = await readFile(new URL('../assets/bio/entry.js', import.meta.url), 'utf8');
   const settings = await readFile(new URL('../templates/bio.html', import.meta.url), 'utf8');
-  const html = template + implementation + intro + boot + bootScript + settings;
+  const html = template + implementation + intro + boot + bootScript + settings + bioEntry;
   for (const marker of [
     'bio-island-wrap',
     'class="bio-island-trigger"',
@@ -42,6 +44,11 @@ test('Bio island follows the compact reference shell and keeps only media, lyric
     assert(html.includes(marker), `Missing Bio experience feature: ${marker}`);
   assert.match(bioApp, /import \{ BioSound \} from '\.\/sound\.js'/);
   assert.match(bioApp, /sound\.play\(control\.matches/);
+  assert.match(bioEntry, /addEventListener\('apprevealed', showWelcome/);
+  assert.match(bioEntry, /bio\.welcome\.dismissed/);
+  assert.match(html, /preloader-orbit-path/);
+  assert.match(bootStyles, /@keyframes orbit-turn/);
+  assert.match(bootStyles, /@keyframes preloader-mark-float/);
   for (const removed of [
     'island-timer-',
     'island-shelf-',

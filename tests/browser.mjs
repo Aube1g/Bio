@@ -217,6 +217,7 @@ try {
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
   assert.equal(await page.locator('[data-mounted]').count(), 7);
   assert.equal(await page.locator('nav').count(), 1);
+  await page.locator('#bio-welcome').waitFor({ state: 'visible' });
   await page.locator('#welcome-explore').click();
   await page.locator('#bio-welcome').waitFor({ state: 'hidden' });
   await page.locator('#bio-island-trigger').click();
